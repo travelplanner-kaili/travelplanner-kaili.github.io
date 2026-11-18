@@ -2238,6 +2238,7 @@ const TOUR = (() => {
     { el: spotTab, t: "點景點框看介紹", x: "特色、營業時間、票價、怎麼排時間都在裡面，也能直接開 Google 地圖。" },
     { el: () => vis("#fs-menu") || vis(".filters .chip-group"), t: "篩選", x: "只看主要景點、免費景點，或選你哪幾天去，營業時間就只顯示那幾天。" },
     { el: () => vis(".plan-btn"), t: "我的行程", x: "把景點排進每一天，地圖上會畫出步行路線，還能一鍵用 Google 導航。" },
+    { el: () => vis(".view-btns .fs-open") || vis("#fs-exit") || vis("#z-full"), t: "全螢幕", x: () => document.body.classList.contains("fs-on") ? "手機一打開就是全螢幕地圖。按這顆可以離開全螢幕，看標題和地圖下方的說明；右下角同樣圖示的按鈕可以再回到全螢幕。" : "把地圖放到整個螢幕，看得更大更清楚；再按一次回到原本的頁面。" },
     { el: () => vis(".names-btn"), t: "簡潔模式", x: "框太多太亂？按一下只留景點名稱。" },
     { el: () => vis(".base-btn"), t: "底圖濃淡", x: "每按一次街道底圖淡一點，最後完全隱藏，只留城牆、道路和景點。" },
     { el: () => vis(".icon-btn.dist"), t: "距離模式", x: "依序點兩個景點，就知道走路多遠、幾分鐘。" },
@@ -2261,7 +2262,7 @@ const TOUR = (() => {
   function show() {
     const st = STEPS[i];
     card.innerHTML = `<h3></h3><p></p><div class="tour-foot"><span class="tour-dots">${STEPS.map((_, k) => `<i class="${k === i ? "on" : ""}"></i>`).join("")}</span>${i ? '<button type="button" class="tour-prev">上一步</button>' : '<button type="button" class="tour-skip">跳過</button>'}<button type="button" class="tour-next">${i === STEPS.length - 1 ? "開始使用" : "下一步"}</button></div>`;
-    card.querySelector("h3").textContent = st.t; card.querySelector("p").textContent = st.x; if (st.f) card.querySelector("h3").insertAdjacentHTML("afterend", st.f);
+    card.querySelector("h3").textContent = st.t; card.querySelector("p").textContent = typeof st.x === "function" ? st.x() : st.x; if (st.f) card.querySelector("h3").insertAdjacentHTML("afterend", st.f);
     card.querySelector(".tour-next").addEventListener("click", () => { if (i === STEPS.length - 1) return end(); i++; show(); });
     const pv = card.querySelector(".tour-prev"); if (pv) pv.addEventListener("click", () => { i--; show(); });
     const sk = card.querySelector(".tour-skip"); if (sk) sk.addEventListener("click", end);
