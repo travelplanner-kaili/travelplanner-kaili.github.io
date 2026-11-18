@@ -1119,6 +1119,11 @@ body:not(.fs-on) .view-btns .fs-open { display: inline-grid !important; }
   .plan-foot { position: sticky; bottom: 0; z-index: 3; background: var(--paper); }
   .plan-days button { padding: 3px 9px; font-size: 12.5px; }
   .plan-head { padding: 6px 10px 2px; }
+  .plan.c1, .plan.c2 { width: auto; }   /* the simpler levels must stay full width on phones too */
+  .plan-head b, .plan-head button { white-space: nowrap; }
+  .plan-days { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }   /* days + ＋ + 匯入 on one row, swipe sideways when more */
+  .plan-days::-webkit-scrollbar { display: none; }
+  .plan-days button { flex: none; white-space: nowrap; }
 }
 .spot.pulse .plan-no, .spot.pulse .pin { animation: spot-pulse .7s ease-in-out 3; }
 @keyframes spot-pulse { 0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(217,119,6,.6); } 50% { transform: scale(1.35); box-shadow: 0 0 0 10px rgba(217,119,6,0); } }
@@ -1464,7 +1469,7 @@ function compactLabel(vals, prefix) {   // vals: the 7 day values, Monday first
   return prefix + main.v + (merged.length ? "（" + merged.map(x => dayRuns(x.days.sort((p, q) => p - q)) + x.t).join("；") + "）" : "");
 }
 
-const MAP_UPDATED = "2026-11-18 15:58";   // shown in the paste box; links carry it so an older map can warn
+const MAP_UPDATED = "2026-11-18 16:00";   // shown in the paste box; links carry it so an older map can warn
 /* ===================== real-map engine (Leaflet + OpenStreetMap/CARTO) ===================== */
 const K = 0.74;   // label offsets: old-map units (m) → screen px, so the label layout matches the drawn map
 const pressed = el => el.getAttribute("aria-pressed") === "true";
