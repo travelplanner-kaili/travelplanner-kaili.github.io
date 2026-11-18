@@ -2,14 +2,14 @@
    - the map page: try the network first (so updates show up), fall back to the saved copy when offline
    - map tiles and fonts: keep what has been viewed, reuse it offline (no bulk pre-download)
    - walking routes: network only (the map falls back to straight-line estimates) */
-const VERSION = "lucca-v2";
+const VERSION = "lucca-v3";
 const PAGE = VERSION + "-page", TILES = "lucca-tiles", FONTS = "lucca-fonts";
 const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
 const MAX_TILES = 4000;
 
 self.addEventListener("install", e => { e.waitUntil(caches.open(PAGE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", e => {
-  e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k.endsWith("-page") && k !== PAGE).map(k => caches.delete(k)))).then(() => self.clients.claim()));
+  e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k.startsWith("lucca-") && k.endsWith("-page") && k !== PAGE).map(k => caches.delete(k)))).then(() => self.clients.claim()));
 });
 
 async function trimTiles() {
