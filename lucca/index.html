@@ -1105,6 +1105,21 @@ body:not(.fs-on) .view-btns .fs-open { display: inline-grid !important; }
 .base-btn[aria-pressed="true"] .base-slash { opacity: 1; }
 #lmap.no-base { background: var(--bg); }
 #lmap.no-base .leaflet-tile-pane { display: none; }
+/* phone: the fullscreen bar on one slim row; the plan sheet scrolls as a whole so the day's spots are always there */
+@media (max-width: 640px) {
+  .mapbox.fs .fs-bar { gap: 5px; padding-top: calc(5px + env(safe-area-inset-top, 0px)); padding-bottom: 5px; }
+  .mapbox.fs .fs-bar .icon-btn { width: 32px; height: 32px; }
+  .mapbox.fs .fs-bar .icon-btn svg { width: 17px !important; height: 17px !important; }
+  .mapbox.fs .fs-btn { padding: 4px 9px; font-size: 13px; }
+  .mapbox.fs .fs-title { font-size: 14px; }
+  .plan { overflow-y: auto; max-height: 58% !important; -webkit-overflow-scrolling: touch; }
+  .plan > * { flex-shrink: 0; }
+  .plan .plan-list { flex: none; overflow: visible; min-height: auto; }
+  .plan-head { position: sticky; top: 0; z-index: 3; background: var(--paper); }
+  .plan-foot { position: sticky; bottom: 0; z-index: 3; background: var(--paper); }
+  .plan-days button { padding: 3px 9px; font-size: 12.5px; }
+  .plan-head { padding: 6px 10px 2px; }
+}
 .req { color: var(--paid); font-weight: 700; font-size: 12px; }
 .plan-un-btn { font-size: 12.5px; }
 #lmap.planning .spot.un-hi { opacity: 1; }
@@ -1447,7 +1462,7 @@ function compactLabel(vals, prefix) {   // vals: the 7 day values, Monday first
   return prefix + main.v + (merged.length ? "（" + merged.map(x => dayRuns(x.days.sort((p, q) => p - q)) + x.t).join("；") + "）" : "");
 }
 
-const MAP_UPDATED = "2026-11-18 15:49";   // shown in the paste box; links carry it so an older map can warn
+const MAP_UPDATED = "2026-11-18 15:56";   // shown in the paste box; links carry it so an older map can warn
 /* ===================== real-map engine (Leaflet + OpenStreetMap/CARTO) ===================== */
 const K = 0.74;   // label offsets: old-map units (m) → screen px, so the label layout matches the drawn map
 const pressed = el => el.getAttribute("aria-pressed") === "true";
