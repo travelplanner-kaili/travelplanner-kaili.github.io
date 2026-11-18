@@ -1120,6 +1120,8 @@ body:not(.fs-on) .view-btns .fs-open { display: inline-grid !important; }
   .plan-days button { padding: 3px 9px; font-size: 12.5px; }
   .plan-head { padding: 6px 10px 2px; }
 }
+.spot.pulse .plan-no, .spot.pulse .pin { animation: spot-pulse .7s ease-in-out 3; }
+@keyframes spot-pulse { 0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(217,119,6,.6); } 50% { transform: scale(1.35); box-shadow: 0 0 0 10px rgba(217,119,6,0); } }
 .req { color: var(--paid); font-weight: 700; font-size: 12px; }
 .plan-un-btn { font-size: 12.5px; }
 #lmap.planning .spot.un-hi { opacity: 1; }
@@ -1462,7 +1464,7 @@ function compactLabel(vals, prefix) {   // vals: the 7 day values, Monday first
   return prefix + main.v + (merged.length ? "（" + merged.map(x => dayRuns(x.days.sort((p, q) => p - q)) + x.t).join("；") + "）" : "");
 }
 
-const MAP_UPDATED = "2026-11-18 15:56";   // shown in the paste box; links carry it so an older map can warn
+const MAP_UPDATED = "2026-11-18 15:58";   // shown in the paste box; links carry it so an older map can warn
 /* ===================== real-map engine (Leaflet + OpenStreetMap/CARTO) ===================== */
 const K = 0.74;   // label offsets: old-map units (m) → screen px, so the label layout matches the drawn map
 const pressed = el => el.getAttribute("aria-pressed") === "true";
@@ -1886,7 +1888,7 @@ function renderPlan() {
     li.dataset.id = x.id;
     li.innerHTML = `<span class="p-drag" aria-label="拖曳調整順序">⋮⋮</span><span class="p-no">${i + 1}</span><span class="p-time-txt"></span><button type="button" class="p-name"></button><input class="p-time" type="text" inputmode="numeric" maxlength="5" placeholder="--:--" aria-label="幾點到（24 小時制，例如 09:30）"><button type="button" class="p-del" aria-label="從這天的行程移除（景點還留在地圖上）" title="從這天的行程移除">×</button><div class="p-info"></div><input class="p-note" type="text" placeholder="備註" aria-label="備註">`;
     li.querySelector(".p-name").textContent = s.name;
-    li.querySelector(".p-name").addEventListener("click", () => { map.panTo(s.ll); openSpot(s.id); });
+    li.querySelector(".p-name").addEventListener("click", () => { openSpot(s.id); setTimeout(() => focusOn(s), 320); });
     const tm = li.querySelector(".p-time"); tm.value = x.time || ""; li.querySelector(".p-time-txt").textContent = x.time || "";
     // 24-hour, like the hours on the map: "930" / "9:30" / "0930" → 09:30
     tm.addEventListener("change", () => { const raw = tm.value.trim(), d = raw.replace(/[^0-9]/g, ""); let v = "", h, m;
@@ -1956,6 +1958,20 @@ function renderPlan() {
       const w = rt.total; document.getElementById("plan-sum").textContent = `走路共約 ${realText(w).replace("・", "・約 ")}`;
     });
   }
+}
+/* from the plan list: bring that spot's number into the part of the map nothing covers (plan panel, drawer), then make it pulse */
+function focusOn(s) {
+  const z = Math.max(map.getZoom(), 17), mr = mapEl.getBoundingClientRect();
+  let l = mr.left, r = mr.right, t = mr.top, b = mr.bottom;
+  [planEl, document.getElementById("drawer")].forEach(el => {
+    if (!el || el.hidden) return; const q = el.getBoundingClientRect(); if (!q.width || !q.height || q.right <= mr.left || q.left >= mr.right || q.top >= mr.bottom) return;
+    if (q.width > mr.width * .75) b = Math.min(b, Math.max(q.top, mr.top + 60));   // bottom sheet (phone)
+    else if (q.left + q.width / 2 < mr.left + mr.width / 2) l = Math.max(l, q.right); else r = Math.min(r, q.left);
+  });
+  const tx = (l + r) / 2 - mr.left, ty = (t + b) / 2 - mr.top;
+  const c = map.project(s.ll, z).add([mr.width / 2 - tx, mr.height / 2 - ty]);
+  map.setView(map.unproject(c, z), z, { animate: true });
+  s.g.classList.remove("pulse"); void s.g.offsetWidth; s.g.classList.add("pulse"); setTimeout(() => s.g.classList.remove("pulse"), 2200);
 }
 function fitPlan() {
   const items = plan.days[plan.cur].filter(x => byId(x.id)); if (!items.length) return;
