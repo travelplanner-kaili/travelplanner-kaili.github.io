@@ -1162,6 +1162,8 @@ body:not(.fs-on) .view-btns .fs-open { display: inline-grid !important; }
 .tour-card button { font: 700 13px var(--f-body); border-radius: 999px; padding: 5px 12px; cursor: pointer; border: 1.5px solid var(--route); background: var(--paper); color: var(--route); }
 .tour-card .tour-next { background: var(--route); color: #fff; }
 .tour-card .tour-skip { border: 0; color: var(--muted); padding: 5px 4px; }
+.tour-card .tour-prev, .tour-card .tour-next { min-width: 40px; font-size: 16px; padding: 3px 12px; }
+.tour-card .tour-next:not([aria-label="下一步"]) { font-size: 13px; }
 /* fullscreen bar, ☰ 篩選 panel and the distance note sit above every map layer (Leaflet panes go up to ~1000) */
 .mapbox.fs .fs-bar, .mapbox.fs .fs-panel { z-index: 1200; }
 .mapbox.fs .fs-dist { z-index: 1150; }
@@ -1508,7 +1510,7 @@ function compactLabel(vals, prefix) {   // vals: the 7 day values, Monday first
   return prefix + main.v + (merged.length ? "（" + merged.map(x => dayRuns(x.days.sort((p, q) => p - q)) + x.t).join("；") + "）" : "");
 }
 
-const MAP_UPDATED = "2026-11-18 16:28";   // shown in the paste box; links carry it so an older map can warn
+const MAP_UPDATED = "2026-11-18 16:37";   // shown in the paste box; links carry it so an older map can warn
 /* ===================== real-map engine (Leaflet + OpenStreetMap/CARTO) ===================== */
 const K = 0.74;   // label offsets: old-map units (m) → screen px, so the label layout matches the drawn map
 const pressed = el => el.getAttribute("aria-pressed") === "true";
@@ -2005,8 +2007,9 @@ function renderPlan() {
   }
 }
 /* from the plan list: bring that spot's number into the part of the map nothing covers (plan panel, drawer), then make it pulse */
-function focusOn(s) {
-  const z = Math.max(map.getZoom(), 17), mr = mapEl.getBoundingClientRect();
+function focusOn(s) { panFree(s.ll, Math.max(map.getZoom(), 17)); s.g.classList.remove("pulse"); void s.g.offsetWidth; s.g.classList.add("pulse"); setTimeout(() => s.g.classList.remove("pulse"), 2200); }
+function panFree(ll, z) {
+  z = z || map.getZoom(); const mr = mapEl.getBoundingClientRect();
   let l = mr.left, r = mr.right, t = mr.top, b = mr.bottom;
   [planEl, document.getElementById("drawer")].forEach(el => {
     if (!el || el.hidden) return; const q = el.getBoundingClientRect(); if (!q.width || !q.height || q.right <= mr.left || q.left >= mr.right || q.top >= mr.bottom) return;
@@ -2014,9 +2017,8 @@ function focusOn(s) {
     else if (q.left + q.width / 2 < mr.left + mr.width / 2) l = Math.max(l, q.right); else r = Math.min(r, q.left);
   });
   const tx = (l + r) / 2 - mr.left, ty = (t + b) / 2 - mr.top;
-  const c = map.project(s.ll, z).add([mr.width / 2 - tx, mr.height / 2 - ty]);
+  const c = map.project(ll, z).add([mr.width / 2 - tx, mr.height / 2 - ty]);
   map.setView(map.unproject(c, z), z, { animate: true });
-  s.g.classList.remove("pulse"); void s.g.offsetWidth; s.g.classList.add("pulse"); setTimeout(() => s.g.classList.remove("pulse"), 2200);
 }
 function fitPlan() {
   const items = plan.days[plan.cur].filter(x => byId(x.id)); if (!items.length) return;
@@ -2045,9 +2047,13 @@ function setAddLL(ll, how) {
   document.getElementById("pa-where").classList.toggle("ok", !!ll);
 }
 function openAdd(ll) {
-  if (!planOpen) setPlanOpen(true);
+  // the same 「地圖沒有的點」 form, whether it was opened from the map (right-click / long-press) or from 我的行程
+  if (!document.getElementById("drawer").hidden) { try { closeSpot(); } catch (e) {} }
+  if (unMode) { unMode = false; }
+  if (!planOpen) setPlanOpen(true); else renderPlan();
   addBox.hidden = false; document.getElementById("pa-name").value = ""; document.getElementById("pa-link").value = ""; document.getElementById("pa-note").value = "";
-  setAddLL(ll || null, ll ? "地圖上點的位置" : ""); document.getElementById("pa-name").focus();
+  setAddLL(ll || null, ll ? "地圖上點的位置" : "");
+  setTimeout(() => { addBox.scrollIntoView({ block: "nearest", behavior: "smooth" }); if (ll) panFree(ll); document.getElementById("pa-name").focus({ preventScroll: true }); }, 60);
 }
 function closeAdd() { addBox.hidden = true; picking = false; mapEl.classList.remove("picking"); setAddLL(null); }
 document.getElementById("plan-addbtn").addEventListener("click", () => addBox.hidden ? openAdd() : closeAdd());
@@ -2069,7 +2075,7 @@ document.getElementById("pa-ok").addEventListener("click", () => {
   plan.days[plan.cur].push({ id: m.id, time: "", note: "" }); savePlan();
   closeAdd(); renderPlan();
 });
-map.on("click", e => { if (!picking) return; picking = false; mapEl.classList.remove("picking"); const ll = [e.latlng.lat, e.latlng.lng]; if (pickCb) { const f = pickCb; pickCb = null; f(ll); } else setAddLL(ll, "地圖上點的位置"); });
+map.on("click", e => { if (!picking) return; picking = false; mapEl.classList.remove("picking"); const ll = [e.latlng.lat, e.latlng.lng]; if (pickCb) { const f = pickCb; pickCb = null; f(ll); } else { setAddLL(ll, "地圖上點的位置"); addBox.scrollIntoView({ block: "nearest", behavior: "smooth" }); } });
 // right-click (computer) or long-press (phone) on an empty part of the map = add a spot there
 map.on("contextmenu", e => { if (e.originalEvent && e.originalEvent.target.closest && e.originalEvent.target.closest(".spot")) return; openAdd([e.latlng.lat, e.latlng.lng]); });
 [addBox].forEach(x => { L.DomEvent.disableClickPropagation(x); L.DomEvent.disableScrollPropagation(x); });
@@ -2241,11 +2247,12 @@ const TOUR = (() => {
     const rs = gs.map(g => g.getBoundingClientRect()), u = { left: Math.min(...rs.map(r => r.left)), top: Math.min(...rs.map(r => r.top)), right: Math.max(...rs.map(r => r.right)), bottom: Math.max(...rs.map(r => r.bottom)) };
     u.width = u.right - u.left; u.height = u.bottom - u.top; return { getBoundingClientRect: () => u }; };
   const STEPS = [
-    { t: "歡迎！", x: "30 秒帶你看主要功能。隨時可以按「跳過」，之後在標題下方（手機在 ☰ 篩選裡）的「▶ 功能導覽」可以再看一次。" },
-    { el: spotTab, t: "點景點看介紹", x: "特色、營業時間、票價、怎麼排時間都在裡面，也能直接開 Google 地圖。" },
-    { el: () => vis("#fs-menu") || filterRow(), t: "篩選", x: "只看主要景點、免費景點，或選你哪幾天去，營業時間就只顯示那幾天。" },
-    { el: () => vis(".plan-btn"), t: "我的行程", x: "把景點排進每一天，地圖上會畫出步行路線，還能一鍵用 Google 導航。" },
-    { el: () => vis(".view-btns .fs-open") || vis("#fs-exit") || vis("#z-full"), t: "全螢幕", x: () => document.body.classList.contains("fs-on") ? "手機一打開就是全螢幕地圖。按這顆可以離開全螢幕，看標題和地圖下方的說明；右下角同樣圖示的按鈕可以再回到全螢幕。" : "把地圖放到整個螢幕，看得更大更清楚；再按一次回到原本的頁面。" },
+    { el: () => document.body.classList.contains("fs-on") ? vis("#fs-menu") : vis(".sub .tour-again"), t: "歡迎！", x: () => document.body.classList.contains("fs-on") ? "30 秒帶你看主要功能。想再看一次，打開框起來的「☰ 篩選」，裡面有「▶ 功能導覽」。" : "30 秒帶你看主要功能。想再看一次，按框起來的「▶ 功能導覽」。" },
+    { el: spotTab, t: "點景點看介紹", x: "各種景點介紹都在裡面，也能直接開 Google 地圖。" },
+    { el: () => vis("#fs-menu") || filterRow(), t: "篩選", x: "景點可以按重要性分級顯示、是否免費。選你星期幾去，地圖上的營業時間就只顯示那幾天。" },
+    { el: () => vis("#f-cold") || vis("#fs-menu"), t: "冷門時段", x: () => document.body.classList.contains("fs-on") ? "在「☰ 篩選」裡按「冷門時段」，只亮早上 9 點前或晚上 7 點後還能去的景點，其他的變淡。" : "按「冷門時段」，只亮早上 9 點前或晚上 7 點後還能去的景點，其他的變淡。" },
+    { el: () => vis(".plan-btn"), t: "我的行程", x: "把景點排進每一天，地圖上會畫出步行路線，還能一鍵 Google 導航。" },
+    { el: () => vis(".view-btns .fs-open") || vis("#fs-exit") || vis("#z-full"), t: "全螢幕", x: () => document.body.classList.contains("fs-on") ? "手機一打開就是全螢幕地圖。按這顆可以離開全螢幕，看標題和地圖下方的說明；右下角同樣圖示的按鈕可以再回到全螢幕。" : "地圖全螢幕，更大更清楚；再按一次回到原本的頁面。" },
     { el: () => vis(".names-btn"), t: "簡潔模式", x: "地圖太亂？按一下只留景點名稱。" },
     { el: () => vis(".base-btn"), t: "底圖（地圖）濃淡", x: "按一次街道淡一點，最後只留城牆、道路和景點。" },
     { el: () => vis(".icon-btn.dist"), t: "距離模式", x: "依序點兩個景點，就知道走路多遠、幾分鐘。" },
@@ -2268,7 +2275,7 @@ const TOUR = (() => {
   }
   function show() {
     const st = STEPS[i];
-    card.innerHTML = `<h3></h3><p></p><div class="tour-foot"><span class="tour-dots">${STEPS.map((_, k) => `<i class="${k === i ? "on" : ""}"></i>`).join("")}</span>${i ? '<button type="button" class="tour-prev">上一步</button>' : '<button type="button" class="tour-skip">跳過</button>'}<button type="button" class="tour-next">${i === STEPS.length - 1 ? "開始使用" : "下一步"}</button></div>`;
+    card.innerHTML = `<h3></h3><p></p><div class="tour-foot"><span class="tour-dots">${STEPS.map((_, k) => `<i class="${k === i ? "on" : ""}"></i>`).join("")}</span>${i < STEPS.length - 1 ? '<button type="button" class="tour-skip">跳過</button>' : ""}${i ? '<button type="button" class="tour-prev" aria-label="上一步">←</button>' : ""}<button type="button" class="tour-next" aria-label="${i === STEPS.length - 1 ? "開始使用" : "下一步"}">${i === STEPS.length - 1 ? "開始使用" : "→"}</button></div>`;
     card.querySelector("h3").textContent = st.t; card.querySelector("p").textContent = typeof st.x === "function" ? st.x() : st.x; if (st.f) card.querySelector("h3").insertAdjacentHTML("afterend", st.f);
     card.querySelector(".tour-next").addEventListener("click", () => { if (i === STEPS.length - 1) return end(); i++; show(); });
     const pv = card.querySelector(".tour-prev"); if (pv) pv.addEventListener("click", () => { i--; show(); });
