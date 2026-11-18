@@ -976,7 +976,7 @@ body:not(.fs-on) .view-btns .fs-open { display: inline-grid !important; }
 .spot > * { pointer-events: auto; }
 .mapbox .spot svg.leader { position: absolute; left: 0; top: 0; overflow: visible; width: 1px !important; height: 1px !important; display: block; pointer-events: none; }
 .spot .leader line { stroke: var(--c); stroke-width: 1.4; }
-.spot .pin { position: absolute; width: 22px; height: 22px; left: -11px; top: -11px; border-radius: 50%; background: var(--c); border: 3.5px solid #fff; box-shadow: 0 0 0 2px rgba(20,18,16,.75), 0 2px 6px rgba(0,0,0,.45); box-sizing: border-box; }   /* white ring + dark outline: stands out on the busy street map, light or dark */
+.spot .pin { position: absolute; width: 16px; height: 16px; left: -8px; top: -8px; border-radius: 50%; background: var(--pc, var(--c)); border: 2.5px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,.45); box-sizing: border-box; }
 .spot.is-base .pin { border-radius: 3px; }
 .spot .tab { position: absolute; white-space: nowrap; background: var(--paper); border: 1.6px solid var(--c); border-radius: 4px; padding: 3px 9px 4px; line-height: 1.35; box-shadow: 0 1px 6px var(--shadow); color: var(--ink); }
 .spot:hover .tab, .spot.active .tab { background: var(--bg); }
@@ -1002,7 +1002,7 @@ body:not(.fs-on) .view-btns .fs-open { display: inline-grid !important; }
 #lmap.planning .spot:not(.in-plan) { opacity: .35; }
 #lmap.planning .spot:not(.in-plan):hover, #lmap.planning .spot:not(.in-plan):focus-visible, #lmap.planning .spot.active { opacity: 1; }
 .leaflet-pane path.area-band { stroke: none; fill: var(--open); fill-opacity: .28; cursor: pointer; }
-.leaflet-pane path.area-dot { stroke: var(--paper); stroke-width: 2; fill: var(--open); fill-opacity: 1; }
+.leaflet-pane path.area-dot { stroke: #fff; stroke-width: 2; fill: #3DAA5A; fill-opacity: 1; }
 .leaflet-pane path.area-core { stroke: var(--open); stroke-opacity: .9; stroke-width: 2.5; stroke-dasharray: 10 7; stroke-linecap: round; stroke-linejoin: round; fill: none; }
 .leaflet-pane path.area-poly { stroke: var(--open); fill: var(--open); fill-opacity: .13; stroke-width: 3; stroke-dasharray: 12 8; }
 .leaflet-pane path.rad-circle { stroke: var(--paid); fill: var(--paid); fill-opacity: .07; stroke-width: 2.5; stroke-dasharray: 10 7; }
@@ -1127,6 +1127,9 @@ body:not(.fs-on) .view-btns .fs-open { display: inline-grid !important; }
 }
 .spot.pulse .plan-no, .spot.pulse .pin { animation: spot-pulse .7s ease-in-out 3; }
 @keyframes spot-pulse { 0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(217,119,6,.6); } 50% { transform: scale(1.35); box-shadow: 0 0 0 10px rgba(217,119,6,0); } }
+.upd-bar { position: fixed; left: 50%; top: calc(10px + env(safe-area-inset-top, 0px)); transform: translateX(-50%); z-index: 3000; display: flex; align-items: center; gap: 10px; max-width: min(94vw, 520px); background: var(--ink); color: var(--paper); padding: 8px 10px 8px 14px; border-radius: 999px; font: 600 13.5px var(--f-body); box-shadow: 0 6px 20px rgba(0,0,0,.3); }
+.upd-bar button { border: 0; border-radius: 999px; padding: 5px 12px; font: 700 13px var(--f-body); cursor: pointer; background: var(--route); color: #fff; }
+.upd-bar .upd-x { background: transparent; color: var(--paper); padding: 4px 6px; }
 .req { color: var(--paid); font-weight: 700; font-size: 12px; }
 .plan-un-btn { font-size: 12.5px; }
 #lmap.planning .spot.un-hi { opacity: 1; }
@@ -1469,7 +1472,7 @@ function compactLabel(vals, prefix) {   // vals: the 7 day values, Monday first
   return prefix + main.v + (merged.length ? "（" + merged.map(x => dayRuns(x.days.sort((p, q) => p - q)) + x.t).join("；") + "）" : "");
 }
 
-const MAP_UPDATED = "2026-11-18 16:04";   // shown in the paste box; links carry it so an older map can warn
+const MAP_UPDATED = "2026-11-18 16:07";   // shown in the paste box; links carry it so an older map can warn
 /* ===================== real-map engine (Leaflet + OpenStreetMap/CARTO) ===================== */
 const K = 0.74;   // label offsets: old-map units (m) → screen px, so the label layout matches the drawn map
 const pressed = el => el.getAttribute("aria-pressed") === "true";
@@ -1563,6 +1566,7 @@ function makeSpot(s) {
   Object.assign(g.dataset, { id: s.id, cat: s.cat });
   g.tabIndex = 0; g.setAttribute("role", "button"); g.setAttribute("aria-label", [s.name, s.sTime, s.sPrice].filter(Boolean).join("，"));
   g.style.setProperty("--c", CAT[s.cat].color);
+  g.style.setProperty("--pc", ({ paid: "#E5484D", free: "#3B82F6", open: "#3DAA5A", base: "#3A3633", mine: "#A855F7" })[s.cat] || CAT[s.cat].color);   // bright dot colours for the busy street map
   const allDay = s.cat === "open" || s.cat === "base";
   g.innerHTML = `<svg class="leader"><line x1="0" y1="0"/></svg><div class="tab"><div class="t-name"></div>${allDay || !WEEK[s.id] ? "" : '<div class="t-wed t-more"></div>'}${s.sPrice ? '<div class="t-price t-more"></div>' : ""}</div><span class="pin"></span><span class="plan-no"></span>`;
   g.querySelector(".t-name").textContent = s.name;
@@ -2192,6 +2196,21 @@ document.querySelectorAll("#plan-all, .plan-all-fs").forEach(btn => btn.addEvent
 }));
 checkShare(); window.addEventListener("hashchange", checkShare);
 
+/* ---- 地圖有更新: when the page comes back into view (or every 30 min), check version.json; if the map was updated, offer a one-tap reload (your own data stays) ---- */
+(() => {
+  if (location.protocol !== "https:") return;
+  let shown = false;
+  const check = () => { if (shown || document.hidden) return;
+    fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then(r => r.ok ? r.json() : null).then(v => {
+      if (!v || !v.updated || v.updated <= MAP_UPDATED || shown) return; shown = true;
+      const bar = document.createElement("div"); bar.className = "upd-bar"; bar.setAttribute("role", "status");
+      bar.innerHTML = '<span>地圖有更新了</span><button type="button" class="upd-go">更新</button><button type="button" class="upd-x" aria-label="先不要">×</button>';
+      bar.querySelector(".upd-go").addEventListener("click", () => location.reload());
+      bar.querySelector(".upd-x").addEventListener("click", () => bar.remove());
+      document.body.append(bar);
+    }).catch(() => {}); };
+  document.addEventListener("visibilitychange", check); setInterval(check, 30 * 60 * 1000); setTimeout(check, 5000);
+})();
 /* ---- 隱藏底圖: hide the street tiles, keep walls / streets / spots (= what the map looks like offline); remembered ---- */
 (() => {
   const KEY = "trip-nobase-lucca"; let off = false; try { off = localStorage.getItem(KEY) === "1"; } catch (e) {}
