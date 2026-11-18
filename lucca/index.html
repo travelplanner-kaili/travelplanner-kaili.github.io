@@ -1504,7 +1504,7 @@ function compactLabel(vals, prefix) {   // vals: the 7 day values, Monday first
   return prefix + main.v + (merged.length ? "（" + merged.map(x => dayRuns(x.days.sort((p, q) => p - q)) + x.t).join("；") + "）" : "");
 }
 
-const MAP_UPDATED = "2026-11-18 16:25";   // shown in the paste box; links carry it so an older map can warn
+const MAP_UPDATED = "2026-11-18 16:27";   // shown in the paste box; links carry it so an older map can warn
 /* ===================== real-map engine (Leaflet + OpenStreetMap/CARTO) ===================== */
 const K = 0.74;   // label offsets: old-map units (m) → screen px, so the label layout matches the drawn map
 const pressed = el => el.getAttribute("aria-pressed") === "true";
@@ -2233,16 +2233,19 @@ const TOUR = (() => {
   const KEY = "trip-tour-lucca";
   const vis = sel => [...document.querySelectorAll(sel)].find(el => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && getComputedStyle(el).visibility !== "hidden"; });
   const spotTab = () => { const order = ["duomo", "michele", "guinigi", "anfiteatro", "frediano"]; for (const id of order) { const s = byId(id); if (s && s.g && !s.g.classList.contains("lbl-off") && !s.g.classList.contains("gone")) { const r = s.tab.getBoundingClientRect(); const m = mapEl.getBoundingClientRect(); if (r.width && r.top > m.top && r.bottom < m.bottom && r.left > m.left && r.right < m.right) return s.tab; } } return null; };
+  const filterRow = () => { const gs = [...document.querySelectorAll(".filters .chip-group")].filter(g => g.getBoundingClientRect().width); if (!gs.length) return null;
+    const rs = gs.map(g => g.getBoundingClientRect()), u = { left: Math.min(...rs.map(r => r.left)), top: Math.min(...rs.map(r => r.top)), right: Math.max(...rs.map(r => r.right)), bottom: Math.max(...rs.map(r => r.bottom)) };
+    u.width = u.right - u.left; u.height = u.bottom - u.top; return { getBoundingClientRect: () => u }; };
   const STEPS = [
     { t: "歡迎！", x: "30 秒帶你看主要功能。隨時可以按「跳過」，之後在標題下方（手機在 ☰ 篩選裡）的「▶ 功能導覽」可以再看一次。" },
-    { el: spotTab, t: "點景點框看介紹", x: "特色、營業時間、票價、怎麼排時間都在裡面，也能直接開 Google 地圖。" },
-    { el: () => vis("#fs-menu") || vis(".filters .chip-group"), t: "篩選", x: "只看主要景點、免費景點，或選你哪幾天去，營業時間就只顯示那幾天。" },
+    { el: spotTab, t: "點景點看介紹", x: "特色、營業時間、票價、怎麼排時間都在裡面，也能直接開 Google 地圖。" },
+    { el: () => vis("#fs-menu") || filterRow(), t: "篩選", x: "只看主要景點、免費景點，或選你哪幾天去，營業時間就只顯示那幾天。" },
     { el: () => vis(".plan-btn"), t: "我的行程", x: "把景點排進每一天，地圖上會畫出步行路線，還能一鍵用 Google 導航。" },
     { el: () => vis(".view-btns .fs-open") || vis("#fs-exit") || vis("#z-full"), t: "全螢幕", x: () => document.body.classList.contains("fs-on") ? "手機一打開就是全螢幕地圖。按這顆可以離開全螢幕，看標題和地圖下方的說明；右下角同樣圖示的按鈕可以再回到全螢幕。" : "把地圖放到整個螢幕，看得更大更清楚；再按一次回到原本的頁面。" },
-    { el: () => vis(".names-btn"), t: "簡潔模式", x: "框太多太亂？按一下只留景點名稱。" },
-    { el: () => vis(".base-btn"), t: "底圖濃淡", x: "每按一次街道底圖淡一點，最後完全隱藏，只留城牆、道路和景點。" },
+    { el: () => vis(".names-btn"), t: "簡潔模式", x: "地圖太亂？按一下只留景點名稱。" },
+    { el: () => vis(".base-btn"), t: "底圖（地圖）濃淡", x: "按一次街道淡一點，最後只留城牆、道路和景點。" },
     { el: () => vis(".icon-btn.dist"), t: "距離模式", x: "依序點兩個景點，就知道走路多遠、幾分鐘。" },
-    { el: () => vis("#z-me"), t: "我在哪", x: "到了盧卡按這裡，地圖上會出現你的藍點。" },
+    { el: () => vis("#z-me"), t: "我在哪", x: "按一下 GPS，地圖上會出現你的位置。" },
     { t: "看附近有哪些景點", f: `<svg viewBox="0 0 260 120" class="tour-fig" aria-hidden="true"><rect x="1" y="1" width="258" height="118" rx="10" class="tf-bg"/><path d="M0 84 L260 70 M90 0 L120 120 M0 30 L260 44" class="tf-road"/><circle cx="118" cy="62" r="50" class="tf-ring"/><circle cx="118" cy="62" r="28" class="tf-ring"/><circle cx="62" cy="40" r="6" class="tf-dot" style="fill:#3B82F6"/><circle cx="150" cy="44" r="6" class="tf-dot" style="fill:#3DAA5A"/><circle cx="214" cy="96" r="6" class="tf-dot tf-out" style="fill:#3B82F6"/><circle cx="118" cy="62" r="8" class="tf-dot" style="fill:#E5484D"/><text x="134" y="98" class="tf-hand">👆</text><text x="178" y="24" class="tf-lbl">按兩下</text><text x="178" y="40" class="tf-lbl tf-sub">手機：長按</text><text x="174" y="112" class="tf-lbl tf-sub">100 m 內 2 個</text></svg>`, x: "在景點上按兩下（手機長按），會畫出方圓 100 公尺的圈，圈外的景點變淡；再按一次圈就變大。點空白處關掉。" },
     { t: "加自己的點", f: `<svg viewBox="0 0 260 120" class="tour-fig" aria-hidden="true"><rect x="1" y="1" width="258" height="118" rx="10" class="tf-bg"/><path d="M0 70 L260 58 M170 0 L190 120" class="tf-road"/><g transform="translate(92 66)"><circle r="16" class="tf-ripple"/><circle r="26" class="tf-ripple tf-ripple2"/><path d="M0 -2 C-9 -11 -9 -24 0 -24 C9 -24 9 -11 0 -2 Z" style="fill:#A855F7;stroke:#fff;stroke-width:2"/></g><text x="98" y="104" class="tf-hand">👆</text><rect x="130" y="16" width="118" height="30" rx="15" class="tf-chip"/><text x="189" y="36" text-anchor="middle" class="tf-lbl tf-chipt">＋ 地圖沒有的點</text><text x="12" y="24" class="tf-lbl">右鍵</text><text x="12" y="40" class="tf-lbl tf-sub">手機：長按空白處</text></svg>`, x: "地圖上沒有的餐廳、店，在那個位置按右鍵（手機長按空白處）就能加成紫色的點，也能排進行程。更多說明在地圖下方的「使用方式」。" }
   ];
