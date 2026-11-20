@@ -474,9 +474,10 @@ a.plan-copy { text-decoration: none; }
 #lmap.geo .spot.slim1 .tab, #lmap.geo .spot.compact .tab { padding: calc(var(--k) * 5px) calc(var(--k) * 12px); }
 #lmap.geo .spot.slim1 .t-name, #lmap.geo .spot.compact .t-name { font-size: calc(var(--k) * 28px); line-height: calc(var(--k) * 34px); }
 #lmap.geo .spot .t-rush { font-size: calc(var(--k) * 15px); }
-.leaflet-pane path.river-line { stroke: #BCD3DE; stroke-opacity: .9; stroke-linecap: round; stroke-linejoin: round; fill: none; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .leaflet-pane path.river-line { stroke: #2E4A5E; } }
-:root[data-theme="dark"] .leaflet-pane path.river-line { stroke: #2E4A5E; }
+.leaflet-pane path.river-line { stroke: #2F7FC1; stroke-opacity: .5; stroke-linecap: round; stroke-linejoin: round; fill: none; }   /* 2026-11-20: as strong as the roads (購物街 .5 / .7), the old pale blue disappeared */
+#lmap.base-faded .leaflet-pane path.river-line { stroke-opacity: .7; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .leaflet-pane path.river-line { stroke: #5AA2E0; } }
+:root[data-theme="dark"] .leaflet-pane path.river-line { stroke: #5AA2E0; }
 .river-name span { position: absolute; white-space: nowrap; transform: translate(0, -50%); font-family: var(--f-body); font-weight: 500; color: var(--free); opacity: .85; font-size: inherit; }
 #lmap.geo .spot .pin { --ps: clamp(7px, calc(var(--k) * 24px), 16px); width: var(--ps); height: var(--ps); left: calc(var(--ps) / -2); top: calc(var(--ps) / -2); border-width: clamp(1.2px, calc(var(--k) * 4px), 2.5px); }
 </style>'''
