@@ -36,6 +36,7 @@ const BASE = (FILE_MODE
 map.attributionControl.setPrefix('<a href="https://leafletjs.com" target="_blank" rel="noopener">Leaflet</a>');
 map.createPane("planRoute").style.zIndex = 640; map.getPane("planRoute").style.pointerEvents = "none";
 map.createPane("planSpots").style.zIndex = 660;
+map.createPane("planPills").style.zIndex = 670; map.getPane("planPills").style.pointerEvents = "none";   // distance pills above everything of the day (they avoid the labels themselves)
 const OLD_TOWN = L.latLngBounds(CITY.bounds);
 /* the river (Rome: Tiber), drawn like the hand-drawn map so it stays when the street map is faded or hidden */
 const unitPx = () => (CITY.unitM ? 256 * Math.pow(2, map.getZoom()) / (40075016.686 * Math.cos(map.getCenter().lat * Math.PI / 180)) * CITY.unitM : 1);
@@ -171,25 +172,35 @@ function layoutLabels() {
       const cx = Math.max(dx, Math.min(0, dx + W)), cy = Math.max(dy, Math.min(0, dy + H));
       s.line.setAttribute("x2", cx); s.line.setAttribute("y2", cy);
     });
-    return;
+    placeLegPills(); return;
   }
-  const boxes = vis.map(s => ({ x: s.p.x - 9, y: s.p.y - 9, w: 18, h: 18 }));   // pins are obstacles too
+  // 我的行程 open (2026-11-20, phone overlaps): that day's spots are placed first, their numbered circles (30px) are obstacles,
+  // and in 自動 the other (faded) spots only get a name label where there is room
+  const planOn = mapEl.classList.contains("planning"), inP = s => planOn && s.g.classList.contains("in-plan");
+  const pOrder = {}; if (planOn) (plan.days[plan.cur] || []).forEach((x, i) => { if (!(x.id in pOrder)) pOrder[x.id] = i; });
+  const boxes = vis.map(s => { const r = inP(s) ? 16 : 9; return { x: s.p.x - r, y: s.p.y - r, w: 2 * r, h: 2 * r }; });   // pins (and plan numbers) are obstacles too
   // street names too: spot labels must not cover them
   const mr = mapEl.getBoundingClientRect();
   STREETS.forEach(st => { const el = st.label && st.label.getElement(); if (!el || el.classList.contains("off")) return; const r = el.querySelector("span").getBoundingClientRect(); if (r.width) boxes.push({ x: r.left - mr.left, y: r.top - mr.top, w: r.width, h: r.height }); });
-  const hit = r => boxes.some(o => r.x < o.x + o.w + 3 && r.x + r.w + 3 > o.x && r.y < o.y + o.h + 3 && r.y + r.h + 3 > o.y);
-  const cands = (W, H) => { const out = []; [12, 34, 60, 95, 135].forEach(g => out.push([g, -H / 2], [-W - g, -H / 2], [-W / 2, -H - g], [-W / 2, g], [g * .7, -H - g * .7], [-W - g * .7, -H - g * .7], [g * .7, g * .7], [-W - g * .7, g * .7])); return out; };
-  [...vis].sort((a, b) => ORDER(a) - ORDER(b)).forEach(s => {
-    const sl = forceSlim || (s.compact && LMODE !== "full");   // compact spots (crowded centre, 次要) keep a name-only label, as on the hand-drawn map
+  coverBoxes(mr).forEach(b => boxes.push(b));
+  // a day open: labels stay inside the map's visible edges (they are placed again after every pan then)
+  const mw = mapEl.clientWidth, mh = mapEl.clientHeight, outside = r => planOn && (r.x < 2 || r.y < 2 || r.x + r.w > mw - 2 || r.y + r.h > mh - 2);
+  const hit = r => outside(r) || boxes.some(o => r.x < o.x + o.w + 3 && r.x + r.w + 3 > o.x && r.y < o.y + o.h + 3 && r.y + r.h + 3 > o.y);
+  const cands = (W, H, g0) => { const out = []; [12, 34, 60, 95, 135].map(g => g + (g0 || 0)).forEach(g => out.push([g, -H / 2], [-W - g, -H / 2], [-W / 2, -H - g], [-W / 2, g], [g * .7, -H - g * .7], [-W - g * .7, -H - g * .7], [g * .7, g * .7], [-W - g * .7, g * .7])); return out; };
+  const rank = s => inP(s) ? -100 + (pOrder[s.id] || 0) / 100 : ORDER(s);
+  [...vis].sort((a, b) => rank(a) - rank(b)).forEach(s => {
+    const g0 = inP(s) ? 7 : 0;
+    const sl = forceSlim || (s.compact && LMODE !== "full") || (planOn && !inP(s) && LMODE === "auto");
+    if (planOn && !inP(s) && LMODE === "auto" && z < 15.5) { s.g.classList.add("lbl-off"); return; }   // zoomed out on a day: only that day's labels   // compact spots (crowded centre, 次要) keep a name-only label, as on the hand-drawn map
     let placed = null, slim = sl;
     for (const mode of sl ? ["slim"] : forceAll ? ["full"] : ["full", "slim"]) {
       const { w, h } = s[mode];
-      for (const [dx, dy] of cands(w, h)) { const r = { x: s.p.x + dx, y: s.p.y + dy, w, h }; if (!hit(r)) { placed = [dx, dy, w, h]; slim = mode === "slim"; break; } }
+      for (const [dx, dy] of cands(w, h, g0)) { const r = { x: s.p.x + dx, y: s.p.y + dy, w, h }; if (!hit(r)) { placed = [dx, dy, w, h]; slim = mode === "slim"; break; } }
       if (placed) break;
     }
     if (!placed && forceAll) {   // 全覽／簡潔: no free room, still show it where it covers the least
       const mode = sl ? "slim" : "full", { w, h } = s[mode]; let best = null, bo = Infinity;
-      for (const [dx, dy] of cands(w, h)) { const r = { x: s.p.x + dx, y: s.p.y + dy, w, h };
+      for (const [dx, dy] of cands(w, h, g0)) { const r = { x: s.p.x + dx, y: s.p.y + dy, w, h };
         const o = boxes.reduce((t, b) => t + Math.max(0, Math.min(r.x + r.w, b.x + b.w) - Math.max(r.x, b.x)) * Math.max(0, Math.min(r.y + r.h, b.y + b.h) - Math.max(r.y, b.y)), 0);
         if (o < bo) { bo = o; best = [dx, dy, w, h]; } }
       placed = best; slim = mode === "slim";
@@ -202,9 +213,48 @@ function layoutLabels() {
     const cx = Math.max(dx, Math.min(0, dx + W)), cy = Math.max(dy, Math.min(0, dy + H));
     s.line.setAttribute("x2", cx); s.line.setAttribute("y2", cy);
   });
+  placeLegPills();
+}
+/* what lies on top of the map (我的行程 panel and its tab, zoom buttons, walk chips): labels and pills keep out of it */
+function coverBoxes(mr) {
+  const out = [];
+  ["plan", "route-pick"].map(id => document.getElementById(id)).concat([...document.querySelectorAll(".mapbox .zoom, .plan-tab")]).forEach(el => {
+    if (!el || el.hidden || !el.offsetParent) return; const q = el.getBoundingClientRect(); if (!q.width) return;
+    out.push({ x: q.left - mr.left, y: q.top - mr.top, w: q.width, h: q.height });
+  });
+  return out;
+}
+/* 我的行程 distance pills (shown after tapping the dashed line): each goes where it covers no label, number or other pill —
+   along its leg (middle first, then toward the ends) and a little to either side; with no free room, where it covers the least */
+let legPills = [];
+function placeLegPills() {
+  if (!legPills.length || !mapEl.classList.contains("legs-on")) return;
+  const mr = mapEl.getBoundingClientRect(), ob = [];
+  const add = el => { if (!el || !el.offsetParent) return; const q = el.getBoundingClientRect(); if (q.width && getComputedStyle(el).visibility !== "hidden") ob.push({ x: q.left - mr.left, y: q.top - mr.top, w: q.width, h: q.height }); };
+  coverBoxes(mr).forEach(b => ob.push(b));
+  SPOTS.forEach(s => { if (s.g.offsetParent && !s.g.classList.contains("lbl-off") && !mapEl.classList.contains("lbl-none")) add(s.tab); add(s.g.querySelector(".plan-no")); add(s.g.querySelector(".pin")); });
+  const over = r => ob.reduce((t, b) => { const ox = Math.min(r.x + r.w, b.x + b.w) - Math.max(r.x, b.x) + 3, oy = Math.min(r.y + r.h, b.y + b.h) - Math.max(r.y, b.y) + 3; return t + (ox > 0 && oy > 0 ? ox * oy : 0); }, 0);   // 3px breathing room
+  legPills.forEach(pl => {
+    const el = pl.getElement(), sp = el && el.querySelector("span"); if (!sp) return;
+    el.classList.remove("leg-hide");   // measure it shown
+    const w = sp.offsetWidth, h = sp.offsetHeight, a = map.latLngToContainerPoint(pl._ab[0]), b = map.latLngToContainerPoint(pl._ab[1]);
+    const len = Math.hypot(b.x - a.x, b.y - a.y) || 1, nx = -(b.y - a.y) / len, ny = (b.x - a.x) / len, side = Math.abs(nx) * w / 2 + Math.abs(ny) * h / 2 + 6;
+    let best = null, bo = Infinity;
+    for (const t of [.5, .38, .62, .26, .74, .15, .85]) for (const o of [0, side, -side, side * 2, -side * 2]) {
+      const cx = a.x + (b.x - a.x) * t + nx * o, cy = a.y + (b.y - a.y) * t + ny * o, r = { x: cx - w / 2, y: cy - h / 2, w, h };
+      const v = over(r) + Math.abs(o) * .5 + Math.abs(t - .5) * 20;   // a free spot near the middle of the leg wins
+      if (v < bo) { bo = v; best = [cx, cy, r]; }
+      if (v < 30 && o === 0) break;
+    }
+    // no clear room (the day is zoomed out): leave this pill off; the list still says the distance, zoom in to see it
+    const free = over(best[2]) === 0; el.classList.toggle("leg-hide", !free);
+    pl.setLatLng(map.containerPointToLatLng(L.point(best[0], best[1]))); if (free) ob.push(best[2]);
+  });
 }
 const sizeTabs = layoutLabels;   // name used by the shared code
 map.on("zoomend", layoutLabels);
+// with 我的行程 open, which labels the panel would cover changes as the map moves: place them again after a pan
+map.on("moveend", () => { const pe = document.getElementById("plan"); if (pe && !pe.hidden) layoutLabels(); });
 
 /* ---- one tap / click on a spot (a drag that starts on a label pans the map instead) ---- */
 const onPanes = (...a) => [map.getPane("markerPane"), map.getPane("planSpots")].forEach(p => p.addEventListener(...a));
@@ -533,7 +583,7 @@ function renderPlan() {
   const w = walkM(total);
   document.getElementById("plan-sum").textContent = items.length > 1 ? `走路共約 ${w.m < 1000 ? w.m + " m" : (w.m / 1000).toFixed(1) + " km"}・${w.min} 分` : "";
   // map: numbers on the pins + dashed route in order
-  planLayer.clearLayers();
+  planLayer.clearLayers(); legPills = [];
   SPOTS.forEach(s => { s.g.classList.remove("in-plan"); s.g.querySelector(".plan-no").textContent = ""; });
   planEl.classList.toggle("un-mode", unMode);
   document.getElementById("plan-un").setAttribute("aria-pressed", unMode);
@@ -561,14 +611,16 @@ function renderPlan() {
     go.href = gDir(pts.slice(0, 10));
     const line = L.polyline(pts, { className: "plan-line", interactive: false, pane: "planRoute" }).addTo(planLayer);
     const hit = L.polyline(pts, { className: "plan-hit", pane: "planRoute" }).addTo(planLayer);
-    hit.on("click", e => { L.DomEvent.stopPropagation(e); legsOn = !legsOn; mapEl.classList.toggle("legs-on", legsOn); });
+    hit.on("click", e => { L.DomEvent.stopPropagation(e); legsOn = !legsOn; mapEl.classList.toggle("legs-on", legsOn); placeLegPills(); });
     const pills = [];
-    for (let i = 0; i + 1 < pts.length; i++) { const pl = pill(mid(pts[i], pts[i + 1]), walkText(hav(pts[i], pts[i + 1])), "leg"); pl.options.pane = "planRoute"; pills.push(pl.addTo(planLayer)); }
+    for (let i = 0; i + 1 < pts.length; i++) { const pl = pill(mid(pts[i], pts[i + 1]), walkText(hav(pts[i], pts[i + 1])), "leg"); pl.options.pane = "planPills"; pl._ab = [pts[i], pts[i + 1]]; pills.push(pl.addTo(planLayer)); }
+    legPills = pills; placeLegPills();
     const want = plan.cur + ":" + items.map(x => x.id).join(",");
     walkRoute(pts).then(rt => {
       if (!rt || want !== plan.cur + ":" + plan.days[plan.cur].filter(x => byId(x.id)).map(x => x.id).join(",")) return;
       line.setLatLngs(rt.coords); hit.setLatLngs(rt.coords);
       rt.legs.forEach((m, i) => { const el = pills[i] && pills[i].getElement(); if (el) el.querySelector("span").textContent = realText(m); const lg = planList.children[i] && planList.children[i].querySelector(".p-leg-t"); if (lg) { lg.textContent = "↓ 步行約 " + realText(m); lg.parentNode.querySelector(".p-leg-go").textContent = "實際路線 ↗"; } });
+      placeLegPills();
       const w = rt.total; document.getElementById("plan-sum").textContent = `走路共約 ${realText(w).replace("・", "・約 ")}`;
     });
   }
@@ -707,7 +759,7 @@ function placeTab() {
   if (innerWidth <= 640) t.style.bottom = (planEl.offsetParent ? planEl.offsetParent.clientHeight - planEl.offsetTop : planEl.offsetHeight) + "px";
   // computer: placed by CSS (sticks to the panel's right edge, also in full screen)
 }
-if (window.ResizeObserver) new ResizeObserver(placeTab).observe(planEl);
+if (window.ResizeObserver) { let rz = 0; new ResizeObserver(() => { placeTab(); clearTimeout(rz); rz = setTimeout(() => { if (!planEl.hidden) layoutLabels(); }, 120); }).observe(planEl); }
 addEventListener("resize", placeTab);
 L.DomEvent.disableClickPropagation(planEl); L.DomEvent.disableScrollPropagation(planEl);
 /* 轉文字: this day as text (copied), as complete as the panel's current level (全覽 / 簡潔 / 最簡) */
