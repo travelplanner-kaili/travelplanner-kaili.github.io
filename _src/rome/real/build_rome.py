@@ -78,7 +78,7 @@ CITY = {
 city_js = 'const CITY = ' + json.dumps(CITY, ensure_ascii=False) + ';\n'
 city_js += '''CITY.tourExtra = [
   { sel: ".icon-btn.route", t: "City Walk", x: "推薦的散步路線，沿著真的街道畫出來；點路線或距離膠囊看路線介紹、沿途吃什麼。" },
-  { sel: ".icon-btn.shop-btn", t: "購物", x: "地圖上橘色的路是購物街，點路名看介紹；按這顆會再加上店家（綠色實心框）。" }
+  { sel: ".icon-btn.shop-btn", t: "購物", x: "地圖上粉紅色的路是購物街，點路名看介紹；按這顆會再加上店家（綠色實心框）。" }
 ];
 '''
 
@@ -149,6 +149,8 @@ def faq_item(title):
     m = re.search(r'<li class="faq-item"><p class="faq-q"><span class="n">Q\d+</span><span>' + re.escape(title) + r'</span>.*?</li>', H, flags=re.S)
     return m.group(0)
 walk_q = faq_item('有推薦的散步路線嗎？'); shop_q = faq_item('想逛街買東西要去哪裡？')
+# 2026-11-20: shopping streets are pink on the real map (orange was mixed up with 我的行程 and City Walk)
+assert '地圖上橘色的路' in shop_q; shop_q = shop_q.replace('地圖上橘色的路', '地圖上粉紅色的路')
 fi = out.index('<section class="faq"'); fj = out.index('</ol></section>\n</div>', fi) + len('</ol></section>')
 faq = out[fi:fj]
 # answers point to other questions by number: turn those into the question's title first, renumber, then put numbers back
@@ -171,9 +173,9 @@ out = out[:fi] + faq + out[fj:]
 # ---- styles ----
 css = '''<style>
 /* ===== Rome: City Walk, 購物 ===== */
-:root { --route-bernini: #1F6FB5; --route-cara: #7B3C8C; --route-michel: #0E7C72; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --route-bernini: #6FB0EE; --route-cara: #C891DA; --route-michel: #5CCABD; } }
-:root[data-theme="dark"] { --route-bernini: #6FB0EE; --route-cara: #C891DA; --route-michel: #5CCABD; }
+:root { --route-bernini: #1F6FB5; --route-cara: #7B3C8C; --route-michel: #0E7C72; --shop-street: #C8457F; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --route-bernini: #6FB0EE; --route-cara: #C891DA; --route-michel: #5CCABD; --shop-street: #F08CBA; } }
+:root[data-theme="dark"] { --route-bernini: #6FB0EE; --route-cara: #C891DA; --route-michel: #5CCABD; --shop-street: #F08CBA; }
 .icon-btn.route { border-color: var(--route); color: var(--route); }
 .icon-btn.route[aria-pressed="true"] { background: var(--route); color: var(--paper); }
 .icon-btn.shop-btn { border-color: var(--open); color: var(--open); }
@@ -185,6 +187,8 @@ css = '''<style>
 .route-pick button[aria-pressed="true"] { background: var(--rc); color: var(--paper); }
 .route-pick button.all { --rc: var(--ink); }
 .mapbox.fs .route-pick { top: calc(var(--fsbar, 56px) + 6px); }
+/* computer: with 我的行程 open, the walk chips sit to the right of the panel (and its tab) instead of over it */
+@media (min-width: 641px) { .mapbox:has(.plan:not([hidden])) .route-pick { left: calc(min(372px, 100% - 80px) + 48px); max-width: calc(100% - min(372px, 100% - 80px) - 120px); } }
 @media (max-width: 640px) { .route-pick { top: 6px; left: 6px; right: 6px; max-width: none; gap: 4px; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; } .route-pick::-webkit-scrollbar { display: none; } .route-pick button { flex: none; } }
 .leaflet-pane path.route-line { stroke: var(--rc, var(--route)); stroke-width: 6; stroke-dasharray: 12 8; stroke-linecap: round; stroke-linejoin: round; fill: none; }
 .leaflet-pane path.route-hit { stroke: transparent; stroke-width: 26; fill: none; cursor: pointer; }
@@ -195,9 +199,9 @@ css = '''<style>
 .route-pill span::after { content: "👆"; position: absolute; right: -16px; bottom: -22px; font-size: 24px; pointer-events: none; filter: drop-shadow(0 1px 1px rgba(0,0,0,.35)); }
 .spot.off-route { display: none !important; }
 #lmap .off-route-area { display: none; }
-.leaflet-pane path.street-band.shop-street { stroke: var(--route); stroke-opacity: .5; cursor: pointer; }
+.leaflet-pane path.street-band.shop-street { stroke: var(--shop-street); stroke-opacity: .5; cursor: pointer; }
 #lmap.base-faded .leaflet-pane path.street-band.shop-street { stroke-opacity: .7; }
-.street-name.shop-street span { color: var(--route); cursor: pointer; pointer-events: auto; }
+.street-name.shop-street span { color: var(--shop-street); cursor: pointer; pointer-events: auto; }
 .street-name.shop-street span:hover { text-decoration: underline; }
 .spot.rush .tab { border-width: 3px; }
 .spot .t-rush { display: inline-block; margin-left: 4px; padding: 0 5px; border-radius: 4px; background: var(--paid); color: var(--paper); font: 700 calc(10.5px * var(--ls, 1))/1.5 var(--f-body); vertical-align: 1px; }

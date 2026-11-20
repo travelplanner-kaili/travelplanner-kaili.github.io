@@ -67,7 +67,7 @@ SPOTS = [
   stay="約 1～1.5 小時",
   hours=["冬季（10 月底至 3 月底）08:30–16:30，最後入場 15:30", "古羅馬廣場–帕拉丁山 09:00 開放"],
   price="24h 票 €18（含預約費）：競技場一次＋古羅馬廣場／帕拉丁山一次，24 小時內使用。Full Experience 票 €24（地下層＋競技場地板，或頂層），兩天內使用。",
-  site=("colosseo.it", "https://colosseo.it/en/visita/orari-e-biglietti/"),
+  site=("ticketing.colosseo.it", "https://ticketing.colosseo.it/zh/categorie/singoli-1-8-persone/"),
   pass_=["羅馬競技場（一、二層）", "古羅馬廣場", "帕拉丁山"]),
  dict(id="foro", cat="paid", lat=41.8920906, lon=12.4864378,
   name="古羅馬廣場", latin="Foro Romano",

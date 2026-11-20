@@ -426,6 +426,7 @@ const PDAYS = plan.list;
 const dayLabel = d => (d.date || "未定") + "（" + WD[d.wd] + "）";
 PDAYS.forEach(d => { d.label = dayLabel(d); if (!Array.isArray(plan.days[d.k])) plan.days[d.k] = []; });
 if (!PDAYS.some(d => d.k === plan.cur)) plan.cur = PDAYS[0].k;
+const visSet = () => { try { return visited; } catch (e) { return null; } };   // 去過 is set up after the engine
 const savePlan = () => { try { localStorage.setItem(PKEY, JSON.stringify(plan)); } catch (e) {} };
 const planHas = (k, id) => plan.days[k].some(x => x.id === id);
 function planToggle(k, id) {
@@ -434,7 +435,7 @@ function planToggle(k, id) {
   plan.cur = k; plan.on = true; savePlan(); renderPlan();
 }
 const planEl = document.getElementById("plan"), planList = document.getElementById("plan-list"), planLayer = L.layerGroup().addTo(map);
-let planOpen = false;
+let planOpen = false, legsOn = false;   // legsOn: the distance pills on the plan's dashed line (tap the line to show / hide)
 try { planOpen = localStorage.getItem(PKEY + "-open") === "1"; } catch (e) {}
 /* plan.on = false: 「不選」 no day chosen, so 我的行程 is off and the map looks as usual (the days stay saved).
    Collapsing the panel (the 「我的行程」 tab) only hides the panel: the chosen day's route stays on the map. */
@@ -478,6 +479,15 @@ function renderPlan() {
     PDAYS.splice(PDAYS.indexOf(cd), 1); delete plan.days[cd.k]; plan.cur = PDAYS[0].k; savePlan(); renderPlan();
   });
   const items = plan.days[plan.cur].filter(x => byId(x.id));
+  const memo = document.getElementById("plan-daymemo");
+  memo.innerHTML = '<input class="pd-memo" type="text" maxlength="60" placeholder="這天的筆記（例如：導遊導覽日）" aria-label="這天的筆記"><button type="button" class="pd-done"></button>';
+  const mi = memo.querySelector(".pd-memo"); mi.value = cd.memo || "";
+  mi.addEventListener("change", () => { cd.memo = mi.value.trim(); savePlan(); });
+  // 10. one tap: every spot of this day 去過 / not 去過 (the same 「已去過」 as in a spot's own page)
+  const V = visSet(), vIds = items.map(x => x.id).filter(id => byId(id).cat !== "base"), allV = !!V && vIds.length > 0 && vIds.every(id => V.has(id));
+  const db = memo.querySelector(".pd-done");
+  db.hidden = !V || !vIds.length; db.textContent = allV ? "取消這天的去過" : "✓ 這天全部去過"; db.setAttribute("aria-pressed", allV);
+  db.addEventListener("click", () => { vIds.forEach(id => allV ? V.delete(id) : V.add(id)); saveVisited(); applyVisited(); renderPlan(); });
   document.getElementById("plan-empty").hidden = items.length > 0;
   planList.innerHTML = "";
   let total = 0;
@@ -486,6 +496,7 @@ function renderPlan() {
     li.dataset.id = x.id;
     li.innerHTML = `<span class="p-drag" aria-label="拖曳調整順序">⋮⋮</span><span class="p-no">${i + 1}</span><span class="p-time-txt"></span><button type="button" class="p-name"></button><input class="p-time" type="text" inputmode="numeric" maxlength="5" placeholder="--:--" aria-label="幾點到（24 小時制，例如 09:30）"><button type="button" class="p-del" aria-label="從這天的行程移除（景點還留在地圖上）" title="從這天的行程移除">×</button><div class="p-info"></div><input class="p-note" type="text" placeholder="備註" aria-label="備註">`;
     li.querySelector(".p-name").textContent = s.name;
+    if (visSet() && visSet().has(s.id)) li.classList.add("p-visited");
     li.querySelector(".p-name").addEventListener("click", () => { openSpot(s.id); setTimeout(() => focusOn(s), 320); });
     const tm = li.querySelector(".p-time"); tm.value = x.time || ""; li.querySelector(".p-time-txt").textContent = x.time || "";
     // 24-hour, like the hours on the map: "930" / "9:30" / "0930" → 09:30
@@ -549,12 +560,14 @@ function renderPlan() {
     const pts = items.map(x => byId(x.id).ll);
     go.href = gDir(pts.slice(0, 10));
     const line = L.polyline(pts, { className: "plan-line", interactive: false, pane: "planRoute" }).addTo(planLayer);
+    const hit = L.polyline(pts, { className: "plan-hit", pane: "planRoute" }).addTo(planLayer);
+    hit.on("click", e => { L.DomEvent.stopPropagation(e); legsOn = !legsOn; mapEl.classList.toggle("legs-on", legsOn); });
     const pills = [];
     for (let i = 0; i + 1 < pts.length; i++) { const pl = pill(mid(pts[i], pts[i + 1]), walkText(hav(pts[i], pts[i + 1])), "leg"); pl.options.pane = "planRoute"; pills.push(pl.addTo(planLayer)); }
     const want = plan.cur + ":" + items.map(x => x.id).join(",");
     walkRoute(pts).then(rt => {
       if (!rt || want !== plan.cur + ":" + plan.days[plan.cur].filter(x => byId(x.id)).map(x => x.id).join(",")) return;
-      line.setLatLngs(rt.coords);
+      line.setLatLngs(rt.coords); hit.setLatLngs(rt.coords);
       rt.legs.forEach((m, i) => { const el = pills[i] && pills[i].getElement(); if (el) el.querySelector("span").textContent = realText(m); const lg = planList.children[i] && planList.children[i].querySelector(".p-leg-t"); if (lg) { lg.textContent = "↓ 步行約 " + realText(m); lg.parentNode.querySelector(".p-leg-go").textContent = "實際路線 ↗"; } });
       const w = rt.total; document.getElementById("plan-sum").textContent = `走路共約 ${realText(w).replace("・", "・約 ")}`;
     });
@@ -658,6 +671,8 @@ map.on("contextmenu", e => { if (e.originalEvent && e.originalEvent.target.close
 let unMode = false;
 document.getElementById("plan-un").addEventListener("click", () => { unMode = !unMode; if (unMode) plan.on = true; renderPlan(); });
 const TORD = { "主要": 0, "推薦": 1, "次要": 2 };
+/* 公休日 from the week table: 「週一休」「週一、二休」 ("" = open every day, or no table) */
+function offDays(id) { const w = WEEK[id]; if (!w) return ""; const d = [...WD].filter((_, i) => !w[i]), o = [...WD].filter((_, i) => w[i]); return !d.length || !o.length ? "" : d.length > 3 ? "只開週" + o.join("、") : "週" + d.join("、") + "休"; }
 function renderUnList(list) {
   const box = document.getElementById("plan-unlist"); box.hidden = !unMode; if (!unMode) return;
   const cd = PDAYS.find(d => d.k === plan.cur), groups = [["主要景點", s => s.tier === "主要"], ["推薦", s => s.tier === "推薦"], ["次要", s => s.tier === "次要"], ["自己加的點", s => s.cat === "mine"]];
@@ -667,8 +682,9 @@ function renderUnList(list) {
     const h = document.createElement("h4"); h.textContent = t; box.append(h);
     g.forEach(s => {
       const r = document.createElement("div"); r.className = "un-row";
-      r.innerHTML = '<button type="button" class="un-name"></button><button type="button" class="un-add">＋ 加入</button>';
+      r.innerHTML = '<button type="button" class="un-name"></button><span class="un-off"></span><button type="button" class="un-add">＋ 加入</button>';
       r.querySelector(".un-name").textContent = s.name;
+      const off = offDays(s.id); if (off) { const o = r.querySelector(".un-off"); o.textContent = off; o.classList.toggle("today", WEEK[s.id] && !WEEK[s.id][cd.wd]); if (o.classList.contains("today")) o.title = dayLabel(cd) + " 休館"; }
       r.querySelector(".un-name").addEventListener("click", () => { map.panTo(s.ll); openSpot(s.id); });
       r.querySelector(".un-add").addEventListener("click", () => planToggle(plan.cur, s.id));
       box.append(r);
@@ -697,7 +713,7 @@ L.DomEvent.disableClickPropagation(planEl); L.DomEvent.disableScrollPropagation(
 /* 轉文字: this day as text (copied), as complete as the panel's current level (全覽 / 簡潔 / 最簡) */
 document.getElementById("plan-copy").addEventListener("click", async e => {
   const d = PDAYS.find(x => x.k === plan.cur), items = plan.days[plan.cur].filter(x => byId(x.id));
-  const lis = [...planList.children], head = CITY.name + " " + dayLabel(d);
+  const lis = [...planList.children], head = CITY.name + " " + dayLabel(d) + (d.memo ? "　" + d.memo : "");
   let txt;
   if (planLv === 2) txt = head + "\n" + items.map((x, i) => `${i + 1} ${x.time ? x.time + " " : ""}${byId(x.id).name}`).join(" → ");
   else {
@@ -729,7 +745,7 @@ const b64d = t => new TextDecoder().decode(Uint8Array.from(atob(t.replace(/-/g, 
 /* 分享我的地圖: one link carries every day, own spots and visited spots; the receiver chooses add / replace for spots and for the plan */
 function shareData() {
   return { v: 2, all: 1, t: MAP_UPDATED, cur: Math.max(0, PDAYS.findIndex(x => x.k === plan.cur)),
-    days: PDAYS.map(x => ({ date: x.date, wd: x.wd, items: plan.days[x.k].filter(y => byId(y.id)).map(y => [y.id, y.time || "", y.note || ""]) })),
+    days: PDAYS.map(x => ({ date: x.date, wd: x.wd, ...(x.memo ? { memo: x.memo } : {}), items: plan.days[x.k].filter(y => byId(y.id)).map(y => [y.id, y.time || "", y.note || ""]) })),
     mine: MINE.map(m => [m.id, m.name, +m.ll[0].toFixed(6), +m.ll[1].toFixed(6), m.note || "", m.gurl || ""]),
     visited: typeof visited !== "undefined" ? [...visited] : [],
     hotel: myHotel || null,
@@ -771,11 +787,11 @@ function askImport(d) {
     const vis = spots === "replace" ? new Set(d.visited || []) : new Set([...(typeof visited !== "undefined" ? visited : []), ...(d.visited || [])]);
     const exists = id => !!byId(id) && !(byId(id).custom) || mine.some(m => m.id === id);
     // plan
-    const keep = planMode === "replace" ? [] : PDAYS.map(x => ({ date: x.date, wd: x.wd, items: plan.days[x.k].map(y => [y.id, y.time || "", y.note || ""]) }));
+    const keep = planMode === "replace" ? [] : PDAYS.map(x => ({ date: x.date, wd: x.wd, memo: x.memo || "", items: plan.days[x.k].map(y => [y.id, y.time || "", y.note || ""]) }));
     const sig = dd => dd.date + "|" + dd.wd + "|" + dd.items.map(it => it[0]).join(",");
     const have = new Set(keep.map(sig));
-    d.days.forEach(sd => { const dd = { date: sd.date, wd: sd.wd, items: sd.items.map(([id, t, n]) => [idMap[id] || id, t, n]) }; if (!have.has(sig(dd))) { keep.push(dd); have.add(sig(dd)); } });   // the very same day twice is skipped
-    const list = keep.map((x, k) => ({ k: "d" + k, date: x.date, wd: x.wd })); list.forEach(x => x.label = dayLabel(x));
+    d.days.forEach(sd => { const dd = { date: sd.date, wd: sd.wd, memo: sd.memo || "", items: sd.items.map(([id, t, n]) => [idMap[id] || id, t, n]) }; if (!have.has(sig(dd))) { keep.push(dd); have.add(sig(dd)); } });   // the very same day twice is skipped
+    const list = keep.map((x, k) => ({ k: "d" + k, date: x.date, wd: x.wd, ...(x.memo ? { memo: x.memo } : {}) })); list.forEach(x => x.label = dayLabel(x));
     const days = {}; keep.forEach((x, k) => days["d" + k] = x.items.filter(it => exists(it[0])).map(([id, time, note]) => ({ id, time, note })));
     if (!list.length) { list.push({ k: "d0", date: "", wd: 3 }); list[0].label = dayLabel(list[0]); days.d0 = []; }
     const cur = planMode === "replace" ? list[Math.max(0, Math.min(list.length - 1, d.cur || 0))].k : (list[PDAYS.length] || list[0]).k;
@@ -836,7 +852,7 @@ const TOUR = (() => {
     { menu: true, el: () => filterRow() || vis("#fs-menu"), t: "篩選", x: "景點可以按重要性分級顯示、是否免費。選你星期幾去，地圖上的營業時間就只顯示那幾天。" },
     { menu: true, el: () => vis("#f-cold") || vis("#fs-menu"), t: "冷門時段", x: "按「冷門時段」，只亮早上 9 點前或晚上 7 點後還能去的景點，其他的變淡。" },
     { el: () => vis(".plan-btn"), t: "我的行程", x: "把景點排進每一天，地圖上會畫出步行路線，還能一鍵 Google 導航。" },
-    { el: () => vis(".view-btns .fs-open") || vis("#fs-exit") || vis("#z-full"), t: "全螢幕", x: () => document.body.classList.contains("fs-on") ? "手機一打開就是全螢幕地圖。按這顆可以離開全螢幕，看標題和地圖下方的說明；右下角同樣圖示的按鈕可以再回到全螢幕。" : "地圖全螢幕，更大更清楚；再按一次回到原本的頁面。" },
+    { el: () => vis(".view-btns .fs-open") || vis("#fs-exit"), t: "全螢幕", x: () => document.body.classList.contains("fs-on") ? "手機一打開就是全螢幕地圖。按這顆可以離開全螢幕，看標題和地圖下方的說明；右下角同樣圖示的按鈕可以再回到全螢幕。" : "地圖全螢幕，更大更清楚；再按一次回到原本的頁面。" },
     { el: () => vis(".names-btn"), t: "眼睛：景點框怎麼顯示", x: "按一下切換三種：自動（預設，放不下的框會自動縮小）、全覽（每個框都完整顯示）、簡潔（只留景點名稱）。" },
     { el: () => vis(".base-btn"), t: "底圖（地圖）濃淡", x: "按一次街道淡一點，最後只留城牆、道路和景點。" },
     { el: () => vis(".icon-btn.dist"), t: "距離模式", x: "依序點兩個景點，就知道走路多遠、幾分鐘。" },
@@ -920,7 +936,7 @@ const TOUR = (() => {
     document.body.append(shield, hole, card); addEventListener("resize", place); show();
   }
   document.querySelectorAll(".tour-again").forEach(b => b.addEventListener("click", e => { e.preventDefault(); setTimeout(() => start(), 150); }));
-  function toMap() { if (innerWidth <= 640 && !document.body.classList.contains("fs-on")) { const b = vis("#z-full") || vis(".fs-open"); if (b) b.click(); } else mapEl.scrollIntoView({ block: "center" }); }
+  function toMap() { if (innerWidth <= 640 && !document.body.classList.contains("fs-on")) { const b = vis(".fs-open"); if (b) b.click(); } else mapEl.scrollIntoView({ block: "center" }); }
   function startPlan() {
     if (card) return;
     if (plan.on === false) { plan.on = true; savePlan(); }
@@ -1016,11 +1032,10 @@ const mapView = { mq, refresh: () => setTimeout(() => { map.invalidateSize(); la
   let on = false;
   const enter = () => { if (on) return; on = true; box.classList.add("fs"); document.body.classList.add("fs-on"); panel.appendChild(filters); distSlot.appendChild(distNote); setMenu(false); mapView.refresh(); };
   const exit = () => { if (!on) return; on = false; box.classList.remove("fs"); document.body.classList.remove("fs-on"); homeF.after(filters); homeD.after(distNote); setMenu(false); mapView.refresh(); };
-  document.getElementById("z-full").addEventListener("click", () => on ? exit() : enter());
   document.getElementById("fs-exit").addEventListener("click", exit);
   document.getElementById("fs-open").addEventListener("click", enter);
   menu.addEventListener("click", () => setMenu(panel.hidden));
-  panel.addEventListener("click", e => { if (e.target.closest("button")) setTimeout(() => setMenu(false), 120); });
+  map.on("click", () => { if (!panel.hidden) setMenu(false); });
   [panel, bar, distSlot].forEach(x => { L.DomEvent.disableClickPropagation(x); L.DomEvent.disableScrollPropagation(x); });
   window.addEventListener("resize", () => { if (on) place(); });
   if (matchMedia("(max-width: 640px)").matches) enter();
@@ -1032,8 +1047,6 @@ function setLMode(m) {
   document.querySelectorAll(".names-btn").forEach(x => {
     x.setAttribute("aria-pressed", m !== "auto"); x.dataset.mode = m; x.dataset.tip = "顯示：" + LMODE_TXT[m];
     x.setAttribute("aria-label", "景點框顯示方式：" + LMODE_TXT[m] + "（按一下切換：自動、全覽、簡潔）");
-    let t = x.querySelector(".lm-tag"); if (!t) { t = document.createElement("span"); t.className = "lm-tag"; t.setAttribute("aria-hidden", "true"); x.append(t); }
-    t.textContent = { auto: "自", full: "全", names: "簡" }[m];
   });
   if (map._loaded) layoutLabels();   // at start-up the map places the labels itself once it has a view
 }

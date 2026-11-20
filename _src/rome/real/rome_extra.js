@@ -87,6 +87,7 @@ function openRoute(id) {
     <div class="d-top"><span class="cat">推薦散步路線</span><button class="close" id="d-close" aria-label="關閉">×</button></div>
     <h3 id="d-name">${esc(r.name)}</h3>
     <p class="latin">${esc(r.latin)}</p>
+    <div class="d-plan rt-plan"><span>整條路線加入行程：</span>${PDAYS.map(d => `<button type="button" class="plan-day" data-day="${d.k}"></button>`).join("")}</div>
     <div class="rt-tabs" role="tablist"><button class="rt-tab" role="tab" data-tab="info" aria-selected="true">路線介紹</button>${r.food ? `<button class="rt-tab" role="tab" data-tab="food" aria-selected="false">🍴 吃什麼</button>` : ""}<button class="rt-tab" role="tab" data-tab="tips" aria-selected="false">💡 小提醒</button></div>
     <div class="rt-panel tips-panel" data-panel="tips" hidden>${list(r.tips)}</div>
     ${r.food ? `<div class="rt-panel" data-panel="food" hidden>
@@ -119,18 +120,37 @@ function openRoute(id) {
   map.fitBounds(b, { paddingTopLeft: [30, 60], paddingBottomRight: [30 + dw, 30 + Math.min(dh, mapEl.offsetHeight * .5)], maxZoom: 17 });
   document.getElementById("d-close").addEventListener("click", closeSpot);
   drawer.querySelectorAll(".stop-link").forEach(b => b.addEventListener("click", () => openSpot(b.dataset.id)));
+  bindRoutePlan(r);
   bindTabs();
   document.getElementById("d-close").focus({ preventScroll: true });
 }
 
-/* ---- 購物: orange shopping streets are always on the map; the button adds the shops (solid boxes) ---- */
+/* 整條路線加入行程 (2026-11-20): the walk's stops go into that day in the walk's order (ones already there stay where they are);
+   when the whole walk is already in that day, the same button takes the walk's stops out again */
+function bindRoutePlan(r) {
+  const ids = r.stops.filter(id => byId(id) && byId(id).cat !== "base");
+  const paint = () => drawer.querySelectorAll(".rt-plan .plan-day").forEach(b => {
+    const d = PDAYS.find(x => x.k === b.dataset.day), all = ids.every(id => planHas(d.k, id));
+    b.setAttribute("aria-pressed", all); b.textContent = (all ? "✓ " : "＋ ") + d.label;
+    b.title = all ? "再按一次，把這條路線的景點從這天移除" : "把沿途 " + ids.length + " 個景點依路線順序加進這天";
+  });
+  drawer.querySelectorAll(".rt-plan .plan-day").forEach(b => b.addEventListener("click", () => {
+    const k = b.dataset.day, a = plan.days[k];
+    if (ids.every(id => planHas(k, id))) plan.days[k] = a.filter(x => !ids.includes(x.id));
+    else ids.forEach(id => { if (!planHas(k, id)) a.push({ id, time: "", note: "" }); });
+    plan.cur = k; plan.on = true; savePlan(); renderPlan(); paint();
+  }));
+  paint();
+}
+
+/* ---- 購物: pink shopping streets are always on the map; the button adds the shops (solid boxes) ---- */
 let shopOn = false;
 {
   const _applySup = applySup;
   applySup = function () {
     _applySup();
     SPOTS.forEach(s => {
-      if (s.shopStreet) { s.g.classList.add("gone"); return; }   // shopping streets are the orange lines, not pins
+      if (s.shopStreet) { s.g.classList.add("gone"); return; }   // shopping streets are the pink lines, not pins
       if (s.tier === "購物") { s.g.classList.toggle("gone", !shopOn); s.g.classList.toggle("shopbox", shopOn); s.g.classList.remove("dim"); }
       else if (shopOn && s.cat !== "base") { if (s.sup) s.g.classList.add("gone"); s.g.classList.remove("dim"); }   // 購物: 主要／推薦 stay as they are, other filters pause
       if (s.g.classList.contains("on-route")) s.g.classList.remove("gone");
