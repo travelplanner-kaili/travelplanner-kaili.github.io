@@ -1,0 +1,4 @@
+# GitHub Pages (Jekyll): publish only the maps. Source code and notes for Claude stay in the repo but are not served.
+exclude:
+  - CLAUDE.md
+  - _src

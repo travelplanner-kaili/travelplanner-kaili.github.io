@@ -1,0 +1,628 @@
+<title>盧卡古城景點地圖</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&family=Cormorant+Garamond:ital,wght@1,500;1,600&display=swap">
+<style>
+/* Layout: walled-city plan drawn in meters (SVG), labels as stone tablets; details open in a side drawer / bottom sheet */
+:root {
+  --bg: #E7E6E0;
+  --paper: #F7F6F2;
+  --ink: #22262A;
+  --muted: #676B66;
+  --line: #CBC9C0;
+  --wall: #6E7E4C;
+  --wall-2: #A3B27A;
+  --street: #D8D5CA;
+  --paid: #A3282D;
+  --free: #3A5880;
+  --open: #57772F;
+  --warn-bg: #F6E7D5;
+  --warn-fg: #8A4A12;
+  --shadow: rgba(30,32,28,.12);
+  --f-display: "Noto Serif TC", "Songti TC", "PMingLiU", serif;
+  --f-body: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  --f-latin: "Cormorant Garamond", "Garamond", "Times New Roman", serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #15171A; --paper: #1E2124; --ink: #E9E7E2; --muted: #9C9F99; --line: #353A3D;
+  --wall: #4D5C35; --wall-2: #75864E; --street: #2C3033;
+  --paid: #E26A68; --free: #85A7D3; --open: #A2C473;
+  --warn-bg: #3A2A19; --warn-fg: #F0B678; --shadow: rgba(0,0,0,.4); color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #15171A; --paper: #1E2124; --ink: #E9E7E2; --muted: #9C9F99; --line: #353A3D;
+  --wall: #4D5C35; --wall-2: #75864E; --street: #2C3033;
+  --paid: #E26A68; --free: #85A7D3; --open: #A2C473;
+  --warn-bg: #3A2A19; --warn-fg: #F0B678; --shadow: rgba(0,0,0,.4); color-scheme: dark }
+
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.65; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-block: 28px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 16px 32px; margin-bottom: 18px; }
+.eyebrow { font-family: var(--f-latin); font-style: italic; font-size: 20px; color: var(--paid); line-height: 1; }
+h1 { font-family: var(--f-display); font-size: clamp(26px, 4vw, 38px); line-height: 1.25; margin: 6px 0 4px; text-wrap: balance; letter-spacing: .02em; }
+.sub { color: var(--muted); margin: 0; font-size: 14px; }
+.filters { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { font: 500 13px var(--f-body); display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--paper); color: var(--ink); cursor: pointer; }
+.chip .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c); }
+.chip[aria-pressed="false"] { opacity: .45; }
+.chip:focus-visible, .spot:focus-visible, .item:focus-visible, .close:focus-visible { outline: 2px solid var(--free); outline-offset: 2px; }
+
+.mapbox { position: relative; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.mapbox svg { display: block; width: 100%; height: auto; }
+.zoom { display: none; position: absolute; right: 10px; bottom: 10px; flex-direction: column; gap: 6px; }
+.zoom button { width: 42px; height: 42px; border-radius: 8px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font: 500 22px/1 var(--f-body); box-shadow: 0 2px 8px var(--shadow); cursor: pointer; }
+.zoom button:focus-visible { outline: 2px solid var(--free); outline-offset: 2px; }
+.mobile-only { display: none; }
+@media (max-width: 860px) {
+  .mapbox svg { touch-action: none; }
+  .zoom { display: flex; }
+  .mobile-only { display: inline; font-weight: 700; color: var(--ink); }
+}
+.hint { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px; font-size: 12.5px; color: var(--muted); margin-top: 8px; }
+
+/* SVG */
+.spot { cursor: pointer; }
+.spot .tab { fill: var(--paper); stroke: var(--c); stroke-width: 1.6; transition: fill .15s; }
+.spot:hover .tab, .spot.active .tab { fill: var(--bg); }
+.spot.active .tab { stroke-width: 3; }
+.spot .pin { fill: var(--c); stroke: var(--paper); stroke-width: 3; }
+.spot .leader { stroke: var(--c); stroke-width: 1.4; fill: none; }
+.spot .t-name { font: 700 19px var(--f-body); fill: var(--ink); }
+.spot .t-wed { font: 500 14.5px var(--f-body); fill: var(--ink); font-variant-numeric: tabular-nums; }
+.spot .t-time { font: 400 14.5px var(--f-body); fill: var(--muted); font-variant-numeric: tabular-nums; }
+.spot .t-price { font: 700 14.5px var(--f-body); fill: var(--c); font-variant-numeric: tabular-nums; }
+.spot.dim, .spot.off { opacity: .12; pointer-events: none; }
+.spot.gone { display: none; }
+.chip.sup .dot { background: none; border: 2px dashed var(--c); width: 8px; height: 8px; }
+.spot.is-sup .tab { stroke-dasharray: 6 4; }
+.area polygon { fill: var(--c); fill-opacity: .13; stroke: var(--c); stroke-width: 3; stroke-dasharray: 12 8; stroke-linejoin: round; }
+.area circle { fill: var(--c); }
+.area.dim { opacity: .12; }
+.spot.hl .tab { stroke-width: 3; }
+.spot.hl .t-time { fill: var(--ink); font-weight: 700; }
+.mode { font: 700 13px var(--f-body); display: inline-flex; align-items: center; gap: 7px; padding: 6px 14px; border-radius: 999px;
+  border: 1.5px solid var(--ink); background: var(--paper); color: var(--ink); cursor: pointer; }
+.mode[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+.mode:focus-visible { outline: 2px solid var(--free); outline-offset: 2px; }
+.mode-note { margin: 0 0 10px; font-size: 13.5px; color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-left: 3px solid var(--ink); padding: 8px 12px; border-radius: 4px; }
+.item.off { display: none; }
+
+/* List */
+.list { margin-top: 36px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 28px; }
+.group h2 { font-family: var(--f-display); font-size: 18px; margin: 0 0 10px; display: flex; align-items: center; gap: 8px; }
+.group h2 .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c); }
+.items { display: grid; gap: 6px; }
+.item { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; text-align: left; width: 100%; padding: 10px 12px;
+  background: var(--paper); border: 1px solid var(--line); border-left: 3px solid var(--c); border-radius: 4px; cursor: pointer; color: var(--ink); font: inherit; }
+.item:hover { background: var(--bg); }
+.item b { font-weight: 700; min-width: 0; }
+.item .p { font-weight: 700; color: var(--c); font-size: 13.5px; font-variant-numeric: tabular-nums; }
+.item .t { grid-column: 1 / -1; color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+
+/* Drawer */
+.scrim { position: fixed; inset: 0; background: rgba(10,12,14,.35); z-index: 20; }
+.drawer { position: fixed; z-index: 21; background: var(--paper); color: var(--ink); box-shadow: 0 10px 40px var(--shadow);
+  top: 0; right: 0; bottom: 0; width: min(420px, 100%); overflow-y: auto; box-sizing: border-box; overscroll-behavior: contain;
+  padding: calc(22px + env(safe-area-inset-top, 0px)) max(24px, env(safe-area-inset-right, 0px)) calc(28px + env(safe-area-inset-bottom, 0px)) 24px; }
+@media (max-width: 640px) {
+  .drawer { top: auto; left: 0; width: 100%; max-height: 82vh; max-height: 82dvh; border-radius: 14px 14px 0 0;
+    padding: 20px max(18px, env(safe-area-inset-right, 0px)) calc(28px + env(safe-area-inset-bottom, 0px)) max(18px, env(safe-area-inset-left, 0px)); }
+}
+.d-top { display: flex; justify-content: space-between; align-items: start; gap: 12px; }
+.cat { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .08em; color: var(--c); border: 1px solid var(--c); padding: 2px 9px; border-radius: 999px; }
+.close { flex: none; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font-size: 20px; line-height: 1; cursor: pointer; }
+.drawer h3 { font-family: var(--f-display); font-size: 26px; line-height: 1.3; margin: 12px 0 0; text-wrap: balance; }
+.latin { font-family: var(--f-latin); font-style: italic; font-size: 19px; color: var(--muted); margin: 2px 0 18px; }
+.warn { background: var(--warn-bg); color: var(--warn-fg); font-weight: 500; font-size: 14px; padding: 9px 12px; border-radius: 4px; margin-bottom: 16px; }
+dl { margin: 0; display: grid; gap: 14px; }
+dt { font-size: 12px; font-weight: 700; letter-spacing: .1em; color: var(--muted); }
+dd { margin: 2px 0 0; font-variant-numeric: tabular-nums; }
+dd ul { margin: 0; padding-left: 1.1em; }
+.site { color: var(--free); font-weight: 500; text-underline-offset: 3px; word-break: break-all; }
+@media (prefers-reduced-motion: no-preference) {
+  .drawer:not([hidden]) { animation: slide .22s ease-out; }
+  @keyframes slide { from { transform: translateX(24px); opacity: 0; } }
+  @media (max-width: 640px) { @keyframes slide { from { transform: translateY(30px); opacity: 0; } } }
+}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow">Lucca · Toscana</div>
+      <h1>盧卡古城景點地圖</h1>
+      <p class="sub">點地圖上的景點，查看完整介紹</p>
+    </div>
+    <div class="filters" role="group" aria-label="篩選類別">
+      <button class="chip" id="f-paid" data-cat="paid" aria-pressed="true" style="--c:var(--paid)"><span class="dot"></span>需購票景點</button>
+      <button class="chip" id="f-free" data-cat="free" aria-pressed="true" style="--c:var(--free)"><span class="dot"></span>免費小教堂</button>
+      <button class="chip" id="f-open" data-cat="open" aria-pressed="true" style="--c:var(--open)"><span class="dot"></span>全天開放</button>
+      <button class="chip sup" id="f-sup" hidden aria-pressed="false" style="--c:var(--muted)"><span class="dot"></span>補充景點</button>
+    </div>
+  </header>
+
+  <div class="mapbox">
+    <svg id="map" viewBox="120 130 1560 1290" role="img" aria-label="盧卡城牆內景點分布圖">
+      <defs>
+        <pattern id="hatch" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <line x1="0" y1="0" x2="0" y2="14" stroke="var(--line)" stroke-width="1"/>
+        </pattern>
+      </defs>
+      <rect x="120" y="130" width="1560" height="1290" fill="url(#hatch)"/>
+      <g id="base"></g>
+      <g id="spots"></g>
+    </svg>
+    <div class="zoom">
+      <button id="z-in" aria-label="放大">+</button>
+      <button id="z-out" aria-label="縮小">−</button>
+      <button id="z-reset" aria-label="顯示整張地圖">⤢</button>
+    </div>
+  </div>
+  <div class="hint">
+    <span class="mobile-only">雙指縮放、單指拖曳移動，點景點看介紹</span>
+    <span>景點依實際座標標示；城牆輪廓依城門位置描繪，街道為簡化示意</span>
+    <span>綠色寬帶為城牆頂林蔭步道（周長 4.2 公里）</span>
+  </div>
+
+  <section class="list" id="list" hidden></section>
+</div>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" hidden role="dialog" aria-modal="true" aria-labelledby="d-name"></aside>
+
+<script>
+const CAT = {
+  paid: { label: "需購票／有營業時限", color: "var(--paid)" },
+  free: { label: "免門票小教堂", color: "var(--free)" },
+  open: { label: "全天無時限", color: "var(--open)" },
+  base: { label: "住宿與交通", color: "var(--ink)" }
+};
+// x, y in meters from the NW corner of the old town; lx, ly = label position
+const SPOTS = [
+  { id:"duomo", cat:"paid", x:965, y:985, lx:1080, ly:905,
+    name:"盧卡主教座堂", latin:"Duomo di Lucca / Cattedrale di San Martino",
+    sTime:"09:30 開門入場", sPrice:"全見聯票 €10",
+    feature:"坐落在安靜的石磚廣場上，建於 11 世紀。羅曼式立面以精細的大理石柱廊雕刻著稱，左右兩側還呈現罕見的不對稱結構。",
+    tips:["鎮館聖物：傳奇的木雕十字架《聖容木雕》（Volto Santo）。","大理石石棺雕塑：聖器室內單獨驗票，收藏雅各布·德拉·奎爾恰（Jacopo della Quercia）名作《伊拉利亞·德爾·卡雷托石棺》（Ilaria del Carretto）。","門廊趣味細節：走進正門入口右側牆面，仔細觀察可以找到一幅刻在石頭上的中世紀「迷宮圖」，是古代朝聖者在此祈禱留下的痕跡。"],
+    when:"第二天上午 09:30 開門第一批入場（光線好、最安靜）。",
+    stay:"約 35～45 分鐘",
+    hours:["週一至週五 09:30～17:00","週六 09:30～18:00","週日 12:00～17:00","最後入場為休館前 30 分鐘","特殊服務期間開放時間可能調整"],
+    price:"主教座堂全見聯票（Biglietto Completo）€10，現場可刷卡。",
+    pass:["盧卡大教堂（含聖器室石棺）","主教座堂鐘樓","主教座堂博物館","聖若望和雷帕拉塔教堂與洗禮堂（含地下考古區）"] },
+  { id:"campanile", cat:"paid", x:919, y:992, lx:600, ly:1000,
+    name:"主教座堂鐘樓", latin:"Campanile del Duomo",
+    sTime:"10:30–11:30", sPrice:"聯票含",
+    feature:"攀登古老鐘樓頂端，正面近距離俯瞰教堂廣場、古城紅瓦屋頂與北方山景。",
+    when:"第二天上午 10:30～11:30（上午順光，俯瞰城景最清晰）。",
+    stay:"約 25～30 分鐘",
+    hours:["週一至週日 10:00～17:00"],
+    price:"包含在主教座堂全見聯票內（票價見盧卡主教座堂）。" },
+  { id:"museo", cat:"paid", x:965, y:1035, lx:1080, ly:1015,
+    name:"主教座堂博物館", latin:"Museo della Cattedrale",
+    sTime:"15:30–17:00", sPrice:"聯票含",
+    feature:"就位在大教堂旁側，館藏歷代珍貴金銀聖器、華麗祭披、手抄本以及中世紀宗教雕塑。",
+    when:"第一天下午 15:30～17:00（可與聖若望和雷帕拉塔教堂一起走完）。",
+    stay:"約 25～35 分鐘",
+    hours:["週一至週五 10:00～17:00","週六 10:00～18:00","週日 10:00～17:00"],
+    price:"包含在主教座堂全見聯票內（票價見盧卡主教座堂）。" },
+  { id:"giovanni", cat:"paid", x:850, y:930, lx:900, ly:800,
+    name:"聖若望和雷帕拉塔教堂", latin:"Chiesa e Battistero di San Giovanni e Reparata",
+    sTime:"15:30–17:00", sPrice:"聯票含",
+    feature:"教堂本身古老莊嚴，內部洗禮堂下方有極具震撼力的地下羅馬多層考古發掘區（Area Archeologica）。沿著鋼架步道可以看到古羅馬浴場馬賽克地板、早期基督徒洗禮池與古墓基石。",
+    when:"第一天下午 15:30～17:00（可與主教座堂博物館一起走完）。",
+    stay:"約 30～40 分鐘",
+    hours:["週一至週五 10:00～17:00","週六 10:00～18:00","週日 10:00～17:00","最後入場為休館前 30 分鐘"],
+    price:"包含在主教座堂全見聯票內（票價見盧卡主教座堂）。" },
+  { id:"guinigi", cat:"paid", x:1043, y:643, lx:1090, ly:560,
+    name:"季尼吉樹塔", latin:"Torre Guinigi",
+    sTime:"11:45–13:00 或 15:30", sPrice:"€8",
+    feature:"盧卡最具代表性的地標建築。這座高 45 公尺的 14 世紀紅磚中世紀塔樓最特別之處，在於頂樓空中花園種植了幾棵高聳的冬青櫟（Holm Oak），象徵著重生與繁榮。",
+    tips:["登頂 230 階樓梯：沿著塔內階梯拾級而上，頂部就是被古老橡樹樹蔭覆蓋的觀景平台。","360 度環景：從樹下望出去，可以清楚看到圓形的競技場廣場、錯落的中世紀教堂鐘樓，以及遠處圍繞盧卡的亞平寧山脈群峰。"],
+    when:"第二天中午 11:45～13:00（全天無休，正好避開其他小景點午休與餐廳尖峰）或下午 15:30。",
+    stay:"約 30～45 分鐘（單程爬梯約 7～10 分鐘，頂部停留約 15 分鐘）",
+    hours:["每日 10:00～17:00","中午不休息"],
+    price:"全票 €8.00（可買市立雙塔／三合一聯票）。現場售票處可刷卡。" },
+  { id:"ore", cat:"paid", x:817, y:679, lx:880, ly:690,
+    name:"時鐘塔", latin:"Torre delle Ore",
+    sTime:"10:30–12:00／15:00–16:30", sPrice:"€8",
+    feature:"古城內最高的塔樓（50 公尺、207 階），內部可近距離看見 1754 年巨大運轉齒輪機械鐘，頂端可俯瞰整條 Via Fillungo 與對面的樹塔。",
+    when:"上午 10:30～12:00 或下午 15:00～16:30（逛街主幹道上順道登頂）。",
+    stay:"約 30～40 分鐘",
+    hours:["每日 10:00～17:00（冬季時間）","中午不休息"],
+    price:"全票 €8.00（建議與樹塔一起買市立聯票）。現場售票處可刷卡。" },
+  { id:"frediano", cat:"paid", x:861, y:378, lx:560, ly:290,
+    name:"聖弗雷迪亞諾聖殿", latin:"Basilica di San Frediano",
+    sTime:"下午／傍晚順訪", sPrice:"外觀免費；入內 €4",
+    feature:"立面擁有托斯卡尼少見的 13 世紀拜占庭風格巨幅金色基督升天馬賽克，堂內藏有精雕羅曼式洗禮盆。",
+    when:"下午或傍晚路過圓形競技場廣場時順訪。",
+    stay:"外觀拍照約 5 分鐘；若入內參觀約 20 分鐘",
+    hours:["週一至週五及週日 09:30～16:30","週六 09:30～17:00"],
+    price:"外觀免費；入內門票全票約 €4.00（獨立售票，不包含在大教堂聯票內）。" },
+
+  { id:"michele", cat:"free", x:705, y:715, lx:560, ly:420,
+    name:"聖彌額爾教堂", latin:"Chiesa di San Michele in Foro",
+    sTime:"07:40–09:00／15:30–17:00", sPrice:"免費",
+    warn:"中午 12:00～15:00 關門午休",
+    feature:"古羅馬市集廣場核心，立面如婚禮蛋糕般雕琢繁複，頂部立有大天使聖米迦勒銅像，內有李皮（Lippi）祭壇畫。",
+    tips:["正立面頂部矗立著巨大的大天使雕像，傳說雕像手指鑲有綠寶石，特定光線角度下才會看見。"],
+    when:"清晨 07:40～09:00（無人、安靜）或下午 15:30～17:00（陽光直照立面最壯觀）。",
+    stay:"約 15 分鐘",
+    hours:["上午 07:40～12:00","下午 15:00～18:00"],
+    price:"免費入場。" },
+  { id:"giusto", cat:"free", x:778, y:840, lx:420, ly:860,
+    name:"聖朱斯特教堂", latin:"Chiesa di San Giusto",
+    sTime:"10:00–11:45／15:30–16:30", sPrice:"免費",
+    warn:"中午午休大門必定關閉；週日與宗教節慶不開放，請勿專程安排",
+    feature:"坐落於聖米迦勒廣場東南側幾步路，門楣上刻有極為細膩的 12 世紀怪獸與卷草紋浮雕，雙色大理石外觀精巧。",
+    tips:["參觀避坑：這是地方免費堂區小教堂，神職人員開關門時間有些許彈性（例如早上 8 點開門到 9 點多晨禱結束，或下午延後至 18:00）。想確保能推門入內，抓官方時段與第三方標記的重疊時段最保險。","中午 12:30～14:30 是義大利傳統午休，現場大門必定關閉。"],
+    when:"最保險的時段：上午 10:00～11:45、下午 15:30～16:30。",
+    stay:"約 10～15 分鐘",
+    hours:["週一至週六：08:00～12:00、14:00～17:00（盧卡市政府官方登記）","週日與宗教節慶：原則上閉門不開放","部分第三方網站標記為 09:30～12:30、15:30～18:30，非官方資訊"],
+    price:"免費入場。" },
+  { id:"alessandro", cat:"free", x:591, y:809, lx:300, ly:745,
+    name:"聖亞歷山大堂", latin:"Chiesa di Sant'Alessandro Maggiore",
+    sTime:"白天散步路過", sPrice:"外觀免費",
+    warn:"平時內部幾乎不開放，只能看外觀",
+    feature:"11 世紀古典羅曼式長方形巴西利卡，純淨的白色石灰岩外牆是全城保存最純粹、幾無後世雕琢改動的羅曼式立面。",
+    tips:["它不是觀光性質的售票景點，內部平時大門常關，僅在極少數義大利環境基金會（FAI）遺產日、教區特展或特定宗教彌撒時才會開門。"],
+    when:"路過時在安靜的廣場欣賞外觀即可。",
+    stay:"外觀欣賞拍照約 5～10 分鐘",
+    hours:["平時大門常關","僅 FAI 遺產日、教區特展或特定宗教彌撒時開門"],
+    price:"外觀免費。" },
+
+  { id:"piazzamichele", cat:"open", x:680, y:740, lx:725, ly:745,
+    name:"聖米迦勒廣場", latin:"Piazza San Michele",
+    sTime:"白天隨時", sPrice:"免費",
+    feature:"古羅馬時代的市中心集會廣場（Forum），也是古城核心散步動線的交會處。廣場中央就是聖彌額爾教堂，也是逛街區的一個角。",
+    when:"散步、逛街時隨時經過；下午順光時拍教堂立面最漂亮。",
+    stay:"散步拍照約 10～15 分鐘",
+    hours:["廣場全天開放"],
+    price:"免費開放。" },
+  { id:"hotel", cat:"base", x:1272, y:715, lx:1300, ly:740,
+    name:"Hotel Ilaria", latin:"Via del Fosso, 26, Lucca",
+    sPrice:"我的住宿",
+    feature:"住宿飯店。位於城牆內東側的 Via del Fosso，距季尼吉樹塔直線約 250 公尺、距主教座堂直線約 400 公尺、距火車站直線約 700 公尺。",
+    hours:["櫃台 24 小時","電話 +39 0583 47615"] },
+  { id:"station", cat:"base", x:975, y:1344, lx:1010, ly:1300,
+    name:"盧卡火車站", latin:"Stazione di Lucca",
+    sPrice:"城牆外南側",
+    feature:"盧卡火車站，位於城牆外南側。最近的城門是西北方的 Porta San Pietro，直線約 300 公尺。" },
+  { id:"mura", cat:"open", x:520, y:1198, lx:290, ly:1085,
+    name:"盧卡城牆", latin:"Mura di Lucca",
+    sTime:"07:30–09:00／16:00–17:00", sPrice:"免費",
+    feature:"興建於 16 至 17 世紀，是歐洲保存最完好的文藝復興防禦工事之一，周長約 4.2 公里。城牆頂部寬達數十公尺，如今改建為綠樹成蔭的高架環城空中公園。步道平坦寬敞，可以俯瞰古城磚紅屋頂與城外的托斯卡尼田園風光。",
+    tips:["租台腳踏車環城：古城門附近與城內隨處都有租車行，騎車約 30～40 分鐘就能悠閒繞完一圈。","午後夕陽散步：下午 4 點到 5 點左右，托斯卡尼的陽光最溫和。走在兩旁種滿懸鈴木與橡樹的城牆上，看當地人慢跑、遛狗的日常。"],
+    when:"清晨 07:30～09:00（空氣好、人少，適合散步或騎車）；下午 16:00～17:00（陽光最溫和，適合夕陽散步）。",
+    stay:"騎腳踏車繞一圈約 30～40 分鐘；徒步一圈約 1 小時",
+    hours:["全天 24 小時開放","夜間路燈較暗"],
+    price:"免費。" },
+  { id:"anfiteatro", cat:"open", x:975, y:462, lx:1030, ly:375,
+    name:"圓形競技場廣場", latin:"Piazza dell'Anfiteatro",
+    sTime:"08:00–09:00／18:00–20:00", sPrice:"免費",
+    feature:"沿古羅馬競技場橢圓地基而建的封閉式廣場，環繞黃色外牆托斯卡尼住宅與餐酒館。",
+    tips:["建立在西元 2 世紀古羅馬角鬥場的遺址上，保留了完整的橢圓形閉合輪廓。","四座通道拱門在中心交會成一個十字交叉點，廣場四周開滿了露天餐廳與酒吧，非常適合小酌與放鬆。"],
+    when:"清晨 08:00～09:00（拍空景）；傍晚至夜間 18:00～20:00（喝開胃酒 Aperitivo、看點燈夜景）。",
+    stay:"散步拍照 15 分鐘；入座用餐／開胃酒約 45 分鐘",
+    hours:["廣場全天開放","周邊餐酒館營業至深夜"],
+    price:"免費。" },
+  { id:"shopping", cat:"open", x:600, y:660, lx:250, ly:560,
+    name:"Piazza San Michele 及周邊購物商圈", latin:"Via Fillungo / Via San Paolino / Via Santa Croce",
+    sTime:"16:00–19:30", sPrice:"免費",
+    area:"330,712 975,462 850,480 825,600 835,705 705,715",
+    corners:[[330,712],[705,715],[975,462]],
+    feature:"全城散步與商業中心，串聯老字號甜點店（Taddeucci 等）、手工皮件與獨立精品工坊。",
+    when:"下午 16:00～19:30（店家下午開門、居民進行傍晚漫步的熱鬧時段）。",
+    stay:"逛街採買伴手禮約 1～1.5 小時",
+    hours:["廣場全天開放","街道商店通常於 19:30 打烊"],
+    price:"免費。" }
+];
+
+const NS = "http://www.w3.org/2000/svg";
+const el = (tag, attrs = {}, parent) => {
+  const n = document.createElementNS(NS, tag);
+  for (const k in attrs) n.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(n);
+  return n;
+};
+
+/* ---- Wednesday hours ---- */
+const WED = {
+  duomo: "09:30–17:00",
+  campanile: "10:00–17:00",
+  museo: "10:00–17:00",
+  giovanni: "10:00–17:00",
+  guinigi: "10:00–17:00",
+  ore: "10:00–17:00",
+  frediano: "09:30–16:30",
+  michele: "07:40–12:00、15:00–18:00",
+  giusto: "08:00–12:00、14:00–17:00",
+  alessandro: "平時不開放，只看外觀",
+  ronzini: "外觀隨時可看",
+  piazzamichele: "廣場 24 小時",
+  mura: "24 小時",
+  anfiteatro: "廣場 24 小時；餐酒館至深夜",
+  shopping: "商店至 19:30；廣場 24 小時"
+};
+
+/* ---- Base map ---- */
+const base = document.getElementById("base");
+// gates: Santa Maria (N), Elisa (E), San Pietro (S), Sant'Anna (W)
+const WALL = [[281,278],[1055,167],[1485,222],[1625,709],[1526,1112],[718,1174],[321,1223],[165,794]];
+const pts = WALL.map(p => p.join(",")).join(" ");
+el("polygon", { points: pts, fill: "var(--paper)" }, base);
+// streets (approximate)
+const streets = [
+  { d:"M835 710 L825 600 L850 480 L880 300 L900 200", name:"Via Fillungo", tx:880, ty:640, rot:-82 },
+  { d:"M705 715 L240 705", name:"Via San Paolino", tx:340, ty:695, rot:0 },
+  { d:"M835 705 L1300 690 L1600 705", name:"Via Santa Croce", tx:1200, ty:680, rot:-1 },
+  { d:"M705 715 L715 900 L718 1170", name:"", tx:0, ty:0, rot:0 },
+  { d:"M719 940 L850 930 L919 992 L1500 1000", name:"", tx:0, ty:0, rot:0 }
+];
+streets.forEach(s => {
+  el("path", { d: s.d, fill: "none", stroke: "var(--street)", "stroke-width": 14, "stroke-linecap": "round", "stroke-linejoin": "round" }, base);
+});
+streets.forEach(s => {
+  if (!s.name) return;
+  const t = el("text", { x: s.tx, y: s.ty, transform: `rotate(${s.rot} ${s.tx} ${s.ty})`,
+    "font-family": "Cormorant Garamond, Garamond, serif", "font-style": "italic", "font-size": 19, fill: "var(--muted)" }, base);
+  t.textContent = s.name;
+});
+// amphitheatre oval
+el("ellipse", { cx: 975, cy: 462, rx: 42, ry: 30, fill: "var(--bg)", stroke: "var(--line)", "stroke-width": 2 }, base);
+// wall: tree-lined band
+el("polygon", { points: pts, fill: "none", stroke: "var(--wall)", "stroke-width": 30, "stroke-linejoin": "round" }, base);
+el("polygon", { points: pts, fill: "none", stroke: "var(--wall-2)", "stroke-width": 9, "stroke-dasharray": "1 15", "stroke-linecap": "round" }, base);
+// bastions
+WALL.forEach(([x, y]) => {
+  el("polygon", { points: `${x},${y-30} ${x+30},${y} ${x},${y+30} ${x-30},${y}`, fill: "var(--wall)" }, base);
+});
+// compass + scale bar
+const comp = el("g", { transform: "translate(1620 1200)" }, base);
+el("path", { d: "M0 -38 L11 0 L0 -8 L-11 0 Z", fill: "var(--ink)" }, comp);
+const nT = el("text", { x: 0, y: 24, "text-anchor": "middle", "font-family": "Cormorant Garamond, serif", "font-size": 24, "font-weight": 600, fill: "var(--ink)" }, comp);
+nT.textContent = "N";
+const sc = el("g", { transform: "translate(1380 1360)" }, base);
+el("rect", { x: 0, y: 0, width: 100, height: 8, fill: "var(--ink)" }, sc);
+el("rect", { x: 100, y: 0, width: 100, height: 8, fill: "var(--paper)", stroke: "var(--ink)", "stroke-width": 1.5 }, sc);
+[["0", 0], ["100", 100], ["200 m", 200]].forEach(([t, x]) => {
+  const tt = el("text", { x, y: -8, "text-anchor": x === 200 ? "start" : "middle", "font-family": "Noto Sans TC, sans-serif", "font-size": 15, fill: "var(--muted)" }, sc);
+  tt.textContent = t;
+});
+
+/* ---- Spots ---- */
+const layer = document.getElementById("spots");
+const areaLayer = el("g", {}, layer);
+const syncArea = () => SPOTS.forEach(s => { if (s.areaEl) s.areaEl.classList.toggle("dim", s.g.classList.contains("dim") || s.g.classList.contains("off")); });
+SPOTS.forEach(s => {
+  const g = el("g", { class: "spot", tabindex: 0, role: "button", "data-id": s.id, "data-cat": s.cat,
+    "aria-label": `${s.name}，${s.sTime}，${s.sPrice}`, style: `--c:${CAT[s.cat].color}` }, layer);
+  if (s.area) {
+    s.areaEl = el("g", { class: "area", style: `--c:${CAT[s.cat].color}` }, areaLayer);
+    el("polygon", { points: s.area }, s.areaEl);
+    s.corners.forEach(([x, y]) => el("circle", { cx: x, cy: y, r: 8 }, s.areaEl));
+  }
+  const leader = el("path", { class: "leader" }, g);
+  const tab = el("rect", { class: "tab", x: s.lx, y: s.ly, rx: 4 }, g);
+  const t1 = el("text", { class: "t-name", x: s.lx + 12, y: s.ly + 25 }, g); t1.textContent = s.name;
+  const allDay = s.cat === "open" || s.cat === "base";
+  let tw = null, t2 = null;
+  if (!allDay) {
+    tw = el("text", { class: "t-wed", x: s.lx + 12, y: s.ly + 47 }, g); tw.textContent = "週三 " + WED[s.id];
+    t2 = el("text", { class: "t-time", x: s.lx + 12, y: s.ly + 67 }, g); t2.textContent = "適合 " + s.sTime;
+  }
+  const t3 = el("text", { class: "t-price", x: s.lx + 12, y: s.ly + (allDay ? 47 : 88) }, g); t3.textContent = s.sPrice;
+  s.H = allDay ? 58 : 99;
+  if (s.cat === "base") el("rect", { class: "pin", x: s.x - 11, y: s.y - 11, width: 22, height: 22, rx: 3 }, g);
+  else el("circle", { class: "pin", cx: s.x, cy: s.y, r: 11 }, g);
+  if (s.sup) g.classList.add("is-sup");
+  s.g = g; s.tab = tab; s.leader = leader; s.texts = [t1, tw, t2, t3].filter(Boolean); s.timeText = t2;
+  g.addEventListener("click", () => openSpot(s.id));
+  g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openSpot(s.id); } });
+});
+function sizeTabs() {
+  SPOTS.forEach(s => {
+    let w = 0;
+    s.texts.forEach(t => { try { w = Math.max(w, t.getComputedTextLength()); } catch (e) { w = Math.max(w, 180); } });
+    if (!w) w = 180;
+    const W = w + 24, H = s.H;
+    s.tab.setAttribute("width", W); s.tab.setAttribute("height", H);
+    const cx = Math.max(s.lx, Math.min(s.x, s.lx + W));
+    const cy = Math.max(s.ly, Math.min(s.y, s.ly + H));
+    s.leader.setAttribute("d", `M${s.x} ${s.y} L${cx} ${cy}`);
+  });
+}
+sizeTabs();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(sizeTabs);
+
+/* ---- List ---- */
+const list = document.getElementById("list");
+Object.entries(CAT).forEach(([key, c]) => {
+  const sec = document.createElement("div");
+  sec.className = "group"; sec.dataset.cat = key; sec.style.setProperty("--c", c.color);
+  sec.innerHTML = `<h2><span class="dot"></span>${c.label}</h2><div class="items"></div>`;
+  const items = sec.querySelector(".items");
+  SPOTS.filter(s => s.cat === key).forEach(s => {
+    const b = document.createElement("button");
+    b.className = "item"; b.id = "item-" + s.id;
+    b.innerHTML = `<b></b><span class="p"></span><span class="t h"></span><span class="t"></span>`;
+    b.querySelector("b").textContent = s.name;
+    b.querySelector(".p").textContent = s.sPrice;
+    b.querySelector(".h").textContent = "週三營業　" + WED[s.id];
+    b.querySelector(".t").textContent = "適合時段　" + s.sTime;
+    b.addEventListener("click", () => openSpot(s.id));
+    items.appendChild(b);
+  });
+  list.appendChild(sec);
+});
+
+/* ---- Filters ---- */
+document.querySelectorAll(".chip").forEach(ch => {
+  ch.addEventListener("click", () => {
+    ch.setAttribute("aria-pressed", ch.getAttribute("aria-pressed") === "true" ? "false" : "true");
+    const on = new Set([...document.querySelectorAll('.chip[aria-pressed="true"]')].map(c => c.dataset.cat));
+    SPOTS.forEach(s => s.g.classList.toggle("dim", s.cat !== "base" && !on.has(s.cat)));
+    document.querySelectorAll(".group").forEach(g => g.hidden = !on.has(g.dataset.cat));
+    applySup();
+    syncArea();
+  });
+});
+function applySup() {
+  const showSup = document.getElementById("f-sup").getAttribute("aria-pressed") === "true";
+  SPOTS.forEach(s => s.g.classList.toggle("gone", !!s.sup && !showSup));
+}
+applySup();
+
+/* ---- Open outside 09–12 / 15–17 ---- */
+const EXTRA = {
+  duomo: "12:00–15:00；週六至 18:00",
+  campanile: "12:00–15:00 照常開放",
+  museo: "12:00–15:00；週六至 18:00",
+  giovanni: "12:00–15:00；週六至 18:00",
+  guinigi: "12:00–15:00 照常開放",
+  ore: "12:00–15:00 照常開放",
+  frediano: "12:00–15:00 照常開放",
+  michele: "07:40–09:00、17:00–18:00",
+  giusto: "08:00–09:00、14:00–15:00（週日閉）",
+  mura: "24 小時開放",
+  anfiteatro: "24 小時（餐酒館至深夜）",
+  shopping: "商店至 19:30；廣場 24 小時"
+};
+// 週三 10:00–12:00、15:00–17:00 是否有開
+const CORE = {
+  duomo: "10–12 ✓、15–17 ✓（16:30 最後入場）",
+  campanile: "10–12 ✓、15–17 ✓",
+  museo: "10–12 ✓、15–17 ✓",
+  giovanni: "10–12 ✓、15–17 ✓（16:30 最後入場）",
+  guinigi: "10–12 ✓、15–17 ✓",
+  ore: "10–12 ✓、15–17 ✓",
+  frediano: "10–12 ✓、15:00–16:30（提早關）",
+  michele: "10–12 ✓、15–17 ✓",
+  giusto: "10–12 ✓、15–17 ✓",
+  mura: "10–12 ✓、15–17 ✓",
+  anfiteatro: "10–12 ✓、15–17 ✓",
+  shopping: "廣場 ✓；商店以下午為主"
+};
+const MODES = {
+  extra: { map: EXTRA, prefix: "另開", note: "只顯示在 09:00–12:00、15:00–17:00 以外仍有營業的景點，灰字改成這些額外的開放時段。可用來安排早上 9 點前、中午和傍晚的行程。" },
+  core: { map: CORE, prefix: "可去", note: "只顯示週三 10:00–12:00、15:00–17:00 有開的景點，灰字改成這兩段時間能不能去。提早關門或有最後入場限制的會特別註明。" }
+};
+const modeNote = document.getElementById("mode-note");
+let curMode = null;
+function applyMode(m) {
+  curMode = m;
+  document.querySelectorAll(".mode").forEach(b => b.setAttribute("aria-pressed", b.dataset.mode === m));
+  modeNote.hidden = !m;
+  if (m) modeNote.textContent = MODES[m].note;
+  SPOTS.forEach(s => {
+    const val = m ? MODES[m].map[s.id] : null;
+    const has = !!val;
+    s.g.classList.toggle("off", !!m && !has);
+    s.g.classList.toggle("hl", has);
+    s.timeText.textContent = has ? MODES[m].prefix + " " + val : "適合 " + s.sTime;
+    const item = document.getElementById("item-" + s.id);
+    item.classList.toggle("off", !!m && !has);
+    item.querySelector(".t:not(.h)").textContent = has ? MODES[m].prefix + "　" + val : "適合時段　" + s.sTime;
+  });
+  syncArea();
+  sizeTabs();
+}
+document.querySelectorAll(".mode").forEach(b => b.addEventListener("click", () => applyMode(curMode === b.dataset.mode ? null : b.dataset.mode)));
+
+/* ---- Mobile pinch zoom ---- */
+(() => {
+  const svg = document.getElementById("map");
+  const b = svg.viewBox.baseVal;
+  const full = { x: b.x, y: b.y, w: b.width, h: b.height };
+  let vb = { ...full };
+  const mq = window.matchMedia("(max-width: 860px)");
+  const apply = () => svg.setAttribute("viewBox", `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
+  const clampW = w => Math.min(full.w, Math.max(full.w / 6, w));
+  const clamp = () => {
+    vb.w = clampW(vb.w); vb.h = vb.w * full.h / full.w;
+    vb.x = Math.min(full.x + full.w - vb.w, Math.max(full.x, vb.x));
+    vb.y = Math.min(full.y + full.h - vb.h, Math.max(full.y, vb.y));
+  };
+  const zoomAt = (f, px, py) => {
+    const nw = clampW(vb.w / f);
+    vb.x = px - (px - vb.x) * nw / vb.w;
+    vb.y = py - (py - vb.y) * nw / vb.w;
+    vb.w = nw; clamp(); apply();
+  };
+  const center = arr => arr.reduce((a, p) => ({ x: a.x + p.x / arr.length, y: a.y + p.y / arr.length }), { x: 0, y: 0 });
+  const dist = arr => arr.length > 1 ? Math.hypot(arr[0].x - arr[1].x, arr[0].y - arr[1].y) : 0;
+  const pts = new Map();
+  let g0 = null, moved = false;
+  const begin = () => {
+    const arr = [...pts.values()];
+    g0 = { vb: { ...vb }, r: svg.getBoundingClientRect(), c: center(arr), d: dist(arr) };
+  };
+  svg.addEventListener("pointerdown", e => {
+    if (!mq.matches) return;
+    if (pts.size === 0) moved = false;
+    pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    begin();
+  });
+  window.addEventListener("pointermove", e => {
+    if (!g0 || !pts.has(e.pointerId)) return;
+    pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    const arr = [...pts.values()], c = center(arr), d = dist(arr);
+    const { r, vb: v0 } = g0;
+    const w = clampW(g0.d > 0 && d > 0 ? v0.w * g0.d / d : v0.w);
+    const sx = v0.x + (g0.c.x - r.left) / r.width * v0.w;
+    const sy = v0.y + (g0.c.y - r.top) / r.height * v0.h;
+    vb.w = w; vb.h = w * full.h / full.w;
+    vb.x = sx - (c.x - r.left) / r.width * vb.w;
+    vb.y = sy - (c.y - r.top) / r.height * vb.h;
+    clamp(); apply();
+    if (arr.length > 1 || Math.hypot(c.x - g0.c.x, c.y - g0.c.y) > 6) moved = true;
+  });
+  const end = e => { if (!pts.delete(e.pointerId)) return; if (pts.size) begin(); else g0 = null; };
+  window.addEventListener("pointerup", end);
+  window.addEventListener("pointercancel", end);
+  svg.addEventListener("click", e => { if (moved) { e.stopPropagation(); e.preventDefault(); moved = false; } }, true);
+  const mid = () => [vb.x + vb.w / 2, vb.y + vb.h / 2];
+  document.getElementById("z-in").addEventListener("click", () => zoomAt(1.6, ...mid()));
+  document.getElementById("z-out").addEventListener("click", () => zoomAt(1 / 1.6, ...mid()));
+  document.getElementById("z-reset").addEventListener("click", () => { vb = { ...full }; apply(); });
+  const reset = () => { vb = { ...full }; apply(); };
+  if (mq.addEventListener) mq.addEventListener("change", reset); else mq.addListener(reset);
+})();
+
+/* ---- Drawer ---- */
+const PASS_SITE_IDS = ["duomo", "campanile", "museo", "giovanni"];
+const drawer = document.getElementById("drawer"), scrim = document.getElementById("scrim");
+let lastFocus = null;
+const esc = t => String(t).replace(/[&<>"]/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[m]));
+function openSpot(id) {
+  const s = SPOTS.find(x => x.id === id); if (!s) return;
+  lastFocus = document.activeElement;
+  SPOTS.forEach(x => x.g.classList.toggle("active", x.id === id));
+  drawer.style.setProperty("--c", CAT[s.cat].color);
+  drawer.innerHTML = `
+    <div class="d-top"><span class="cat">${esc(CAT[s.cat].label)}</span><button class="close" id="d-close" aria-label="關閉">×</button></div>
+    <h3 id="d-name">${esc(s.name)}</h3>
+    <p class="latin">${esc(s.latin)}</p>
+    ${s.warn ? `<div class="warn">⚠ ${esc(s.warn)}</div>` : ""}
+    <dl>
+      <div><dt>特色</dt><dd>${esc(s.feature)}</dd></div>
+      ${s.tips ? `<div><dt>看點</dt><dd><ul>${s.tips.map(t => `<li>${esc(t)}</li>`).join("")}</ul></dd></div>` : ""}
+      ${s.hours ? `<div><dt>${s.cat === "base" ? "服務資訊" : "營業時間"}</dt><dd><ul>${s.hours.map(h => `<li>${esc(h)}</li>`).join("")}</ul></dd></div>` : ""}
+      ${s.when ? `<div><dt>合適旅遊時段</dt><dd>${esc(s.when)}</dd></div>` : ""}
+      ${s.stay ? `<div><dt>建議停留時間</dt><dd>${esc(s.stay)}</dd></div>` : ""}
+      ${s.price ? `<div><dt>票價</dt><dd>${esc(s.price)}</dd></div>` : ""}
+      ${PASS_SITE_IDS.includes(s.id) ? `<div><dt>官方網站（聯票資訊）</dt><dd><a class="site" href="https://www.museocattedralelucca.it/en/" target="_blank" rel="noopener">museocattedralelucca.it ↗</a></dd></div>` : ""}
+      ${s.pass ? `<div><dt>聯票包含</dt><dd><ul>${s.pass.map(p => `<li>${esc(p)}</li>`).join("")}</ul></dd></div>` : ""}
+    </dl>`;
+  drawer.hidden = false; scrim.hidden = false;
+  document.getElementById("d-close").addEventListener("click", closeSpot);
+  document.getElementById("d-close").focus();
+}
+function closeSpot() {
+  drawer.hidden = true; scrim.hidden = true;
+  SPOTS.forEach(x => x.g.classList.remove("active"));
+  if (lastFocus && lastFocus.focus) lastFocus.focus();
+}
+scrim.addEventListener("click", closeSpot);
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !drawer.hidden) closeSpot(); });
+</script>

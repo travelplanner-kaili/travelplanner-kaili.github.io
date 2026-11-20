@@ -1,0 +1,1324 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>盧卡古城景點地圖</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&family=Cormorant+Garamond:ital,wght@1,500;1,600&display=swap">
+<style>
+/* hidden must win even where the page is shown without the artifact wrapper (e.g. project file preview) */
+[hidden] { display: none !important; }
+/* Layout: walled-city plan drawn in meters (SVG), labels as stone tablets; details open in a side drawer / bottom sheet */
+:root {
+  color-scheme: light dark;   /* the page has its own dark theme: browsers should not force-darken it */
+  --bg: #E7E6E0;
+  --paper: #F7F6F2;
+  --ink: #22262A;
+  --muted: #676B66;
+  --line: #CBC9C0;
+  --wall: #6E7E4C;
+  --wall-2: #A3B27A;
+  --street: #D8D5CA;
+  --paid: #A3282D;
+  --free: #3A5880;
+  --open: #57772F;
+  --warn-bg: #F6E7D5;
+  --warn-fg: #8A4A12;
+  --shadow: rgba(30,32,28,.12);
+  --f-display: "Noto Serif TC", "Songti TC", "PMingLiU", serif;
+  --f-body: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  --f-latin: "Cormorant Garamond", "Garamond", "Times New Roman", serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #15171A; --paper: #1E2124; --ink: #E9E7E2; --muted: #9C9F99; --line: #353A3D;
+  --wall: #4D5C35; --wall-2: #75864E; --street: #2C3033;
+  --paid: #E26A68; --free: #85A7D3; --open: #A2C473;
+  --warn-bg: #3A2A19; --warn-fg: #F0B678; --shadow: rgba(0,0,0,.4); color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #15171A; --paper: #1E2124; --ink: #E9E7E2; --muted: #9C9F99; --line: #353A3D;
+  --wall: #4D5C35; --wall-2: #75864E; --street: #2C3033;
+  --paid: #E26A68; --free: #85A7D3; --open: #A2C473;
+  --warn-bg: #3A2A19; --warn-fg: #F0B678; --shadow: rgba(0,0,0,.4); color-scheme: dark }
+
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.65; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-block: 28px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 16px 32px; margin-bottom: 18px; }
+.eyebrow { font-family: var(--f-latin); font-style: italic; font-size: 20px; color: var(--paid); line-height: 1; }
+h1 { font-family: var(--f-display); font-size: clamp(26px, 4vw, 38px); line-height: 1.25; margin: 6px 0 4px; text-wrap: balance; letter-spacing: .02em; }
+.sub { color: var(--muted); margin: 0; font-size: 14px; }
+.filters { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { font: 500 13px var(--f-body); display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--paper); color: var(--ink); cursor: pointer; }
+.chip .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c); }
+.chip[aria-pressed="false"] { opacity: .45; }
+.chip:focus-visible, .spot:focus-visible, .item:focus-visible, .close:focus-visible { outline: 2px solid var(--free); outline-offset: 2px; }
+
+.mapbox { position: relative; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.mapbox svg { display: block; width: 100%; height: auto; }
+.zoom { display: flex; position: absolute; right: 10px; bottom: 10px; flex-direction: column; gap: 6px; }
+.zoom button { width: 42px; height: 42px; border-radius: 8px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font: 500 22px/1 var(--f-body); box-shadow: 0 2px 8px var(--shadow); cursor: pointer; }
+.zoom button:focus-visible { outline: 2px solid var(--free); outline-offset: 2px; }
+.mobile-only { display: none; }
+.desktop-only { display: inline; font-weight: 700; color: var(--ink); }
+.zoom-hint { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(20,22,24,.45); color: #fff; font: 700 20px var(--f-body); pointer-events: none; z-index: 3; }
+@media (max-width: 860px) {
+  .mapbox { height: 70vh; height: min(70dvh, 900px); }
+  .mapbox svg { touch-action: none; height: 100%; }
+  .zoom { display: flex; }
+  .mobile-only { display: inline; font-weight: 700; color: var(--ink); }
+  .desktop-only { display: none; }
+}
+.hint { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px; font-size: 12.5px; color: var(--muted); margin-top: 8px; }
+
+/* SVG */
+.spot { cursor: pointer; }
+.spot .tab { fill: var(--paper); stroke: var(--c); stroke-width: 1.6; transition: fill .15s; }
+.spot:hover .tab, .spot.active .tab { fill: var(--bg); }
+.spot.active .tab { stroke-width: 3; }
+.spot .pin { fill: var(--c); stroke: var(--paper); stroke-width: 3; }
+.spot .leader { stroke: var(--c); stroke-width: 1.4; fill: none; }
+.spot .t-name { font: 700 19px var(--f-body); fill: var(--ink); }
+.spot .t-wed { font: 500 14.5px var(--f-body); fill: var(--ink); font-variant-numeric: tabular-nums; }
+.spot .t-time { font: 400 14.5px var(--f-body); fill: var(--muted); font-variant-numeric: tabular-nums; }
+.spot .t-price { font: 700 14.5px var(--f-body); fill: var(--c); font-variant-numeric: tabular-nums; }
+.spot.dim, .spot.off { opacity: .12; pointer-events: none; }
+.spot.gone { display: none; }
+.chip.dist { border-color: var(--ink); font-weight: 700; }
+.chip.dist[aria-pressed="false"] { opacity: 1; }
+.chip.dist[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+.chip.dist svg { width: 14px; height: 14px; }
+.dist-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin: 0 0 10px; font-size: 13.5px; background: var(--paper); border: 1px solid var(--line); border-left: 3px solid var(--ink); padding: 8px 12px; border-radius: 4px; }
+.dist-bar p { margin: 0; flex: 1 1 320px; min-width: 0; }
+.seg { display: inline-flex; border: 1.5px solid var(--ink); border-radius: 999px; overflow: hidden; flex: none; }
+.seg-btn { font: 700 13px var(--f-body); padding: 5px 14px; background: var(--paper); color: var(--ink); border: 0; cursor: pointer; }
+.seg-btn[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+.seg-btn:focus-visible { outline: 2px solid var(--free); outline-offset: -3px; }
+.p2p-line { stroke: var(--paid); stroke-width: 3; stroke-dasharray: 2 8; stroke-linecap: round; fill: none; }
+.p2p-pill { fill: var(--paid); }
+/* 長按範圍模式 */
+#map { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+.rad-circle { fill: var(--paid); fill-opacity: .07; stroke: var(--paid); stroke-width: 2.5; stroke-dasharray: 10 7; pointer-events: none; }
+.rad-ring { fill: none; stroke: var(--paid); stroke-opacity: .35; stroke-width: 1.5; stroke-dasharray: 4 6; pointer-events: none; }
+.spot.rad-out, .area.rad-out { opacity: .13 !important; }
+.spot.rad-center .tab { stroke-width: 3.5; }
+.rad-card { position: absolute; left: 12px; top: 12px; z-index: 2; max-width: min(360px, calc(100% - 84px)); box-sizing: border-box; padding: 9px 14px; border-radius: 12px;
+  background: var(--paper); color: var(--ink); border: 2px solid var(--paid); box-shadow: 0 4px 16px var(--shadow); font: 500 13px/1.5 var(--f-body); }
+.mapbox.fs .rad-card { top: auto; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
+.rad-card b { font-size: 16px; color: var(--paid); }
+.rad-card .rad-x { margin-left: 8px; border: 0; background: none; color: var(--muted); font: 700 13px var(--f-body); cursor: pointer; padding: 2px 4px; text-decoration: underline; }
+.p2p-card { position: absolute; left: 12px; top: 12px; z-index: 2; max-width: calc(100% - 24px); box-sizing: border-box; display: flex; flex-direction: column; gap: 2px; padding: 10px 16px; border-radius: 12px; background: var(--paid); color: var(--paper); box-shadow: 0 4px 16px var(--shadow); pointer-events: none; }
+.p2p-route { font: 500 15px/1.4 var(--f-body); overflow-wrap: anywhere; }
+.p2p-dist { font: 700 28px/1.2 var(--f-body); font-variant-numeric: tabular-nums; }
+.p2p-dist small { font-size: 14px; font-weight: 500; margin-left: 6px; }
+@media (max-width: 640px) { .p2p-card { left: 8px; right: 8px; top: 8px; max-width: none; padding: 8px 14px; } .p2p-dist { font-size: 24px; } }
+@media (max-width: 860px) { .p2p-lbl { display: none; } }
+.p2p-text { font: 700 16px var(--f-body); fill: var(--paper); font-variant-numeric: tabular-nums; }
+#map.dist .t-more, #map.names .t-more { display: none; }
+#map.dist .spot.picked .tab { stroke-width: 3; fill: var(--bg); }
+.edge line { stroke: var(--ink); stroke-opacity: .6; stroke-width: 3; stroke-dasharray: 2 6; stroke-linecap: round; }
+.edge .conn { stroke-width: 1; stroke-dasharray: none; stroke-opacity: .4; }
+.edge rect { fill: var(--paper); stroke: var(--line); stroke-width: 1; }
+.edge text { font: 500 15px var(--f-body); fill: var(--ink); font-variant-numeric: tabular-nums; }
+.edge:not(.on) { display: none; }
+.edge.dim { opacity: .12; }
+.chip.done { border-style: dashed; border-color: var(--open); }
+.chip.done[aria-pressed="false"] { opacity: 1; }
+.chip.done[aria-pressed="true"] { background: var(--open); color: var(--paper); border-style: solid; }
+.visit-btn { display: inline-flex; align-items: center; gap: 6px; margin: 0 0 16px; padding: 7px 16px; border-radius: 999px; border: 1.5px solid var(--open); background: var(--paper); color: var(--open); font: 700 14px var(--f-body); cursor: pointer; }
+.d-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 16px; }
+.d-actions .visit-btn { margin: 0; }
+.gmap { display: inline-flex; align-items: center; gap: 6px; padding: 7px 16px; border-radius: 999px; border: 1.5px solid var(--free); color: var(--free); background: var(--paper); font: 700 14px var(--f-body); text-decoration: none; }
+.gmap svg { width: 15px; height: 15px; }
+.gmap:hover { background: var(--bg); }
+.gmap:focus-visible { outline: 2px solid var(--free); outline-offset: 2px; }
+.d-icons { display: inline-flex; gap: 8px; }
+.icon-act { display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid var(--free); color: var(--free); background: var(--paper); cursor: pointer; padding: 0; text-decoration: none; }
+.icon-act svg { width: 20px !important; height: 20px !important; }
+.icon-act:hover { background: var(--bg); }
+.icon-act:focus-visible { outline: 2px solid var(--free); outline-offset: 2px; }
+.icon-act.report { border-color: var(--paid); color: var(--paid); }
+.icon-act.report:focus-visible { outline-color: var(--paid); }
+.foot-report { color: var(--paid); font-weight: 700; }
+.share-note { font-size: 13px; color: var(--muted); }
+.share-note input { font: 12px var(--f-body); width: min(260px, 60vw); }
+.visit-btn[aria-pressed="true"] { background: var(--open); color: var(--paper); }
+.visit-btn:focus-visible { outline: 2px solid var(--free); outline-offset: 2px; }
+.spot.visited { opacity: .45; }
+.spot.visited .tab { stroke-dasharray: 5 4; }
+.spot.hide-v, .area.hide-v, .edge.hide-v { display: none; }
+
+.chip-group { display: inline-flex; flex-wrap: wrap; gap: 6px; padding-right: 8px; margin-right: 2px; border-right: 1px solid var(--line, rgba(0,0,0,.12)); }
+.chip-group:last-of-type { border-right: 0; }
+.chip.tier[data-tier="推薦"] .dot { background: none; border: 2.5px solid var(--c); width: 7px; height: 7px; }
+.chip[data-cat="free"] .dot { background: linear-gradient(90deg, var(--free) 50%, var(--open) 50%); }
+.chip.cold .dot { background: linear-gradient(90deg, var(--c) 50%, transparent 50%); border: 1.5px solid var(--c); width: 8px; height: 8px; }
+.item.gone { display: none; }
+.spot.dim { opacity: .28; pointer-events: auto; }   /* faded by a filter, but still clickable */
+.chip.sup .dot { background: none; border: 2px dashed var(--c); width: 8px; height: 8px; }
+.spot.is-sup .tab { stroke-dasharray: 6 4; }
+.area polygon { fill: var(--c); fill-opacity: .13; stroke: var(--c); stroke-width: 3; stroke-dasharray: 12 8; stroke-linejoin: round; }
+.area circle { fill: var(--c); }
+.area.dim { opacity: .12; }
+.spot.hl .tab { stroke-width: 3; }
+.spot.hl .t-time { fill: var(--ink); font-weight: 700; }
+.mode { font: 700 13px var(--f-body); display: inline-flex; align-items: center; gap: 7px; padding: 6px 14px; border-radius: 999px;
+  border: 1.5px solid var(--ink); background: var(--paper); color: var(--ink); cursor: pointer; }
+.mode[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+.mode:focus-visible { outline: 2px solid var(--free); outline-offset: 2px; }
+.mode-note { margin: 0 0 10px; font-size: 13.5px; color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-left: 3px solid var(--ink); padding: 8px 12px; border-radius: 4px; }
+.item.off { display: none; }
+
+/* List */
+.list { margin-top: 36px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 28px; }
+.group h2 { font-family: var(--f-display); font-size: 18px; margin: 0 0 10px; display: flex; align-items: center; gap: 8px; }
+.group h2 .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c); }
+.items { display: grid; gap: 6px; }
+.item { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; text-align: left; width: 100%; padding: 10px 12px;
+  background: var(--paper); border: 1px solid var(--line); border-left: 3px solid var(--c); border-radius: 4px; cursor: pointer; color: var(--ink); font: inherit; }
+.item:hover { background: var(--bg); }
+.item b { font-weight: 700; min-width: 0; }
+.item .p { font-weight: 700; color: var(--c); font-size: 13.5px; font-variant-numeric: tabular-nums; }
+.item .t { grid-column: 1 / -1; color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+
+/* Drawer */
+.scrim { position: fixed; inset: 0; background: rgba(10,12,14,.35); z-index: 20; }
+.drawer { position: fixed; z-index: 21; background: var(--paper); color: var(--ink); box-shadow: 0 10px 40px var(--shadow);
+  top: 0; right: 0; bottom: 0; width: min(420px, 100%); overflow-y: auto; box-sizing: border-box; overscroll-behavior: contain;
+  padding: calc(22px + env(safe-area-inset-top, 0px)) max(24px, env(safe-area-inset-right, 0px)) calc(28px + env(safe-area-inset-bottom, 0px)) 24px; }
+@media (max-width: 640px) {
+  .drawer::before { content: ""; display: block; width: 44px; height: 5px; border-radius: 3px; background: var(--line); margin: -8px auto 12px; }
+  .drawer { top: auto; left: 0; width: 100%; max-height: 82vh; max-height: 82dvh; border-radius: 14px 14px 0 0;
+    padding: 20px max(18px, env(safe-area-inset-right, 0px)) calc(28px + env(safe-area-inset-bottom, 0px)) max(18px, env(safe-area-inset-left, 0px)); }
+}
+.d-top { display: flex; justify-content: space-between; align-items: start; gap: 12px; }
+.cat { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .08em; color: var(--c); border: 1px solid var(--c); padding: 2px 9px; border-radius: 999px; }
+.close { flex: none; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font-size: 20px; line-height: 1; cursor: pointer; }
+.drawer h3 { font-family: var(--f-display); font-size: 26px; line-height: 1.3; margin: 12px 0 0; text-wrap: balance; }
+.latin { font-family: var(--f-latin); font-style: italic; font-size: 19px; color: var(--muted); margin: 2px 0 18px; }
+.rt-tabs { display: flex; margin: 4px 0 18px; border-bottom: 1px solid var(--line); }
+.rt-tab { font: 700 15px var(--f-body); padding: 9px 12px; white-space: nowrap; background: none; border: 0; border-bottom: 3px solid transparent; margin-bottom: -1px; color: var(--muted); cursor: pointer; }
+.rt-tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--c, var(--ink)); }
+.rt-tab:focus-visible { outline: 2px solid var(--ink); outline-offset: -3px; }
+.rt-panel[data-panel="tips"] > ul { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 10px; line-height: 1.7; }
+.tab-alert { display: inline-grid; place-items: center; width: 18px; height: 18px; margin-left: 6px; border-radius: 50%; background: var(--warn-fg); color: var(--warn-bg); font-size: 12px; font-weight: 800; vertical-align: 2px; }
+.warn-jump { display: block; width: 100%; text-align: left; font: 600 14px var(--f-body); padding: 9px 12px; margin: 0 0 16px; border-radius: 4px; border: 0; background: var(--warn-bg); color: var(--warn-fg); cursor: pointer; }
+.warn { background: var(--warn-bg); color: var(--warn-fg); font-weight: 500; font-size: 14px; padding: 9px 12px; border-radius: 4px; margin-bottom: 16px; }
+dl { margin: 0; display: grid; gap: 14px; }
+dt { font-size: 12px; font-weight: 700; letter-spacing: .1em; color: var(--muted); }
+dd { margin: 2px 0 0; font-variant-numeric: tabular-nums; }
+dd ul { margin: 0; padding-left: 1.1em; }
+.site { color: var(--free); font-weight: 500; text-underline-offset: 3px; word-break: break-all; }
+@media (prefers-reduced-motion: no-preference) {
+  .drawer:not([hidden]) { animation: slide .22s ease-out; }
+  @keyframes slide { from { transform: translateX(24px); opacity: 0; } }
+  @media (max-width: 640px) { @keyframes slide { from { transform: translateY(30px); opacity: 0; } } }
+}
+
+/* full-screen map (small screens) */
+.fs-only, .fs-bar { display: none; }
+#z-full { display: none; font-size: 18px; }
+@media (max-width: 860px) { #z-full { display: block; } }
+.mapbox.fs .zoom { bottom: calc(16px + env(safe-area-inset-bottom, 0px)); right: max(10px, env(safe-area-inset-right, 0px)); }
+.mapbox.fs { position: fixed; inset: 0; z-index: 15; height: 100vh; height: 100dvh; border: 0; border-radius: 0; }
+.mapbox.fs { display: flex; flex-direction: column; }
+.mapbox.fs .fs-bar { position: relative !important; flex: none; order: -1; }
+.mapbox.fs svg { flex: 1 1 auto; min-height: 0; height: auto !important; }
+body.fs-on { overflow: hidden; }
+.mapbox.fs .fs-bar { display: flex; position: absolute; top: 0; left: 0; right: 0; z-index: 4; align-items: center; gap: 8px;
+  padding: calc(8px + env(safe-area-inset-top, 0px)) max(10px, env(safe-area-inset-right, 0px)) 8px max(10px, env(safe-area-inset-left, 0px));
+  background: var(--paper); border-bottom: 1px solid var(--line); box-shadow: 0 2px 10px var(--shadow); }
+.fs-title { flex: 1; min-width: 0; font: 700 16px var(--f-display); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fs-btn { flex: none; font: 700 14px var(--f-body); padding: 7px 12px; border-radius: 999px; border: 1.5px solid var(--ink); background: var(--paper); color: var(--ink); cursor: pointer; }
+.fs-btn[aria-expanded="true"] { background: var(--ink); color: var(--paper); }
+.fs-panel { position: absolute; left: 0; right: 0; z-index: 4; max-height: 60%; overflow-y: auto; box-sizing: border-box;
+  padding: 10px max(10px, env(safe-area-inset-right, 0px)) 12px max(10px, env(safe-area-inset-left, 0px));
+  background: var(--paper); border-bottom: 1px solid var(--line); box-shadow: 0 6px 14px var(--shadow); }
+.fs-panel .filters { justify-content: flex-start; }
+.fs-dist { position: absolute; left: 0; right: 0; z-index: 3; padding: 0 8px; }
+.fs-dist .dist-bar { margin: 6px 0 0; }
+.mapbox.fs .p2p-card { top: auto; bottom: 12px; }
+.fs-open:not(.icon-btn) { display: none; align-items: center; gap: 6px; font: 700 14px var(--f-body); padding: 8px 14px; border-radius: 999px; border: 1.5px solid var(--ink); background: var(--paper); color: var(--ink); box-shadow: 0 2px 8px var(--shadow); cursor: pointer; }
+body.fs-on .fs-open { display: none !important; }
+#z-full svg, .fs-open:not(.icon-btn) svg { display: block; flex: none; width: 16px !important; height: 16px !important; }
+#z-full svg { margin: auto; width: 18px !important; height: 18px !important; }
+.fs-open { white-space: nowrap; }
+@media (max-width: 860px) { body:not(.fs-on) .fs-open { display: inline-grid; } .mapbox:not(.fs) { height: 82vh; height: min(84dvh, 1000px); } }
+
+/* icon buttons + names-only view */
+.view-btns { order: 99; display: inline-flex; gap: 8px; }
+body.fs-on .view-btns { display: none !important; }
+.icon-btn { display: inline-grid; place-items: center; width: 38px; height: 38px; padding: 0; border-radius: 50%; border: 1.5px solid var(--ink); background: var(--paper); color: var(--ink); cursor: pointer; }
+.icon-btn svg { display: block; width: 20px !important; height: 20px !important; }
+.icon-btn[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+.icon-btn:focus-visible { outline: 2px solid var(--free); outline-offset: 2px; }
+.fs-bar .icon-btn { flex: none; width: 36px; height: 36px; }
+#map.names .t-more { display: none; }
+.view-btns .fs-open { display: none; }
+/* 全螢幕 on every screen size, desktop too */
+body:not(.fs-on) .view-btns .fs-open { display: inline-grid !important; }
+#z-full { display: block; }
+
+
+/* no big focus box around map items after a tap; keyboard focus thickens the label border instead */
+#map [tabindex]:focus, #map [tabindex]:focus-visible { outline: none; }
+#map .spot:focus-visible .tab { stroke-width: 4; }
+#map .route-pill:focus-visible rect, #map .route-mark:focus-visible circle { stroke: var(--ink); stroke-width: 4; }
+/* icon labels on hover / tap */
+.icon-btn { position: relative; }
+.icon-btn[data-tip]::after { content: attr(data-tip); position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%); z-index: 30;
+  white-space: nowrap; font: 700 13px var(--f-body); padding: 5px 10px; border-radius: 6px; background: var(--ink); color: var(--paper);
+  box-shadow: 0 2px 8px var(--shadow); pointer-events: none; opacity: 0; transition: opacity .12s; }
+.view-btns .icon-btn:first-child[data-tip]::after { left: 0; transform: none; }
+.fs-bar .icon-btn:last-child[data-tip]::after { left: auto; right: 0; transform: none; }
+@media (hover: hover) { .icon-btn[data-tip]:hover::after { opacity: 1; } }
+.icon-btn[data-tip]:focus-visible::after, .icon-btn.tip-show[data-tip]::after { opacity: 1; }
+.icon-btn.dist svg { width: 20px !important; height: 20px !important; }
+
+/* 使用方式 Q&A under the map */
+.faq { margin-top: 28px; border-top: 1px solid var(--line); padding-top: 18px; }
+.faq-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; margin-bottom: 12px; }
+.faq h2 { font-family: var(--f-display); font-size: 22px; margin: 0; }
+.faq-note { font-size: 13px; color: var(--muted); margin: 0; }
+.faq-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 10px 24px; margin: 0; padding: 0; list-style: none; }
+.faq-item { min-width: 0; padding: 10px 0; border-bottom: 1px dashed var(--line); }
+.faq-q { font-weight: 700; margin: 0 0 3px; display: flex; gap: 8px; }
+.faq-q .n { flex: none; color: var(--paid); font-variant-numeric: tabular-nums; }
+.faq-a { margin: 0; color: var(--ink); font-size: 14.5px; line-height: 1.75; padding-left: 2.4em; }
+.ic { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--ink); color: var(--ink); background: var(--paper); vertical-align: -6px; margin: 0 2px; }
+.ic svg { width: 14px !important; height: 14px !important; display: block; }
+.ic.ic-walk { border-color: var(--route); color: var(--route); }
+.ic.ic-shop { border-color: var(--open); color: var(--open); }
+.ic.ic-act { border-color: var(--free); color: var(--free); }
+.ic.ic-warn { border-color: var(--paid); color: var(--paid); }
+
+/* 我去的日子 */
+.chip-group.days { align-items: center; gap: 4px; }
+.days-lbl { font: 700 12.5px var(--f-body); color: var(--muted); margin-right: 2px; white-space: nowrap; }
+.chip.day { width: 30px; height: 30px; padding: 0; justify-content: center; border-radius: 50%; font: 700 14px var(--f-body); border-color: var(--ink); }
+.chip.day[aria-pressed="true"] { background: var(--ink); color: var(--paper); opacity: 1; }
+.chip.day[aria-pressed="false"] { opacity: .5; }
+.spot .day-off { fill: var(--paid) !important; font-weight: 700; }
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow">Lucca · Toscana</div>
+      <h1>盧卡古城景點地圖</h1>
+    </div>
+    <div class="filters" role="group" aria-label="篩選類別"><span class="view-btns"><button class="icon-btn fs-open" id="fs-open" type="button" aria-label="全螢幕" data-tip="全螢幕"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 20h6M12 16v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7.5 9.5V7.5h2M16.5 9.5V7.5h-2M7.5 12.5v2h2M16.5 12.5v2h-2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button><button class="icon-btn names-btn" type="button" aria-pressed="false" aria-label="簡潔模式：地圖只顯示景點名稱" data-tip="簡潔模式"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="12" r="3.2" fill="currentColor"/></svg></button><button class="icon-btn dist" id="f-dist" type="button" aria-pressed="false" aria-label="距離模式" data-tip="距離模式"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="13" r="2" fill="currentColor"/><circle cx="13" cy="3" r="2" fill="currentColor"/><path d="M4.5 11.5 L11.5 4.5" stroke="currentColor" stroke-width="1.6" stroke-dasharray="1.5 2.5" stroke-linecap="round"/></svg></button></span>
+      <span class="chip-group" role="group" aria-label="景點層級"><button class="chip tier" data-tier="主要" aria-pressed="true" style="--c:var(--ink)"><span class="dot"></span>主要景點</button><button class="chip tier" data-tier="推薦" aria-pressed="true" style="--c:var(--ink)"><span class="dot"></span>推薦</button><button class="chip tier sup" id="f-sup" data-tier="次要" aria-pressed="false" style="--c:var(--muted)"><span class="dot"></span>次要</button></span>
+      <span class="chip-group days" role="group" aria-label="星期幾去：景點框只顯示這幾天的營業時間"><span class="days-lbl">星期幾去</span><button class="chip day" type="button" data-day="0" aria-pressed="false" aria-label="星期一">一</button><button class="chip day" type="button" data-day="1" aria-pressed="false" aria-label="星期二">二</button><button class="chip day" type="button" data-day="2" aria-pressed="true" aria-label="星期三">三</button><button class="chip day" type="button" data-day="3" aria-pressed="false" aria-label="星期四">四</button><button class="chip day" type="button" data-day="4" aria-pressed="false" aria-label="星期五">五</button><button class="chip day" type="button" data-day="5" aria-pressed="false" aria-label="星期六">六</button><button class="chip day" type="button" data-day="6" aria-pressed="false" aria-label="星期日">日</button></span><span class="chip-group" role="group" aria-label="景點類型"><button class="chip" id="f-paid" data-cat="paid" aria-pressed="true" style="--c:var(--paid)"><span class="dot"></span>需購票景點</button><button class="chip" id="f-free" data-cat="free" aria-pressed="true" style="--c:var(--free)"><span class="dot"></span>免費景點</button><button class="chip cold" id="f-cold" aria-pressed="false" style="--c:var(--ink)" data-tip="只看早上 9 點前或晚上 7 點後還能去的景點" title="只看早上 9 點前或晚上 7 點後還能去的景點"><span class="dot"></span>冷門時段（9 點前或晚上 7 點後）</button></span>
+      
+      <button class="chip done" id="f-done" hidden aria-pressed="false" title="去過的景點記在這台裝置的瀏覽器裡">顯示去過的景點（<span id="done-n">0</span>）</button>
+    </div>
+  </header>
+
+  <div class="dist-bar" id="dist-note" hidden><p id="dist-text">先點起點，會顯示它到相鄰景點的距離；再點終點，就畫出兩點之間的距離與步行時間。點空白處重新選。步行距離以直線距離 ×1.3 估算，步速每分鐘 80 公尺；實際路線請以 Google 地圖導航為準。</p></div>
+  <div class="mapbox">
+    <svg id="map" viewBox="120 130 1560 1290" role="img" aria-label="盧卡城牆內景點分布圖">
+      <defs>
+        <pattern id="hatch" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <line x1="0" y1="0" x2="0" y2="14" stroke="var(--line)" stroke-width="1"/>
+        </pattern>
+      </defs>
+      <rect x="120" y="130" width="1560" height="1290" fill="url(#hatch)"/>
+      <g id="base"></g>
+      <g id="edges" hidden></g>
+      <g id="spots"></g>
+    </svg>
+    <div class="rad-card" id="rad-card" hidden aria-live="polite"></div>
+    <div class="p2p-card" id="p2p-card" hidden aria-live="polite"><span class="p2p-route" id="p2p-route"></span><span class="p2p-dist" id="p2p-dist"></span></div>
+    <div class="fs-bar" id="fs-bar"><span class="fs-title" id="fs-title"></span><button class="fs-btn" id="fs-menu" type="button" aria-expanded="false" aria-controls="fs-panel">☰ 篩選</button><button class="icon-btn" id="fs-exit" type="button" aria-pressed="true" aria-label="離開全螢幕" data-tip="離開全螢幕"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 20h6M12 16v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7.5 9.5V7.5h2M16.5 9.5V7.5h-2M7.5 12.5v2h2M16.5 12.5v2h-2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button><button class="icon-btn names-btn" type="button" aria-pressed="false" aria-label="簡潔模式：地圖只顯示景點名稱" data-tip="簡潔模式"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="12" r="3.2" fill="currentColor"/></svg></button><button class="icon-btn dist" id="fs-dist-btn" type="button" aria-pressed="false" aria-label="距離模式" data-tip="距離模式"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="13" r="2" fill="currentColor"/><circle cx="13" cy="3" r="2" fill="currentColor"/><path d="M4.5 11.5 L11.5 4.5" stroke="currentColor" stroke-width="1.6" stroke-dasharray="1.5 2.5" stroke-linecap="round"/></svg></button></div>
+    <div class="fs-panel" id="fs-panel" hidden></div>
+    <div class="fs-dist" id="fs-dist"></div>
+    <div class="zoom">
+      <button id="z-full" aria-label="全螢幕地圖" title="全螢幕地圖"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 20h6M12 16v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7.5 9.5V7.5h2M16.5 9.5V7.5h-2M7.5 12.5v2h2M16.5 12.5v2h-2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+      <button id="z-in" aria-label="放大">+</button>
+      <button id="z-out" aria-label="縮小">−</button>
+      <button id="z-reset" aria-label="顯示整張地圖">⤢</button>
+    </div>
+  </div>
+  <div class="hint">
+    <span class="desktop-only">滑鼠：按住 Ctrl 滾動縮放（Mac 觸控板可直接雙指縮放）、雙擊放大、放大後拖曳移動</span>
+    <span class="mobile-only">單指拖曳移動、雙指縮放，點景點看介紹；介紹頁點一下就會關閉</span>
+    <span>景點依實際座標標示；城牆輪廓依城門位置描繪，街道為簡化示意</span>
+    <span><a class="foot-report" id="foot-report" href="https://docs.google.com/forms/d/e/1FAIpQLSfczsbVIwVeT78rpvKnk8CF1upTBqEKsf6viWWYu5iBn532Lg/viewform?usp=pp_url&entry.772922063=%E7%9B%A7%E5%8D%A1" target="_blank" rel="noopener">⚠ 發現錯誤？匿名回報給作者</a></span>
+    <span>綠色寬帶為城牆頂林蔭步道（周長 4.2 公里）</span>
+  </div>
+
+  <section class="list" id="list" hidden></section>
+  <section class="faq" id="faq" aria-labelledby="faq-h"><div class="faq-head"><h2 id="faq-h">使用方式</h2><p class="faq-note">連結不定時更新到出發前，2027 年 2 月之後停止更新。</p></div><ol class="faq-list"><li class="faq-item"><p class="faq-q"><span class="n">Q1</span><span>怎麼看某個景點的介紹？</span></p><p class="faq-a">點地圖上的景點框，旁邊會打開介紹：「介紹」寫景點有什麼好看，「💡 實用資訊」有營業時間、票價、午休和聯票提醒、怎麼排時間。</p></li><li class="faq-item"><p class="faq-q"><span class="n">Q2</span><span>可以看某個地方周邊的景點嗎？</span></p><p class="faq-a">電腦版在景點上按兩下，會顯示方圓 100 公尺內的景點；再按兩下，再擴大 100 公尺。手機、平板等小螢幕改成長按景點、再長按一次擴大。點一下地圖空白處就會關掉。</p></li><li class="faq-item"><p class="faq-q"><span class="n">Q3</span><span>可以知道到某個景點要走多遠嗎？</span></p><p class="faq-a">按右上角的 <span class="ic "><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="13" r="2" fill="currentColor"/><circle cx="13" cy="3" r="2" fill="currentColor"/><path d="M4.5 11.5 L11.5 4.5" stroke="currentColor" stroke-width="1.6" stroke-dasharray="1.5 2.5" stroke-linecap="round"/></svg></span> 距離模式，先點起點、再點終點，就會顯示兩個景點間的距離和步行時間，省掉在 Google 地圖上一個個輸入的時間。（直線距離 ×1.3 估算，實際路線以 Google 地圖為準）</p></li><li class="faq-item"><p class="faq-q"><span class="n">Q4</span><span>地圖好亂，可以乾淨一點嗎？</span></p><p class="faq-a">可以。按右上角的 <span class="ic "><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="12" r="3.2" fill="currentColor"/></svg></span> 簡潔模式，框裡就只留名稱。需要快速看票價和營業時間時，再按一次 <span class="ic "><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="12" r="3.2" fill="currentColor"/></svg></span> 就會把完整資訊開回來。</p></li><li class="faq-item"><p class="faq-q"><span class="n">Q5</span><span>我只在盧卡待一天，可以只看最重要的景點嗎？</span></p><p class="faq-a">可以。景點依重要性分三層：「主要景點」「推薦」「次要」，在篩選列（手機在上方的「☰ 篩選」裡）點選要顯示哪幾層，依自己的需求開關。</p></li><li class="faq-item"><p class="faq-q"><span class="n">Q6</span><span>我只想去免費的景點？</span></p><p class="faq-a">可以。篩選列只留「免費景點」、把「需購票景點」關掉，要買票的景點就會變淡（還是可以點開看）。</p></li><li class="faq-item"><p class="faq-q"><span class="n">Q7</span><span>義大利景點開放時間很短，早上很早或晚上還能去哪裡？</span></p><p class="faq-a">篩選列選「冷門時段」，會突顯早上 9 點前或晚上 7 點後還能去的景點。</p></li><li class="faq-item"><p class="faq-q"><span class="n">Q8</span><span>我只有某幾天會去，可以只看那幾天的營業時間嗎？</span></p><p class="faq-a">可以。篩選列的「星期幾去」（預設是週三）點選星期幾（可以複選，例如只選二、四），景點框裡就只顯示那幾天的營業時間，有休館的會寫「週一休」；你選的日子全部都休館的景點會變淡，框裡寫「你選的日子休館」。選擇會記在你自己的手機或電腦。（節日、特殊活動這類臨時休館不會算進來，請看景點的實用資訊）</p></li><li class="faq-item"><p class="faq-q"><span class="n">Q9</span><span>去過的景點可以不要留在地圖上嗎？</span></p><p class="faq-a">可以。點景點，在介紹最上面按「標記為已去過」，那個景點就會從地圖上消失。想再看到時，篩選列會出現「顯示去過的景點」，按下去就會回到地圖上。（這個紀錄只存在你自己這台手機或電腦）</p></li><li class="faq-item"><p class="faq-q"><span class="n">Q10</span><span>這張地圖是你的，我可以客製成自己的嗎？</span></p><p class="faq-a">可以。用上面的「去過」功能，把自己不要的點關掉，這張地圖就變成你的囉。（一樣只存在你自己這台手機或電腦）</p></li><li class="faq-item"><p class="faq-q"><span class="n">Q11</span><span>地圖上的飯店可以改成我的嗎？</span></p><p class="faq-a">沒辦法直接改，但你可以看自己住在哪個景點附近，把那個景點當作你的飯店定位點。</p></li><li class="faq-item"><p class="faq-q"><span class="n">Q12</span><span>手機上地圖太小？</span></p><p class="faq-a">按 <span class="ic "><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 20h6M12 16v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7.5 9.5V7.5h2M16.5 9.5V7.5h-2M7.5 12.5v2h2M16.5 12.5v2h-2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span> 全螢幕（手機一打開就是全螢幕）。地圖可以單指拖曳、雙指縮放，按右下角的 ⤢ 回到整張地圖。</p></li><li class="faq-item"><p class="faq-q"><span class="n">Q13</span><span>我還是想用 Google 地圖導航耶？</span></p><p class="faq-a">可以。打開景點介紹，上方的 <span class="ic ic-act"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5a6.5 6.5 0 0 0-6.5 6.5c0 4.9 6.5 12.5 6.5 12.5s6.5-7.6 6.5-12.5A6.5 6.5 0 0 0 12 2.5zm0 9a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z" fill="currentColor"/></svg></span> 就是 Google 地圖連結。</p></li><li class="faq-item"><p class="faq-q"><span class="n">Q14</span><span>可以把景點分享給朋友嗎？</span></p><p class="faq-a">可以。在景點介紹上方點 <span class="ic ic-act"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5.5" r="2.6" fill="currentColor"/><circle cx="6" cy="12" r="2.6" fill="currentColor"/><circle cx="18" cy="18.5" r="2.6" fill="currentColor"/><path d="M8.3 10.8 15.7 6.7M8.3 13.2l7.4 4.1" stroke="currentColor" stroke-width="2" fill="none"/></svg></span> 分享。</p></li><li class="faq-item"><p class="faq-q"><span class="n">Q15</span><span>發現資料有錯怎麼辦？</span></p><p class="faq-a">點景點介紹裡的 <span class="ic ic-warn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 20.5h20L12 3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 9.5v5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="17.3" r="1.3" fill="currentColor"/></svg></span> 回報，或頁面最下方的「⚠ 發現錯誤？匿名回報給作者」，不用留下任何個人資料。</p></li><li class="faq-item"><p class="faq-q"><span class="n">Q16</span><span>畫面怪怪的，字和底色都是白的？</span></p><p class="faq-a">通常是手機瀏覽器的「網頁深色模式」把顏色改亂了。Chrome：右上角「⋮」→「設定」→「主題」，取消勾選「盡可能為網站套用深色主題」；Samsung 瀏覽器：在設定裡關掉深色模式。改完重新整理。</p></li></ol></section>
+</div>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" hidden role="dialog" aria-modal="true" aria-labelledby="d-name"></aside>
+
+<script>
+const CAT = {
+  paid: { label: "需購票／有營業時限", color: "var(--paid)" },
+  free: { label: "免費景點", color: "var(--free)" },
+  open: { label: "全天無時限", color: "var(--open)" },
+  base: { label: "住宿與交通", color: "var(--ink)" }
+};
+// x, y in meters from the NW corner of the old town; lx, ly = label position
+const SPOTS = [
+  { id:"duomo", cat:"paid", x:965, y:985, lx:1080, ly:905,
+    name:"盧卡主教座堂", latin:"Duomo di Lucca / Cattedrale di San Martino",
+    sTime:"09:30 開門入場", sPrice:"全見聯票 €10",
+    feature:"坐落在安靜的石磚廣場上，建於 11 世紀。羅曼式立面以精細的大理石柱廊雕刻著稱，左右兩側還呈現罕見的不對稱結構。",
+    tips:["鎮館聖物：傳奇的木雕十字架《聖容木雕》（Volto Santo）。","大理石石棺雕塑：聖器室內單獨驗票，收藏雅各布·德拉·奎爾恰（Jacopo della Quercia）名作《伊拉利亞·德爾·卡雷托石棺》（Ilaria del Carretto）。","門廊趣味細節：走進正門入口右側牆面，仔細觀察可以找到一幅刻在石頭上的中世紀「迷宮圖」，是古代朝聖者在此祈禱留下的痕跡。"],
+    when:"第二天上午 09:30 開門第一批入場（光線好、最安靜）。",
+    stay:"約 35～45 分鐘",
+    hours:["週一至週五 09:30～17:00","週六 09:30～18:00","週日 12:00～17:00","最後入場為休館前 30 分鐘","特殊服務期間開放時間可能調整"],
+    price:"主教座堂全見聯票（Biglietto Completo）€10，現場可刷卡。",
+    pass:["盧卡大教堂（含聖器室石棺）","主教座堂鐘樓","主教座堂博物館","聖若望和雷帕拉塔教堂與洗禮堂（含地下考古區）"] },
+  { id:"campanile", cat:"paid", x:919, y:992, lx:600, ly:1000,
+    name:"主教座堂鐘樓", latin:"Campanile del Duomo",
+    sTime:"10:30–11:30", sPrice:"聯票含",
+    feature:"攀登古老鐘樓頂端，正面近距離俯瞰教堂廣場、古城紅瓦屋頂與北方山景。",
+    when:"第二天上午 10:30～11:30（上午順光，俯瞰城景最清晰）。",
+    stay:"約 25～30 分鐘",
+    hours:["週一至週日 10:00～17:00"],
+    price:"包含在主教座堂全見聯票內（票價見盧卡主教座堂）。" },
+  { id:"museo", cat:"paid", x:965, y:1035, lx:1080, ly:1015,
+    name:"主教座堂博物館", latin:"Museo della Cattedrale",
+    sTime:"15:30–17:00", sPrice:"聯票含",
+    feature:"就位在大教堂旁側，館藏歷代珍貴金銀聖器、華麗祭披、手抄本以及中世紀宗教雕塑。",
+    when:"第一天下午 15:30～17:00（可與聖若望和雷帕拉塔教堂一起走完）。",
+    stay:"約 25～35 分鐘",
+    hours:["週一至週五 10:00～17:00","週六 10:00～18:00","週日 10:00～17:00"],
+    price:"包含在主教座堂全見聯票內（票價見盧卡主教座堂）。" },
+  { id:"giovanni", cat:"paid", x:850, y:930, lx:900, ly:800,
+    name:"聖若望和雷帕拉塔教堂", latin:"Chiesa e Battistero di San Giovanni e Reparata",
+    sTime:"15:30–17:00", sPrice:"聯票含",
+    feature:"教堂本身古老莊嚴，內部洗禮堂下方有極具震撼力的地下羅馬多層考古發掘區（Area Archeologica）。沿著鋼架步道可以看到古羅馬浴場馬賽克地板、早期基督徒洗禮池與古墓基石。",
+    when:"第一天下午 15:30～17:00（可與主教座堂博物館一起走完）。",
+    stay:"約 30～40 分鐘",
+    hours:["週一至週五 10:00～17:00","週六 10:00～18:00","週日 10:00～17:00","最後入場為休館前 30 分鐘"],
+    price:"包含在主教座堂全見聯票內（票價見盧卡主教座堂）。" },
+  { id:"guinigi", cat:"paid", x:1043, y:643, lx:1090, ly:560,
+    name:"季尼吉樹塔", latin:"Torre Guinigi",
+    sTime:"11:45–13:00 或 15:30", sPrice:"€8",
+    feature:"盧卡最具代表性的地標建築。這座高 45 公尺的 14 世紀紅磚中世紀塔樓最特別之處，在於頂樓空中花園種植了幾棵高聳的冬青櫟（Holm Oak），象徵著重生與繁榮。",
+    tips:["登頂 230 階樓梯：沿著塔內階梯拾級而上，頂部就是被古老橡樹樹蔭覆蓋的觀景平台。","360 度環景：從樹下望出去，可以清楚看到圓形的競技場廣場、錯落的中世紀教堂鐘樓，以及遠處圍繞盧卡的亞平寧山脈群峰。"],
+    when:"第二天中午 11:45～13:00（全天無休，正好避開其他小景點午休與餐廳尖峰）或下午 15:30。",
+    stay:"約 30～45 分鐘（單程爬梯約 7～10 分鐘，頂部停留約 15 分鐘）",
+    hours:["每日 10:00～17:00","中午不休息"],
+    price:"全票 €8.00（可買市立雙塔／三合一聯票）。現場售票處可刷卡。" },
+  { id:"ore", cat:"paid", x:817, y:679, lx:880, ly:690,
+    name:"時鐘塔", latin:"Torre delle Ore",
+    sTime:"10:30–12:00／15:00–16:30", sPrice:"€8",
+    feature:"古城內最高的塔樓（50 公尺、207 階），內部可近距離看見 1754 年巨大運轉齒輪機械鐘，頂端可俯瞰整條 Via Fillungo 與對面的樹塔。",
+    when:"上午 10:30～12:00 或下午 15:00～16:30（逛街主幹道上順道登頂）。",
+    stay:"約 30～40 分鐘",
+    hours:["每日 10:00～17:00（冬季時間）","中午不休息"],
+    price:"全票 €8.00（建議與樹塔一起買市立聯票）。現場售票處可刷卡。" },
+  { id:"frediano", cat:"paid", x:861, y:378, lx:560, ly:290,
+    name:"聖弗雷迪亞諾聖殿", latin:"Basilica di San Frediano",
+    sTime:"下午／傍晚順訪", sPrice:"外觀免費；入內 €4",
+    feature:"立面擁有托斯卡尼少見的 13 世紀拜占庭風格巨幅金色基督升天馬賽克，堂內藏有精雕羅曼式洗禮盆。",
+    when:"下午或傍晚路過圓形競技場廣場時順訪。",
+    stay:"外觀拍照約 5 分鐘；若入內參觀約 20 分鐘",
+    hours:["週一至週五及週日 09:30～16:30","週六 09:30～17:00"],
+    price:"外觀免費；入內門票全票約 €4.00（獨立售票，不包含在大教堂聯票內）。" },
+
+  { id:"michele", cat:"free", x:705, y:715, lx:560, ly:420,
+    name:"聖彌額爾教堂", latin:"Chiesa di San Michele in Foro",
+    sTime:"07:40–09:00／15:30–17:00", sPrice:"免費",
+    warn:"中午 12:00～15:00 關門午休",
+    feature:"古羅馬市集廣場核心，立面如婚禮蛋糕般雕琢繁複，頂部立有大天使聖米迦勒銅像，內有李皮（Lippi）祭壇畫。",
+    tips:["正立面頂部矗立著巨大的大天使雕像，傳說雕像手指鑲有綠寶石，特定光線角度下才會看見。"],
+    when:"清晨 07:40～09:00（無人、安靜）或下午 15:30～17:00（陽光直照立面最壯觀）。",
+    stay:"約 15 分鐘",
+    hours:["上午 07:40～12:00","下午 15:00～18:00"],
+    price:"免費入場。" },
+  { id:"giusto", cat:"free", x:778, y:840, lx:420, ly:860,
+    name:"聖朱斯特教堂", latin:"Chiesa di San Giusto",
+    sTime:"10:00–11:45／15:30–16:30", sPrice:"免費",
+    warn:"中午午休大門必定關閉；週日與宗教節慶不開放，請勿專程安排",
+    feature:"坐落於聖米迦勒廣場東南側幾步路，門楣上刻有極為細膩的 12 世紀怪獸與卷草紋浮雕，雙色大理石外觀精巧。",
+    tips:["參觀避坑：這是地方免費堂區小教堂，神職人員開關門時間有些許彈性（例如早上 8 點開門到 9 點多晨禱結束，或下午延後至 18:00）。想確保能推門入內，抓官方時段與第三方標記的重疊時段最保險。","中午 12:30～14:30 是義大利傳統午休，現場大門必定關閉。"],
+    when:"最保險的時段：上午 10:00～11:45、下午 15:30～16:30。",
+    stay:"約 10～15 分鐘",
+    hours:["週一至週六：08:00～12:00、14:00～17:00（盧卡市政府官方登記）","週日與宗教節慶：原則上閉門不開放","部分第三方網站標記為 09:30～12:30、15:30～18:30，非官方資訊"],
+    price:"免費入場。" },
+  { id:"alessandro", cat:"free", x:591, y:809, lx:300, ly:745,
+    name:"聖亞歷山大堂", latin:"Chiesa di Sant'Alessandro Maggiore",
+    sTime:"白天散步路過", sPrice:"外觀免費",
+    warn:"平時內部幾乎不開放，只能看外觀",
+    feature:"11 世紀古典羅曼式長方形巴西利卡，純淨的白色石灰岩外牆是全城保存最純粹、幾無後世雕琢改動的羅曼式立面。",
+    tips:["它不是觀光性質的售票景點，內部平時大門常關，僅在極少數義大利環境基金會（FAI）遺產日、教區特展或特定宗教彌撒時才會開門。"],
+    when:"路過時在安靜的廣場欣賞外觀即可。",
+    stay:"外觀欣賞拍照約 5～10 分鐘",
+    hours:["平時大門常關","僅 FAI 遺產日、教區特展或特定宗教彌撒時開門"],
+    price:"外觀免費。" },
+
+  { id:"piazzamichele", cat:"open", x:680, y:740, lx:725, ly:745,
+    name:"聖米迦勒廣場", latin:"Piazza San Michele",
+    sTime:"白天隨時", sPrice:"免費",
+    feature:"古羅馬時代的市中心集會廣場（Forum），也是古城核心散步動線的交會處。廣場中央就是聖彌額爾教堂，也是逛街區的一個角。",
+    when:"散步、逛街時隨時經過；下午順光時拍教堂立面最漂亮。",
+    stay:"散步拍照約 10～15 分鐘",
+    hours:["廣場全天開放"],
+    price:"免費開放。" },
+  { id:"hotel", cat:"base", x:1272, y:715, lx:1300, ly:740,
+    name:"Hotel Ilaria", latin:"Via del Fosso, 26, Lucca",
+    sPrice:"我的住宿",
+    feature:"住宿飯店。位於城牆內東側的 Via del Fosso，距季尼吉樹塔直線約 250 公尺、距主教座堂直線約 400 公尺、距火車站直線約 700 公尺。",
+    hours:["櫃台 24 小時","電話 +39 0583 47615"] },
+  { id:"station", cat:"base", x:975, y:1344, lx:1010, ly:1300,
+    name:"盧卡火車站", latin:"Stazione di Lucca",
+    sPrice:"城牆外南側",
+    feature:"盧卡火車站，位於城牆外南側。最近的城門是西北方的 Porta San Pietro，直線約 300 公尺。" },
+  { id:"mura", cat:"open", x:520, y:1198, lx:290, ly:1085,
+    name:"盧卡城牆", latin:"Mura di Lucca",
+    sTime:"07:30–09:00／16:00–17:00", sPrice:"免費",
+    feature:"興建於 16 至 17 世紀，是歐洲保存最完好的文藝復興防禦工事之一，周長約 4.2 公里。城牆頂部寬達數十公尺，如今改建為綠樹成蔭的高架環城空中公園。步道平坦寬敞，可以俯瞰古城磚紅屋頂與城外的托斯卡尼田園風光。",
+    tips:["租台腳踏車環城：古城門附近與城內隨處都有租車行，騎車約 30～40 分鐘就能悠閒繞完一圈。","午後夕陽散步：下午 4 點到 5 點左右，托斯卡尼的陽光最溫和。走在兩旁種滿懸鈴木與橡樹的城牆上，看當地人慢跑、遛狗的日常。"],
+    when:"清晨 07:30～09:00（空氣好、人少，適合散步或騎車）；下午 16:00～17:00（陽光最溫和，適合夕陽散步）。",
+    stay:"騎腳踏車繞一圈約 30～40 分鐘；徒步一圈約 1 小時",
+    hours:["全天 24 小時開放","夜間路燈較暗"],
+    price:"免費。" },
+  { id:"anfiteatro", cat:"open", x:975, y:462, lx:1030, ly:375,
+    name:"圓形競技場廣場", latin:"Piazza dell'Anfiteatro",
+    sTime:"08:00–09:00／18:00–20:00", sPrice:"免費",
+    feature:"沿古羅馬競技場橢圓地基而建的封閉式廣場，環繞黃色外牆托斯卡尼住宅與餐酒館。",
+    tips:["建立在西元 2 世紀古羅馬角鬥場的遺址上，保留了完整的橢圓形閉合輪廓。","四座通道拱門在中心交會成一個十字交叉點，廣場四周開滿了露天餐廳與酒吧，非常適合小酌與放鬆。"],
+    when:"清晨 08:00～09:00（拍空景）；傍晚至夜間 18:00～20:00（喝開胃酒 Aperitivo、看點燈夜景）。",
+    stay:"散步拍照 15 分鐘；入座用餐／開胃酒約 45 分鐘",
+    hours:["廣場全天開放","周邊餐酒館營業至深夜"],
+    price:"免費。" },
+  { id:"shopping", cat:"open", x:600, y:660, lx:250, ly:560,
+    name:"Piazza San Michele 及周邊購物商圈", latin:"Via Fillungo / Via San Paolino / Via Santa Croce",
+    sTime:"16:00–19:30", sPrice:"免費",
+    area:"330,712 975,462 850,480 825,600 835,705 705,715",
+    corners:[[330,712],[705,715],[975,462]],
+    feature:"全城散步與商業中心，串聯老字號甜點店（Taddeucci 等）、手工皮件與獨立精品工坊。",
+    when:"下午 16:00～19:30（店家下午開門、居民進行傍晚漫步的熱鬧時段）。",
+    stay:"逛街採買伴手禮約 1～1.5 小時",
+    hours:["廣場全天開放","街道商店通常於 19:30 打烊"],
+    price:"免費。" }
+];
+/* ---- tiers (same rules as the Rome map) ---- */
+const TIER_MAIN = new Set(["duomo", "guinigi", "mura", "anfiteatro", "michele", "frediano"]);
+const TIER_REC = new Set(["giovanni", "ore", "piazzamichele", "campanile"]);
+SPOTS.forEach(s => {
+  if (s.cat === "base") return;
+  s.tier = TIER_MAIN.has(s.id) ? "主要" : TIER_REC.has(s.id) ? "推薦" : "次要";
+  s.sup = s.tier === "次要";
+  // 冷門時段: visitable before 09:00 or after 19:00 (any listed time outside 09–19, or open all day)
+  const txt = (s.hours || []).join(" ");
+  const ts = [...txt.matchAll(/(\d{1,2}):(\d{2})/g)].map(m => +m[1] * 60 + +m[2]);
+  s.cold = /全天|24 ?小時/.test(txt) || ts.some(t => t < 540 || t > 1140);
+});
+
+
+const NS = "http://www.w3.org/2000/svg";
+const el = (tag, attrs = {}, parent) => {
+  const n = document.createElementNS(NS, tag);
+  for (const k in attrs) n.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(n);
+  return n;
+};
+
+/* ---- Distance mode data ---- */
+const SIMPLE = {"duomo": [980.0, 989.5], "campanile": [719.1, 991.2], "museo": [966.9, 1050.3], "giovanni": [621.0, 912.0], "guinigi": [909.1, 605.1], "ore": [776.5, 629.0], "frediano": [719.3, 329.0], "michele": [618.7, 632.3], "giusto": [791.0, 822.0], "alessandro": [440.0, 791.0], "piazzamichele": [707.2, 734.7], "hotel": [1257.1, 728.0], "station": [969.2, 1357.0], "mura": [523.7, 1211.0], "anfiteatro": [972.3, 412.6], "shopping": [431.2, 590.0]};
+const EDGES = [{"a": [705, 715], "b": [680, 740], "box": [607.9, 674.5, 695.1, 698.5], "anc": [692.5, 727.5], "text": "50 m・1 分", "ids": ["michele", "piazzamichele"]}, {"a": [965, 985], "b": [919, 992], "box": [908.9, 946.6, 996.1, 970.6], "anc": [956.7, 986.3], "text": "60 m・1 分", "ids": ["duomo", "campanile"]}, {"a": [965, 985], "b": [965, 1035], "box": [863.4, 1006.0, 950.6, 1030.0], "anc": [965.0, 1018.0], "text": "60 m・1 分", "ids": ["duomo", "museo"]}, {"a": [919, 992], "b": [850, 930], "box": [806.9, 959.9, 902.5, 983.9], "anc": [873.5, 951.1], "text": "100 m・1 分", "ids": ["campanile", "giovanni"]}, {"a": [591, 809], "b": [680, 740], "box": [587.7, 762.5, 683.3, 786.5], "anc": [635.5, 774.5], "text": "150 m・2 分", "ids": ["alessandro", "piazzamichele"]}, {"a": [680, 740], "b": [600, 660], "box": [562.5, 717.7, 658.1, 741.7], "anc": [640.0, 700.0], "text": "150 m・2 分", "ids": ["piazzamichele", "shopping"]}, {"a": [850, 930], "b": [778, 840], "box": [766.2, 873.0, 861.8, 897.0], "anc": [814.0, 885.0], "text": "150 m・2 分", "ids": ["giovanni", "giusto"]}, {"a": [817, 679], "b": [705, 715], "box": [726.8, 696.4, 822.4, 720.4], "anc": [770.0, 694.1], "text": "150 m・2 分", "ids": ["ore", "michele"]}, {"a": [778, 840], "b": [680, 740], "box": [689.0, 786.0, 784.6, 810.0], "anc": [736.8, 798.0], "text": "200 m・2 分", "ids": ["giusto", "piazzamichele"]}, {"a": [861, 378], "b": [975, 462], "box": [870.2, 408.0, 965.8, 432.0], "anc": [918.0, 420.0], "text": "200 m・2 分", "ids": ["frediano", "anfiteatro"]}, {"a": [1043, 643], "b": [975, 462], "box": [961.2, 540.5, 1056.8, 564.5], "anc": [1009.0, 552.5], "text": "250 m・3 分", "ids": ["guinigi", "anfiteatro"]}, {"a": [1043, 643], "b": [817, 679], "box": [882.2, 649.0, 977.8, 673.0], "anc": [930.0, 661.0], "text": "300 m・4 分", "ids": ["guinigi", "ore"]}, {"a": [1043, 643], "b": [1272, 715], "box": [1091.4, 661.2, 1187.0, 685.2], "anc": [1139.2, 673.2], "text": "300 m・4 分", "ids": ["guinigi", "hotel"]}, {"a": [965, 1035], "b": [975, 1344], "box": [922.2, 1177.5, 1017.8, 1201.5], "anc": [970.0, 1189.5], "text": "400 m・5 分", "ids": ["museo", "station"]}, {"a": [1272, 715], "b": [975, 462], "box": [1075.7, 576.5, 1171.3, 600.5], "anc": [1123.5, 588.5], "text": "500 m・6 分", "ids": ["hotel", "anfiteatro"]}, {"a": [591, 809], "b": [520, 1198], "box": [507.7, 991.5, 603.3, 1015.5], "anc": [555.5, 1003.5], "text": "500 m・6 分", "ids": ["alessandro", "mura"]}, {"a": [965, 985], "b": [1272, 715], "box": [1070.7, 838.0, 1166.3, 862.0], "anc": [1118.5, 850.0], "text": "550 m・7 分", "ids": ["duomo", "hotel"]}];
+
+/* ---- Wednesday hours ---- */
+const WED = {
+  duomo: "09:30–17:00",
+  campanile: "10:00–17:00",
+  museo: "10:00–17:00",
+  giovanni: "10:00–17:00",
+  guinigi: "10:00–17:00",
+  ore: "10:00–17:00",
+  frediano: "09:30–16:30",
+  michele: "07:40–12:00、15:00–18:00",
+  giusto: "08:00–12:00、14:00–17:00",
+  alessandro: "平時不開放，只看外觀",
+  ronzini: "外觀隨時可看",
+  piazzamichele: "廣場 24 小時",
+  mura: "24 小時",
+  anfiteatro: "廣場 24 小時；餐酒館至深夜",
+  shopping: "商店至 19:30；廣場 24 小時"
+};
+
+/* ---- Base map ---- */
+const base = document.getElementById("base");
+// gates: Santa Maria (N), Elisa (E), San Pietro (S), Sant'Anna (W)
+const WALL = [[281,278],[1055,167],[1485,222],[1625,709],[1526,1112],[718,1174],[321,1223],[165,794]];
+const pts = WALL.map(p => p.join(",")).join(" ");
+el("polygon", { points: pts, fill: "var(--paper)" }, base);
+// streets (approximate)
+const streets = [
+  { d:"M835 710 L825 600 L850 480 L880 300 L900 200", name:"Via Fillungo", tx:880, ty:640, rot:-82 },
+  { d:"M705 715 L240 705", name:"Via San Paolino", tx:340, ty:695, rot:0 },
+  { d:"M835 705 L1300 690 L1600 705", name:"Via Santa Croce", tx:1200, ty:680, rot:-1 },
+  { d:"M705 715 L715 900 L718 1170", name:"", tx:0, ty:0, rot:0 },
+  { d:"M719 940 L850 930 L919 992 L1500 1000", name:"", tx:0, ty:0, rot:0 }
+];
+streets.forEach(s => {
+  el("path", { d: s.d, fill: "none", stroke: "var(--street)", "stroke-width": 14, "stroke-linecap": "round", "stroke-linejoin": "round" }, base);
+});
+streets.forEach(s => {
+  if (!s.name) return;
+  const t = el("text", { x: s.tx, y: s.ty, transform: `rotate(${s.rot} ${s.tx} ${s.ty})`,
+    "font-family": "Cormorant Garamond, Garamond, serif", "font-style": "italic", "font-size": 19, fill: "var(--muted)" }, base);
+  t.textContent = s.name;
+});
+// amphitheatre oval
+el("ellipse", { cx: 975, cy: 462, rx: 42, ry: 30, fill: "var(--bg)", stroke: "var(--line)", "stroke-width": 2 }, base);
+// wall: tree-lined band
+el("polygon", { points: pts, fill: "none", stroke: "var(--wall)", "stroke-width": 30, "stroke-linejoin": "round" }, base);
+el("polygon", { points: pts, fill: "none", stroke: "var(--wall-2)", "stroke-width": 9, "stroke-dasharray": "1 15", "stroke-linecap": "round" }, base);
+// bastions
+WALL.forEach(([x, y]) => {
+  el("polygon", { points: `${x},${y-30} ${x+30},${y} ${x},${y+30} ${x-30},${y}`, fill: "var(--wall)" }, base);
+});
+// compass + scale bar
+const comp = el("g", { transform: "translate(1620 1200)" }, base);
+el("path", { d: "M0 -38 L11 0 L0 -8 L-11 0 Z", fill: "var(--ink)" }, comp);
+const nT = el("text", { x: 0, y: 24, "text-anchor": "middle", "font-family": "Cormorant Garamond, serif", "font-size": 24, "font-weight": 600, fill: "var(--ink)" }, comp);
+nT.textContent = "N";
+const sc = el("g", { transform: "translate(1380 1360)" }, base);
+el("rect", { x: 0, y: 0, width: 100, height: 8, fill: "var(--ink)" }, sc);
+el("rect", { x: 100, y: 0, width: 100, height: 8, fill: "var(--paper)", stroke: "var(--ink)", "stroke-width": 1.5 }, sc);
+[["0", 0], ["100", 100], ["200 m", 200]].forEach(([t, x]) => {
+  const tt = el("text", { x, y: -8, "text-anchor": x === 200 ? "start" : "middle", "font-family": "Noto Sans TC, sans-serif", "font-size": 15, fill: "var(--muted)" }, sc);
+  tt.textContent = t;
+});
+
+/* ---- Spots ---- */
+const layer = document.getElementById("spots");
+const areaLayer = el("g", {}, layer);
+const syncArea = () => SPOTS.forEach(s => { if (s.areaEl) s.areaEl.classList.toggle("dim", s.g.classList.contains("dim") || s.g.classList.contains("off")); });
+SPOTS.forEach(s => {
+  const g = el("g", { class: "spot", tabindex: 0, role: "button", "data-id": s.id, "data-cat": s.cat,
+    "aria-label": `${s.name}，${s.sTime}，${s.sPrice}`, style: `--c:${CAT[s.cat].color}` }, layer);
+  if (s.area) {
+    s.areaEl = el("g", { class: "area", style: `--c:${CAT[s.cat].color}` }, areaLayer);
+    el("polygon", { points: s.area }, s.areaEl);
+    s.corners.forEach(([x, y]) => el("circle", { cx: x, cy: y, r: 8 }, s.areaEl));
+  }
+  const leader = el("path", { class: "leader" }, g);
+  const tab = el("rect", { class: "tab", x: s.lx, y: s.ly, rx: 4 }, g);
+  const t1 = el("text", { class: "t-name", x: s.lx + 12, y: s.ly + 25 }, g); t1.textContent = s.name;
+  const allDay = s.cat === "open" || s.cat === "base";
+  let tw = null, t2 = null;
+  if (!allDay) {
+    tw = el("text", { class: "t-wed t-more", x: s.lx + 12, y: s.ly + 47 }, g); tw.textContent = "週三 " + WED[s.id];
+    t2 = el("text", { class: "t-time t-more", x: s.lx + 12, y: s.ly + 67, style: "display:none" }, g);
+  }
+  const t3 = el("text", { class: "t-price t-more", x: s.lx + 12, y: s.ly + (allDay ? 47 : 67) }, g); t3.textContent = s.sPrice;
+  s.H = allDay ? 58 : 78;
+  if (s.cat === "base") el("rect", { class: "pin", x: s.x - 11, y: s.y - 11, width: 22, height: 22, rx: 3 }, g);
+  else el("circle", { class: "pin", cx: s.x, cy: s.y, r: 11 }, g);
+  if (s.sup) g.classList.add("is-sup");
+  s.g = g; s.tab = tab; s.leader = leader; s.t1 = t1; s.tw = tw; s.texts = [t1, tw, t3].filter(Boolean); s.timeText = t2 || { textContent: "" };
+  [s.slx, s.sly] = SIMPLE[s.id];
+  const act = () => distMode ? pickSpot(s.id) : openSpot(s.id);
+  g.addEventListener("click", e => { e.stopPropagation(); act(); });
+  g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); act(); } });
+});
+function sizeTabs() {
+  const slim = distMode || !!window.NAME_ONLY;
+  SPOTS.forEach(s => {
+    const lx = slim ? s.slx : s.lx, ly = slim ? s.sly : s.ly;
+    let w = 0;
+    (slim ? [s.t1] : s.texts).forEach(t => { try { w = Math.max(w, t.getComputedTextLength()); } catch (e) { w = Math.max(w, 180); } });
+    if (!w) w = 180;
+    const W = w + 24, H = slim ? 36 : s.H;
+    s.tab.setAttribute("x", lx); s.tab.setAttribute("y", ly);
+    s.tab.setAttribute("width", W); s.tab.setAttribute("height", H);
+    s.t1.setAttribute("x", lx + 12); s.t1.setAttribute("y", ly + 25);
+    const cx = Math.max(lx, Math.min(s.x, lx + W));
+    const cy = Math.max(ly, Math.min(s.y, ly + H));
+    s.leader.setAttribute("d", `M${s.x} ${s.y} L${cx} ${cy}`);
+  });
+}
+let distMode = false;
+sizeTabs();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(sizeTabs);
+
+/* ---- List ---- */
+const list = document.getElementById("list");
+Object.entries(CAT).forEach(([key, c]) => {
+  const sec = document.createElement("div");
+  sec.className = "group"; sec.dataset.cat = key; sec.style.setProperty("--c", c.color);
+  sec.innerHTML = `<h2><span class="dot"></span>${c.label}</h2><div class="items"></div>`;
+  const items = sec.querySelector(".items");
+  SPOTS.filter(s => s.cat === key).forEach(s => {
+    const b = document.createElement("button");
+    b.className = "item"; b.id = "item-" + s.id;
+    b.innerHTML = `<b></b><span class="p"></span><span class="t h"></span><span class="t"></span>`;
+    b.querySelector("b").textContent = s.name;
+    b.querySelector(".p").textContent = s.sPrice;
+    b.querySelector(".h").textContent = "週三營業　" + WED[s.id];
+    b.querySelector(".t").textContent = "適合時段　" + s.sTime;
+    b.addEventListener("click", () => openSpot(s.id));
+    items.appendChild(b);
+  });
+  list.appendChild(sec);
+});
+
+/* ---- Distance mode ---- */
+const edgeLayer = document.getElementById("edges");
+EDGES.forEach(e => {
+  const g = el("g", { class: "edge" }, edgeLayer);
+  el("line", { x1: e.a[0], y1: e.a[1], x2: e.b[0], y2: e.b[1] }, g);
+  if (e.box) {
+    const cx = (e.box[0] + e.box[2]) / 2, cy = (e.box[1] + e.box[3]) / 2;
+    if (Math.hypot(cx - e.anc[0], cy - e.anc[1]) > 16) el("line", { class: "conn", x1: e.anc[0], y1: e.anc[1], x2: cx, y2: cy }, g);
+    el("rect", { x: e.box[0], y: e.box[1], width: e.box[2] - e.box[0], height: e.box[3] - e.box[1], rx: 12 }, g);
+    const t = el("text", { x: cx, y: cy + 5, "text-anchor": "middle" }, g); t.textContent = e.text;
+  }
+  e.g = g;
+});
+const mapSvg = document.getElementById("map");
+let picked = null, pairEnd = null, sub = "p2p";
+const M_PER_UNIT = 1;
+const NOTES = { p2p: "先點起點，會顯示它到相鄰景點的距離；再點終點，就畫出兩點之間的距離與步行時間。點空白處重新選。", all: "顯示所有相鄰景點之間的步行距離與時間。" }, NOTE_TAIL = "步行距離以直線距離 ×1.3 估算，步速每分鐘 80 公尺；實際路線請以 Google 地圖導航為準。";
+const p2pLine = el("g", {}); mapSvg.insertBefore(p2pLine, document.getElementById("spots"));
+const p2pLabel = el("g", { class: "p2p-lbl" }, mapSvg);
+function walkText(units) {
+  const m = units * M_PER_UNIT * 1.3;
+  const w = m < 100 ? Math.round(m / 10) * 10 : Math.round(m / 50) * 50;
+  return (w < 1000 ? w + " m" : (w / 1000).toFixed(1) + " km") + "・" + Math.max(1, Math.round(w / 80)) + " 分";
+}
+function renderDist() {
+  SPOTS.forEach(s => s.g.classList.toggle("picked", sub === "p2p" && (s.id === picked || s.id === pairEnd)));
+  EDGES.forEach(e => e.g.classList.toggle("on", sub === "all" || (!!picked && !pairEnd && e.ids.includes(picked))));
+  p2pLine.replaceChildren(); p2pLabel.replaceChildren();
+  const card = document.getElementById("p2p-card");
+  card.hidden = !(sub === "p2p" && picked && pairEnd);
+  const nm = id => SPOTS.find(s => s.id === id).name;
+  const dt = document.getElementById("dist-text");
+  if (sub === "p2p") dt.textContent = !picked ? NOTES.p2p + NOTE_TAIL
+    : !pairEnd ? "起點：" + nm(picked) + "。再點另一個景點當終點，就會顯示兩點之間的距離；點空白處取消。"
+    : "起點 " + nm(picked) + " → 終點 " + nm(pairEnd) + "。點空白處可重新選起點。";
+  if (sub !== "p2p" || !picked || !pairEnd) return;
+  const a = SPOTS.find(s => s.id === picked), b = SPOTS.find(s => s.id === pairEnd);
+  el("line", { class: "p2p-line", x1: a.x, y1: a.y, x2: b.x, y2: b.y }, p2pLine);
+  const cx = (a.x + b.x) / 2, cy = (a.y + b.y) / 2;
+  const pill = el("rect", { class: "p2p-pill" }, p2pLabel);
+  const t = el("text", { class: "p2p-text", x: cx, y: cy + 5.8, "text-anchor": "middle" }, p2pLabel);
+  const wt = walkText(Math.hypot(b.x - a.x, b.y - a.y));
+  t.textContent = a.name + " → " + b.name + "　" + wt;
+  document.getElementById("p2p-route").textContent = a.name + " → " + b.name;
+  document.getElementById("p2p-dist").innerHTML = wt.replace("・", " ・ ") + "<small>步行估算</small>";
+  let w = 300; try { w = t.getComputedTextLength() + 19; } catch (e) {}
+  pill.setAttribute("x", cx - w / 2); pill.setAttribute("y", cy - 28 / 2);
+  pill.setAttribute("width", w); pill.setAttribute("height", 28); pill.setAttribute("rx", 28 / 2);
+}
+function pickSpot(id) {
+  if (id === null) { picked = pairEnd = null; }
+  else if (sub !== "p2p") return;
+  else if (!picked || pairEnd) { picked = id; pairEnd = null; }
+  else if (id === picked) { picked = null; }
+  else { pairEnd = id; }
+  renderDist();
+}
+document.querySelectorAll(".seg-btn").forEach(b => b.addEventListener("click", () => {
+  sub = b.dataset.sub;
+  document.querySelectorAll(".seg-btn").forEach(x => x.setAttribute("aria-pressed", x === b));
+  document.getElementById("dist-text").textContent = NOTES[sub] + NOTE_TAIL;
+  pickSpot(null);
+}));
+document.getElementById("f-dist").addEventListener("click", ev => {
+  distMode = !distMode;
+  ev.currentTarget.setAttribute("aria-pressed", distMode);
+  mapSvg.classList.toggle("dist", distMode);
+  edgeLayer.toggleAttribute("hidden", !distMode);
+  document.getElementById("dist-note").hidden = !distMode;
+  pickSpot(null);
+  sizeTabs();
+});
+mapSvg.addEventListener("click", () => { if (distMode && sub === "p2p" && picked) pickSpot(null); });
+const syncEdges = () => EDGES.forEach(e => e.g.classList.toggle("dim", e.ids.some(id => SPOTS.find(s => s.id === id).g.classList.contains("dim"))));
+
+/* ---- Filters: tier (主要／推薦／次要) hides, type (需購票／免費) and 冷門時段 dim ---- */
+const pressed = el => el.getAttribute("aria-pressed") === "true";
+function applySup() {
+  const tiers = new Set([...document.querySelectorAll(".chip[data-tier]")].filter(pressed).map(c => c.dataset.tier));
+  const cats = new Set([...document.querySelectorAll(".chip[data-cat]")].filter(pressed).map(c => c.dataset.cat));
+  if (!cats.size) ["paid", "free"].forEach(c => cats.add(c));   // nothing picked = no type filter
+  if (cats.has("free")) cats.add("open");   // 免費 covers the free squares and walls too
+  const cold = pressed(document.getElementById("f-cold"));
+  SPOTS.forEach(s => {
+    const gone = !!s.tier && !tiers.has(s.tier), dim = s.cat !== "base" && (!cats.has(s.cat) || (cold && !s.cold) || !!s.dayClosed);
+    s.g.classList.toggle("gone", gone); s.g.classList.toggle("dim", dim);
+    const it = document.getElementById("item-" + s.id); if (it) it.classList.toggle("gone", gone || dim);
+  });
+  document.querySelectorAll(".group").forEach(g => g.hidden = ![...g.querySelectorAll(".item")].some(i => !i.classList.contains("gone")));
+  syncArea(); syncEdges();
+  if (RAD && RAD.id) renderRad();
+}
+/* remember the filter chips from the last visit (this device's browser) */
+/* ---- 我去的日子: pick weekdays (multi), labels show only those days' hours; spots closed on all of them fade ---- */
+const DKEY = "trip-days-lucca", DAYS = [...document.querySelectorAll(".chip.day")], DN = "一二三四五六日";
+const WEEK = {"duomo": ["09:30–17:00", "09:30–17:00", "09:30–17:00", "09:30–17:00", "09:30–17:00", "09:30–18:00", "12:00–17:00"], "campanile": ["10:00–17:00", "10:00–17:00", "10:00–17:00", "10:00–17:00", "10:00–17:00", "10:00–17:00", "10:00–17:00"], "museo": ["10:00–17:00", "10:00–17:00", "10:00–17:00", "10:00–17:00", "10:00–17:00", "10:00–18:00", "10:00–17:00"], "giovanni": ["10:00–17:00", "10:00–17:00", "10:00–17:00", "10:00–17:00", "10:00–17:00", "10:00–18:00", "10:00–17:00"], "guinigi": ["10:00–17:00", "10:00–17:00", "10:00–17:00", "10:00–17:00", "10:00–17:00", "10:00–17:00", "10:00–17:00"], "ore": ["10:00–17:00", "10:00–17:00", "10:00–17:00", "10:00–17:00", "10:00–17:00", "10:00–17:00", "10:00–17:00"], "frediano": ["09:30–16:30", "09:30–16:30", "09:30–16:30", "09:30–16:30", "09:30–16:30", "09:30–17:00", "09:30–16:30"], "michele": ["07:40–12:00、15:00–18:00", "07:40–12:00、15:00–18:00", "07:40–12:00、15:00–18:00", "07:40–12:00、15:00–18:00", "07:40–12:00、15:00–18:00", "07:40–12:00、15:00–18:00", "07:40–12:00、15:00–18:00"], "giusto": ["08:00–12:00、14:00–17:00", "08:00–12:00、14:00–17:00", "08:00–12:00、14:00–17:00", "08:00–12:00、14:00–17:00", "08:00–12:00、14:00–17:00", "08:00–12:00、14:00–17:00", ""]}, WEEK_PREFIX = {}, WEEK_NODIM = new Set([]);
+try { const sv = JSON.parse(localStorage.getItem(DKEY) || "null"); if (Array.isArray(sv) && sv.length) DAYS.forEach(b => b.setAttribute("aria-pressed", sv.includes(+b.dataset.day) ? "true" : "false")); } catch (e) {}
+function dayRuns(ds) {   // [0,1,2,4] → "週一至三、五"; [4,5] → "週五六"; [0,6] → "週一、日"
+  if (ds.length === 7) return "每日";
+  const runs = []; ds.forEach(d => { const r = runs[runs.length - 1]; if (r && d === r[1] + 1) r[1] = d; else runs.push([d, d]); });
+  return "週" + runs.map(r => r[1] - r[0] >= 2 ? DN[r[0]] + "至" + DN[r[1]] : DN.slice(r[0], r[1] + 1)).join("、");
+}
+function weekLabel(id, sel) {
+  const wk = WEEK[id], groups = [];
+  sel.forEach(d => { const v = wk[d]; const g = groups.find(x => x.v === v); if (g) g.days.push(d); else groups.push({ v, days: [d] }); });
+  const open = groups.filter(g => g.v), closed = groups.filter(g => !g.v).flatMap(g => g.days);
+  if (!open.length) return null;
+  const parts = open.map(g => ({ d: g.days[0], t: dayRuns(g.days) + " " + g.v }));
+  if (closed.length) parts.push({ d: closed[0], t: dayRuns(closed) + "休" });
+  return (WEEK_PREFIX[id] || "") + parts.sort((a, b) => a.d - b.d).map(x => x.t).join("｜");
+}
+/* every day picked: one main time + the exceptions in brackets, e.g. 「09:00–19:00（週一休）」「收費 09:00–22:00（週一、五 11:30 起）」 */
+const _tm = v => { const m = String(v).match(/^\d{2}:\d{2}–\d{2}:\d{2}(、\d{2}:\d{2}–\d{2}:\d{2})*$/); return m ? v.split("、").flatMap(x => x.split("–")) : null; };
+function exceptionText(main, v) {
+  if (!v) return "休";
+  const a = _tm(main), b = _tm(v);
+  const sp = t => (/^\d/.test(t) ? " " : "") + t;   // a space only before a time
+  if (!a || !b || a.length !== b.length) return sp(v);
+  const diff = a.map((x, i) => x !== b[i] ? i : -1).filter(i => i >= 0), last = a.length - 1;
+  if (diff.length === 1 && diff[0] === 0) return " " + b[0] + " 起";
+  if (diff.length === 1 && diff[0] === last) return "到 " + b[last];
+  if (a.length === 4 && diff.every(i => i === 1 || i === 2)) return diff.length === 2 ? "午休 " + b[1] + "–" + b[2] : diff[0] === 1 ? " " + b[1] + " 起午休" : "午休到 " + b[2];
+  return sp(v);
+}
+function compactLabel(vals, prefix) {   // vals: the 7 day values, Monday first
+  const groups = [];
+  vals.forEach((v, d) => { const g = groups.find(x => x.v === v); if (g) g.days.push(d); else groups.push({ v, days: [d] }); });
+  const open = groups.filter(g => g.v);
+  if (!open.length) return null;
+  const score = g => g.days.length * 2 + (_tm(g.v) ? 1 : 0);   // most days wins; on a tie prefer a real time
+  const main = open.reduce((m, g) => score(g) > score(m) ? g : m, open[0]);
+  const ex = groups.filter(g => g !== main).sort((x, y) => x.days[0] - y.days[0]);
+  const merged = [];   // same note on several days → one entry (週六日時間不同)
+  ex.forEach(g => { let t = exceptionText(main.v, g.v); if (t.length > 16) t = "時間不同"; const m = merged.find(x => x.t === t); if (m) m.days.push(...g.days); else merged.push({ t, days: [...g.days] }); });
+  return prefix + main.v + (merged.length ? "（" + merged.map(x => dayRuns(x.days.sort((p, q) => p - q)) + x.t).join("；") + "）" : "");
+}
+function applyDays() {
+  let sel = DAYS.filter(pressed).map(b => +b.dataset.day);
+  if (!sel.length) sel = [0, 1, 2, 3, 4, 5, 6];
+  SPOTS.forEach(s => {
+    s.dayClosed = false;
+    const t = WEEK[s.id] ? (s.tw) : null; if (!t) return;
+    // reserve the box width the label had at first paint, so a longer line shrinks instead of widening the box
+    if (s.dayOrig == null) s.dayOrig = t.textContent;
+    if (!s.dayLim) { t.textContent = s.dayOrig; t.style.fontSize = ""; t.removeAttribute("textLength");
+      try { const w = Math.max(...[...s.g.querySelectorAll("text")].map(x => x.getComputedTextLength())); if (w > 0) s.dayLim = w; } catch (e) {} }
+    const lbl = sel.length === 7 ? compactLabel(WEEK[s.id], WEEK_PREFIX[s.id] || "") : weekLabel(s.id, sel), closed = lbl === null;
+    s.dayClosed = closed && !WEEK_NODIM.has(s.id);
+    t.textContent = closed ? "你選的日子休館" : lbl;
+    t.classList.toggle("day-off", closed);
+    t.style.fontSize = ""; t.removeAttribute("textLength"); t.removeAttribute("lengthAdjust");
+    try {
+      const w = t.getComputedTextLength(), lim = s.dayLim || w;
+      if (w > lim && w > 0) {
+        const k = Math.max(.7, lim / w); t.style.fontSize = (parseFloat(getComputedStyle(t).fontSize) * k) + "px";
+        if (w * k > lim + 1) { t.setAttribute("textLength", lim); t.setAttribute("lengthAdjust", "spacingAndGlyphs"); }
+      }
+    } catch (e) {}
+  });
+}
+DAYS.forEach(b => b.addEventListener("click", () => {
+  b.setAttribute("aria-pressed", pressed(b) ? "false" : "true");
+  try { localStorage.setItem(DKEY, JSON.stringify(DAYS.filter(pressed).map(x => +x.dataset.day))); } catch (e) {}
+  applyDays(); applySup(); sizeTabs();
+}));
+applyDays();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { SPOTS.forEach(s => s.dayLim = 0); applyDays(); applySup(); sizeTabs(); });
+
+const FKEY = "trip-filters-lucca", FCHIPS = [...document.querySelectorAll(".chip[data-tier], .chip[data-cat], #f-cold")];
+const chipKey = ch => ch.id || ch.dataset.tier || ch.dataset.cat;
+try { const saved = JSON.parse(localStorage.getItem(FKEY) || "null"); if (saved) FCHIPS.forEach(ch => { const k = chipKey(ch); if (k in saved) ch.setAttribute("aria-pressed", saved[k] ? "true" : "false"); }); } catch (e) {}
+const saveFilters = () => { try { localStorage.setItem(FKEY, JSON.stringify(Object.fromEntries(FCHIPS.map(ch => [chipKey(ch), pressed(ch)])))); } catch (e) {} };
+FCHIPS.forEach(ch => ch.addEventListener("click", () => {
+  ch.setAttribute("aria-pressed", pressed(ch) ? "false" : "true"); saveFilters(); applySup();
+}));
+applySup();
+
+/* ---- 長按範圍模式: long-press a spot → spots within 100 m; long-press it again → +100 m; one tap on the map background closes it ---- */
+var RAD = { id: null, r: 0, closedAt: 0 };
+const radLayer = el("g", {}); document.getElementById("map").insertBefore(radLayer, document.getElementById("spots"));
+const radCard = document.getElementById("rad-card");
+function renderRad() {
+  radLayer.replaceChildren();
+  SPOTS.forEach(s => { s.g.classList.remove("rad-out", "rad-center"); if (s.areaEl) s.areaEl.classList.remove("rad-out"); });
+  radCard.hidden = !RAD.id;
+  if (!RAD.id) return;
+  const c = SPOTS.find(s => s.id === RAD.id);
+  for (let k = 100; k < RAD.r; k += 100) el("circle", { class: "rad-ring", cx: c.x, cy: c.y, r: k / M_PER_UNIT }, radLayer);
+  el("circle", { class: "rad-circle", cx: c.x, cy: c.y, r: RAD.r / M_PER_UNIT }, radLayer);
+  let n = 0;
+  SPOTS.forEach(s => {
+    if (s.g.classList.contains("gone")) return;
+    const m = Math.hypot(s.x - c.x, s.y - c.y) * M_PER_UNIT;
+    const inside = Math.round(m / 5) * 5 <= RAD.r;   // 5 m tolerance: pins are approximate
+    s.g.classList.toggle("rad-out", !inside); if (s.areaEl) s.areaEl.classList.toggle("rad-out", !inside);
+    if (inside && s.id !== c.id && s.cat !== "base") n++;
+  });
+  c.g.classList.add("rad-center");
+  radCard.innerHTML = "";
+  const h = document.createElement("div");
+  h.innerHTML = `<b></b>　半徑 ${RAD.r} 公尺內 ${n} 個景點<button class="rad-x" type="button">關閉</button>`;
+  h.querySelector("b").textContent = c.name;
+  h.querySelector(".rad-x").addEventListener("click", closeRad);
+  const t = document.createElement("div"); t.style.color = "var(--muted)"; t.style.fontSize = "12px";
+  t.textContent = "再長按一次（電腦：在景點上點兩下）擴大 100 公尺；點一下地圖空白處關閉（直線距離）";
+  radCard.append(h, t);
+  placeRadCard(c);
+}
+/* put the 範圍 card in the map corner farthest from the circle, so it never sits on the labels being looked at */
+function placeRadCard(c) {
+  const card = document.getElementById("rad-card"), svg = document.getElementById("map"), box = card.parentElement;
+  try {
+    const m = svg.getScreenCTM(), p = svg.createSVGPoint(); p.x = c.x; p.y = c.y;
+    const q = p.matrixTransform(m), r = box.getBoundingClientRect();
+    const cx = q.x - r.left, cy = q.y - r.top, W = r.width;
+    const fs = box.classList.contains("fs");
+    // only the part of the map that is on screen counts (the map can be taller than the window)
+    const visTop = Math.max(0, -r.top), visBot = Math.min(r.height, innerHeight - r.top);
+    const top = visTop + (fs ? (document.getElementById("fs-bar")?.offsetHeight || 0) + 10 : 12);
+    const bot = r.height - visBot + 12;
+    // corners (bottom-right is kept for the zoom buttons)
+    const opts = [{ l: 12, t: top, x: 0, y: top }, { r: 12, t: top, x: W, y: top }, { l: 12, b: bot, x: 0, y: visBot }];
+    const best = opts.reduce((a, o) => Math.hypot(o.x - cx, o.y - cy) > Math.hypot(a.x - cx, a.y - cy) ? o : a, opts[0]);
+    Object.assign(card.style, { left: best.l != null ? best.l + "px" : "auto", right: best.r != null ? best.r + "px" : "auto",
+      top: best.t != null ? best.t + "px" : "auto", bottom: best.b != null ? "calc(" + best.b + "px + env(safe-area-inset-bottom, 0px))" : "auto" });
+  } catch (e) {}
+}
+
+function closeRad() { if (!RAD.id) return; RAD.id = null; RAD.r = 0; RAD.closedAt = performance.now(); renderRad(); }
+(() => {
+  const spotsEl = document.getElementById("spots");
+  let timer = null, start = null, fired = 0;
+  const cancel = () => { clearTimeout(timer); timer = null; };
+  spotsEl.addEventListener("pointerdown", e => {
+    const g = e.target.closest(".spot"); if (!g || (e.pointerType === "mouse" && e.button !== 0)) return;
+    cancel(); start = { x: e.clientX, y: e.clientY };
+    timer = setTimeout(() => {
+      timer = null; fired = performance.now();
+      const id = g.dataset.id;
+      if (RAD.id === id) RAD.r += 100; else { RAD.id = id; RAD.r = 100; }
+      if (navigator.vibrate) try { navigator.vibrate(15); } catch (_) {}
+      renderRad();
+    }, 550);
+  });
+  window.addEventListener("pointermove", e => { if (timer && start && Math.hypot(e.clientX - start.x, e.clientY - start.y) > 10) cancel(); });
+  window.addEventListener("pointerup", cancel); window.addEventListener("pointercancel", cancel);
+  spotsEl.addEventListener("contextmenu", e => { if (e.target.closest(".spot")) e.preventDefault(); });
+  // the click that ends a long press must not open the drawer
+  spotsEl.addEventListener("click", e => { if (performance.now() - fired < 700) { e.stopPropagation(); e.preventDefault(); } }, true);
+  // a tap on the map background closes it (a drag to pan does not)
+  document.getElementById("map").addEventListener("click", e => { if (RAD.id && !e.target.closest(".spot")) closeRad(); });
+})();
+/* ---- 電腦：在景點上點兩下 = 長按（畫出 / 擴大 100 公尺範圍）；點一下照常開介紹（等 0.25 秒確定不是點兩下） ---- */
+(() => {
+  const spotsEl = document.getElementById("spots");
+  let lastType = "mouse", pend = null, bypass = false;
+  spotsEl.addEventListener("pointerdown", e => { lastType = e.pointerType || "mouse"; }, true);
+  spotsEl.addEventListener("click", e => {
+    if (bypass || lastType !== "mouse" || (typeof distMode !== "undefined" && distMode)) return;
+    const g = e.target.closest(".spot"); if (!g) return;
+    e.stopPropagation(); e.preventDefault();
+    if (pend && pend.g === g) {   // second click on the same spot
+      clearTimeout(pend.t); pend = null;
+      const id = g.dataset.id;
+      if (RAD.id === id) RAD.r += 100; else { RAD.id = id; RAD.r = 100; }
+      renderRad(); return;
+    }
+    if (pend) clearTimeout(pend.t);
+    pend = { g, t: setTimeout(() => { pend = null; bypass = true; g.dispatchEvent(new MouseEvent("click", { bubbles: true })); bypass = false; }, 260) };
+  }, true);
+})();
+
+
+/* ---- Open outside 09–12 / 15–17 ---- */
+const EXTRA = {
+  duomo: "12:00–15:00；週六至 18:00",
+  campanile: "12:00–15:00 照常開放",
+  museo: "12:00–15:00；週六至 18:00",
+  giovanni: "12:00–15:00；週六至 18:00",
+  guinigi: "12:00–15:00 照常開放",
+  ore: "12:00–15:00 照常開放",
+  frediano: "12:00–15:00 照常開放",
+  michele: "07:40–09:00、17:00–18:00",
+  giusto: "08:00–09:00、14:00–15:00（週日閉）",
+  mura: "24 小時開放",
+  anfiteatro: "24 小時（餐酒館至深夜）",
+  shopping: "商店至 19:30；廣場 24 小時"
+};
+// 週三 10:00–12:00、15:00–17:00 是否有開
+const CORE = {
+  duomo: "10–12 ✓、15–17 ✓（16:30 最後入場）",
+  campanile: "10–12 ✓、15–17 ✓",
+  museo: "10–12 ✓、15–17 ✓",
+  giovanni: "10–12 ✓、15–17 ✓（16:30 最後入場）",
+  guinigi: "10–12 ✓、15–17 ✓",
+  ore: "10–12 ✓、15–17 ✓",
+  frediano: "10–12 ✓、15:00–16:30（提早關）",
+  michele: "10–12 ✓、15–17 ✓",
+  giusto: "10–12 ✓、15–17 ✓",
+  mura: "10–12 ✓、15–17 ✓",
+  anfiteatro: "10–12 ✓、15–17 ✓",
+  shopping: "廣場 ✓；商店以下午為主"
+};
+const MODES = {
+  extra: { map: EXTRA, prefix: "另開", note: "只顯示在 09:00–12:00、15:00–17:00 以外仍有營業的景點，灰字改成這些額外的開放時段。可用來安排早上 9 點前、中午和傍晚的行程。" },
+  core: { map: CORE, prefix: "可去", note: "只顯示週三 10:00–12:00、15:00–17:00 有開的景點，灰字改成這兩段時間能不能去。提早關門或有最後入場限制的會特別註明。" }
+};
+const modeNote = document.getElementById("mode-note");
+let curMode = null;
+function applyMode(m) {
+  curMode = m;
+  document.querySelectorAll(".mode").forEach(b => b.setAttribute("aria-pressed", b.dataset.mode === m));
+  modeNote.hidden = !m;
+  if (m) modeNote.textContent = MODES[m].note;
+  SPOTS.forEach(s => {
+    const val = m ? MODES[m].map[s.id] : null;
+    const has = !!val;
+    s.g.classList.toggle("off", !!m && !has);
+    s.g.classList.toggle("hl", has);
+    s.timeText.textContent = has ? MODES[m].prefix + " " + val : "適合 " + s.sTime;
+    const item = document.getElementById("item-" + s.id);
+    item.classList.toggle("off", !!m && !has);
+    item.querySelector(".t:not(.h)").textContent = has ? MODES[m].prefix + "　" + val : "適合時段　" + s.sTime;
+  });
+  syncArea();
+  sizeTabs();
+}
+document.querySelectorAll(".mode").forEach(b => b.addEventListener("click", () => applyMode(curMode === b.dataset.mode ? null : b.dataset.mode)));
+
+/* ---- Mobile pinch zoom ---- */
+const mapView = (() => {
+  const svg = document.getElementById("map");
+  const b = svg.viewBox.baseVal;
+  const full = { x: b.x, y: b.y, w: b.width, h: b.height };
+  const mq = window.matchMedia("(max-width: 860px)");
+  const PXU = 0.36;            // px per map unit when the map first opens on a phone
+  const HOME = null;       // spot id to centre on, or null for the map centre
+  let vb = { ...full }, raf = 0;
+  const ratio = () => { const r = svg.getBoundingClientRect(); return mq.matches && r.width ? r.height / r.width : full.h / full.w; };
+  const maxW = () => Math.max(full.w, full.h / ratio());
+  const clampW = w => Math.min(maxW(), Math.max(full.w / 10, w));
+  const axis = (p, size, lo, span) => size >= span ? lo + (span - size) / 2 : Math.min(lo + span - size, Math.max(lo, p));
+  const clamp = () => {
+    vb.w = clampW(vb.w); vb.h = vb.w * ratio();
+    vb.x = axis(vb.x, vb.w, full.x, full.w); vb.y = axis(vb.y, vb.h, full.y, full.h);
+  };
+  const apply = () => { svg.setAttribute("viewBox", `${vb.x} ${vb.y} ${vb.w} ${vb.h}`); svg.parentElement.classList.toggle("zoomed", vb.w < full.w - 1); };
+  const set = (cx, cy, w) => { vb.w = clampW(w); vb.h = vb.w * ratio(); vb.x = cx - vb.w / 2; vb.y = cy - vb.h / 2; clamp(); };
+  const animateTo = (cx, cy, w) => {
+    cancelAnimationFrame(raf);
+    const from = { cx: vb.x + vb.w / 2, cy: vb.y + vb.h / 2, w: vb.w };
+    const keep = { ...vb }; set(cx, cy, w);
+    const to = { cx: vb.x + vb.w / 2, cy: vb.y + vb.h / 2, w: vb.w }; vb = keep;
+    const t0 = performance.now(), D = 420;
+    const step = now => {
+      const k = Math.min(1, (now - t0) / D), e = 1 - Math.pow(1 - k, 3);
+      vb.w = from.w + (to.w - from.w) * e; vb.h = vb.w * ratio();
+      vb.x = from.cx + (to.cx - from.cx) * e - vb.w / 2; vb.y = from.cy + (to.cy - from.cy) * e - vb.h / 2;
+      apply(); if (k < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+  };
+  const home = () => {
+    cancelAnimationFrame(raf);
+    if (!mq.matches) { vb = { ...full }; apply(); return; }
+    const s = HOME && SPOTS.find(x => x.id === HOME);
+    set(s ? s.x : full.x + full.w / 2, s ? s.y : full.y + full.h / 2, svg.getBoundingClientRect().width / PXU); apply();
+  };
+  const fit = (x0, y0, x1, y1) => {
+    const w = Math.max(x1 - x0, (y1 - y0) / ratio()) * 1.12;
+    animateTo((x0 + x1) / 2, (y0 + y1) / 2, w);
+  };
+  const zoomAt = (f, px, py) => {
+    const nw = clampW(vb.w / f);
+    vb.x = px - (px - vb.x) * nw / vb.w; vb.y = py - (py - vb.y) * nw / vb.w;
+    vb.w = nw; clamp(); apply();
+  };
+  const center = arr => arr.reduce((a, p) => ({ x: a.x + p.x / arr.length, y: a.y + p.y / arr.length }), { x: 0, y: 0 });
+  const dist = arr => arr.length > 1 ? Math.hypot(arr[0].x - arr[1].x, arr[0].y - arr[1].y) : 0;
+  const pts = new Map();
+  let g0 = null, moved = false, lastMove = 0;
+  const begin = () => {
+    const arr = [...pts.values()];
+    g0 = { vb: { ...vb }, r: svg.getBoundingClientRect(), c: center(arr), d: dist(arr), k: ratio() };
+  };
+  svg.addEventListener("pointerdown", e => {
+    if (!mq.matches && (e.pointerType !== "mouse" || e.button !== 0 || vb.w >= full.w - 1)) return;
+    if (e.pointerType === "mouse") e.preventDefault();
+    cancelAnimationFrame(raf);
+    if (e.isPrimary || pts.size === 0 || performance.now() - lastMove > 800) { pts.clear(); moved = false; }
+    pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    begin();
+  });
+  window.addEventListener("pointermove", e => {
+    if (!g0 || !pts.has(e.pointerId)) return;
+    pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    const arr = [...pts.values()], c = center(arr), d = dist(arr);
+    const { r, vb: v0 } = g0;
+    const w = clampW(g0.d > 0 && d > 0 ? v0.w * g0.d / d : v0.w);
+    const sx = v0.x + (g0.c.x - r.left) / r.width * v0.w;
+    const sy = v0.y + (g0.c.y - r.top) / r.height * v0.h;
+    vb.w = w; vb.h = w * g0.k;
+    vb.x = sx - (c.x - r.left) / r.width * vb.w;
+    vb.y = sy - (c.y - r.top) / r.height * vb.h;
+    clamp(); apply();
+    lastMove = performance.now();
+    if (arr.length > 1 || Math.hypot(c.x - g0.c.x, c.y - g0.c.y) > 6) moved = true;
+  });
+  const end = e => { if (!pts.delete(e.pointerId)) return; if (pts.size) begin(); else g0 = null; };
+  window.addEventListener("pointerup", end);
+  window.addEventListener("pointercancel", end);
+  svg.addEventListener("click", e => { if (moved && performance.now() - lastMove < 600) { e.stopPropagation(); e.preventDefault(); moved = false; } }, true);
+  const atCursor = e => { const r = svg.getBoundingClientRect(); return [vb.x + (e.clientX - r.left) / r.width * vb.w, vb.y + (e.clientY - r.top) / r.height * vb.h]; };
+  svg.addEventListener("wheel", e => {
+    if (!(e.ctrlKey || e.metaKey)) return;   // plain wheel keeps scrolling the page
+    e.preventDefault(); cancelAnimationFrame(raf);
+    zoomAt(Math.exp(-e.deltaY * (e.deltaMode === 1 ? 0.05 : 0.0025)), ...atCursor(e));
+  }, { passive: false });
+  svg.addEventListener("dblclick", e => {
+    if (e.target.closest(".spot, .route-pill, .route-hit")) return;
+    if (RAD && (RAD.id || performance.now() - RAD.closedAt < 600)) { e.preventDefault(); return; }
+    e.preventDefault(); cancelAnimationFrame(raf); zoomAt(1.8, ...atCursor(e));
+  });
+  const mid = () => [vb.x + vb.w / 2, vb.y + vb.h / 2];
+  document.getElementById("z-in").addEventListener("click", () => zoomAt(1.6, ...mid()));
+  document.getElementById("z-out").addEventListener("click", () => zoomAt(1 / 1.6, ...mid()));
+  document.getElementById("z-reset").addEventListener("click", () => { cancelAnimationFrame(raf); set(full.x + full.w / 2, full.y + full.h / 2, maxW()); apply(); });
+  if (mq.addEventListener) mq.addEventListener("change", home); else mq.addListener(home);
+  let rw = 0;
+  window.addEventListener("resize", () => {
+    const w = svg.getBoundingClientRect().width; if (!mq.matches || w === rw) return; rw = w;
+    const [cx, cy] = mid(); set(cx, cy, vb.w); apply();
+  });
+  home(); rw = svg.getBoundingClientRect().width;
+  const refresh = () => { const [cx, cy] = mid(); set(cx, cy, vb.w); apply(); };
+  return { fit, home, mq, refresh };
+})();
+/* ---- Full-screen map (small screens) ---- */
+(() => {
+  const box = document.querySelector(".mapbox"), bar = document.getElementById("fs-bar"), panel = document.getElementById("fs-panel");
+  const distSlot = document.getElementById("fs-dist"), menu = document.getElementById("fs-menu");
+  const filters = document.querySelector(".filters"), distNote = document.getElementById("dist-note");
+  const homeF = document.createComment("filters"), homeD = document.createComment("dist");
+  filters.before(homeF); if (distNote) distNote.before(homeD);
+  document.getElementById("fs-title").textContent = (document.querySelector("h1") || {}).textContent || "";
+  const place = () => { const h = bar.offsetHeight; panel.style.top = h + "px"; distSlot.style.top = (h + (panel.hidden ? 0 : panel.offsetHeight)) + "px"; };
+  const setMenu = open => { panel.hidden = !open; menu.setAttribute("aria-expanded", open); place(); };
+  let on = false;
+  const enter = () => {
+    if (on) return; on = true;
+    box.classList.add("fs"); document.body.classList.add("fs-on");
+    panel.appendChild(filters); if (distNote) distSlot.appendChild(distNote);
+    setMenu(false); mapView.refresh();
+  };
+  const exit = () => {
+    if (!on) return; on = false;
+    box.classList.remove("fs"); document.body.classList.remove("fs-on");
+    homeF.after(filters); if (distNote) homeD.after(distNote);
+    setMenu(false); mapView.refresh();
+  };
+  document.getElementById("z-full").addEventListener("click", () => on ? exit() : enter());
+  document.getElementById("fs-exit").addEventListener("click", exit);
+  document.getElementById("fs-open").addEventListener("click", enter);
+  menu.addEventListener("click", () => setMenu(panel.hidden));
+  // picking a filter or mode closes the panel so the map is visible again
+  panel.addEventListener("click", e => { if (e.target.closest("button")) setTimeout(() => setMenu(false), 120); });
+  window.addEventListener("resize", () => { if (on) place(); });
+  const phone = window.matchMedia("(max-width: 640px)");
+  if (phone.matches) enter();
+  const onChange = () => { if (!mapView.mq.matches) exit(); };
+  if (mapView.mq.addEventListener) mapView.mq.addEventListener("change", onChange);
+})();
+/* ---- Names-only view (eye button) ---- */
+(() => {
+  const svgMap = document.getElementById("map");
+  const set = on => {
+    window.NAME_ONLY = on;
+    svgMap.classList.toggle("names", on);
+    document.querySelectorAll(".names-btn").forEach(b => b.setAttribute("aria-pressed", on));
+    sizeTabs();
+  };
+  document.querySelectorAll(".names-btn").forEach(b => b.addEventListener("click", () => set(!window.NAME_ONLY)));
+})();
+/* ---- Icon labels on touch + distance icon in the full-screen bar ---- */
+(() => {
+  document.querySelectorAll(".icon-btn[data-tip]").forEach(b => b.addEventListener("pointerdown", e => {
+    if (e.pointerType === "mouse") return;
+    b.classList.add("tip-show"); clearTimeout(b._tip); b._tip = setTimeout(() => b.classList.remove("tip-show"), 1400);
+  }));
+  const main = document.getElementById("f-dist"), mirror = document.getElementById("fs-dist-btn");
+  if (main && mirror) {
+    mirror.addEventListener("click", () => main.click());
+    new MutationObserver(() => mirror.setAttribute("aria-pressed", main.getAttribute("aria-pressed"))).observe(main, { attributes: true, attributeFilter: ["aria-pressed"] });
+  }
+})();
+
+
+
+
+/* ---- Visited ---- */
+const VKEY = "trip-visited-lucca";
+let visited = new Set();
+try { visited = new Set(JSON.parse(localStorage.getItem(VKEY) || "[]")); } catch (e) {}
+let showDone = false;
+const saveVisited = () => { try { localStorage.setItem(VKEY, JSON.stringify([...visited])); } catch (e) {} };
+function applyVisited() {
+  const hid = id => visited.has(id) && !showDone;
+  SPOTS.forEach(s => {
+    s.g.classList.toggle("visited", visited.has(s.id));
+    s.g.classList.toggle("hide-v", hid(s.id));
+    if (s.areaEl) s.areaEl.classList.toggle("hide-v", hid(s.id));
+  });
+  EDGES.forEach(e => e.g.classList.toggle("hide-v", e.ids.some(hid)));
+  const n = visited.size, chip = document.getElementById("f-done");
+  if (n === 0) showDone = false;
+  chip.hidden = n === 0;
+  document.getElementById("done-n").textContent = n;
+  chip.setAttribute("aria-pressed", showDone);
+}
+document.getElementById("f-done").addEventListener("click", () => { showDone = !showDone; applyVisited(); });
+applyVisited();
+
+/* ---- Google Maps link ---- */
+const GQ = {"duomo": "Cattedrale di San Martino", "giovanni": "Chiesa dei Santi Giovanni e Reparata", "hotel": "Hotel Ilaria Via del Fosso", "station": "Stazione ferroviaria", "shopping": "Via Fillungo", "campanile": "Campanile Cattedrale di San Martino", "museo": "Museo della Cattedrale"};
+/* share a spot's Google Maps link: system share sheet if allowed, else copy, else show the link to copy by hand */
+async function shareLink(btn) {
+  const url = btn.dataset.url, name = btn.dataset.name, note = document.getElementById("d-share-note");
+  const say = t => { note.textContent = t; clearTimeout(shareLink.t); shareLink.t = setTimeout(() => { note.textContent = ""; }, 2500); };
+  try { if (navigator.share) { await navigator.share({ title: name, text: name + "（Google 地圖）", url }); return; } } catch (err) { if (err && err.name === "AbortError") return; }
+  try { await navigator.clipboard.writeText(name + " " + url); say("已複製連結，可以貼到 LINE 或訊息裡"); return; } catch (err) {}
+  note.textContent = "複製這個連結："; const inp = document.createElement("input"); inp.readOnly = true; inp.value = url; inp.setAttribute("aria-label", "Google 地圖連結");
+  note.appendChild(inp); inp.focus(); inp.select();
+}
+/* anonymous error report: Google Form (no sign-in, no e-mail collected), prefilled with map + spot */
+const REPORT_FORM = "https://docs.google.com/forms/d/e/1FAIpQLSfczsbVIwVeT78rpvKnk8CF1upTBqEKsf6viWWYu5iBn532Lg/viewform";
+const REPORT_MAP = "盧卡";
+const REPORT_BUILD = "2026-11-13";   // map version, so a report can be matched to what the reader saw
+/* "來源" field: where the report came from, filled automatically so even an empty report says roughly what was wrong */
+function reportSource(where) {
+  const d = document.getElementById("drawer"), open = d && !d.hidden;
+  const sp = open && d.dataset.spot ? SPOTS.find(x => x.id === d.dataset.spot) : null;
+  const rt = open && d.dataset.route ? (typeof ROUTES !== "undefined" ? ROUTES.find(x => x.id === d.dataset.route) : null) : null;
+  const tab = open ? d.querySelector('.rt-tab[aria-selected="true"]') : null;
+  const parts = [REPORT_MAP, where];
+  if (sp) parts.push("景點：" + sp.name + "（" + sp.id + "）");
+  if (rt) parts.push("路線：" + (rt.tag || rt.name) + "（" + rt.id + "）");
+  if (tab) parts.push("分頁：" + tab.textContent.replace(/^[^\p{L}]+|[^\p{L}]+$/gu, "").trim());
+  if (!sp && !rt) parts.push("沒有打開側邊內容");
+  if (typeof routeOn !== "undefined" && routeOn) parts.push("City Walk 模式");
+  if (window.NAME_ONLY) parts.push("簡潔模式");
+  if (document.querySelector(".mapbox.fs")) parts.push("全螢幕");
+  parts.push(innerWidth <= 640 ? "手機版" : "電腦版", "地圖版本 " + REPORT_BUILD);
+  return parts.join("｜");
+}
+const reportUrl = (s, where) => REPORT_FORM + "?usp=pp_url&entry.772922063=" + encodeURIComponent(REPORT_MAP) + (s ? "&entry.2061406689=" + encodeURIComponent(s.name) : "") + "&entry.1913794735=" + encodeURIComponent(reportSource(where || "側邊內容"));
+/* refresh the link at click time so 來源 reflects the current tab / mode */
+document.addEventListener("click", e => {
+  const a = e.target.closest && e.target.closest("a.icon-act.report, #foot-report");
+  if (!a) return;
+  const d = document.getElementById("drawer"), id = d && !d.hidden && d.dataset.spot;
+  a.href = reportUrl(id ? SPOTS.find(x => x.id === id) : null, a.id === "foot-report" ? "頁尾" : "側邊內容");
+}, true);
+const gmapUrl = s => "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent((GQ[s.id] || s.latin.split(/ \/ | – /)[0]) + " Lucca");
+
+/* ---- Drawer ---- */
+const PASS_SITE_IDS = ["duomo", "campanile", "museo", "giovanni"];
+const drawer = document.getElementById("drawer"), scrim = document.getElementById("scrim");
+let lastFocus = null;
+const esc = t => String(t).replace(/[&<>"]/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[m]));
+// tips (by index) that are practical reminders -> shown in the 小提醒 tab
+const REMIND = { giusto: [0, 1], alessandro: [0], mura: [0, 1] };
+// extra reminders written from each spot's own hours / price data
+const EXTRA_REMIND = {
+  duomo: ["最後入場是休館前 30 分鐘；特殊宗教儀式期間開放時間可能調整。", "全見聯票 €10 一次包含主教座堂、鐘樓、主教座堂博物館、聖若望和雷帕拉塔教堂，現場可刷卡，買一次就好。"],
+  campanile: ["含在主教座堂全見聯票內，不用另外買票。", "上午順光，俯瞰城景最清晰。"],
+  museo: ["含在主教座堂全見聯票內，不用另外買票。", "可以和聖若望和雷帕拉塔教堂一起走完。"],
+  giovanni: ["含在主教座堂全見聯票內，不用另外買票。", "最後入場是休館前 30 分鐘。"],
+  guinigi: ["可買市立雙塔聯票，和時鐘塔一起買；現場售票處可刷卡。", "中午不休息，正好避開其他小景點的午休和餐廳尖峰。"],
+  ore: ["建議和圭尼吉塔一起買市立聯票；現場售票處可刷卡。"],
+  frediano: ["入內約 €4，獨立售票，不包含在大教堂聯票內。"],
+  piazzamichele: ["下午順光時拍教堂立面最漂亮。"],
+  anfiteatro: ["清晨 08:00～09:00 人最少，適合拍空景。"],
+  shopping: ["街上商店通常 19:30 打烊；下午 16:00 後最熱鬧。"],
+};
+function showTab(tab) {
+  drawer.querySelectorAll(".rt-tab").forEach(x => x.setAttribute("aria-selected", x.dataset.tab === tab));
+  drawer.querySelectorAll(".rt-panel").forEach(p => p.hidden = p.dataset.panel !== tab);
+  drawer.scrollTop = 0;
+}
+function bindTabs() {
+  drawer.querySelectorAll(".rt-tab").forEach(b => b.addEventListener("click", () => showTab(b.dataset.tab)));
+  drawer.querySelector(".warn-jump")?.addEventListener("click", () => showTab("tips"));
+}
+const STRIKE_IDS = ["station"];   // train stations: link to strike lookup (user-requested 2026-11-17)
+function openSpot(id) {
+  drawer.dataset.spot = id; drawer.dataset.route = "";
+  const s = SPOTS.find(x => x.id === id); if (!s) return;
+  lastFocus = document.activeElement;
+  SPOTS.forEach(x => x.g.classList.toggle("active", x.id === id));
+  drawer.style.setProperty("--c", CAT[s.cat].color);
+  const rIdx = REMIND[s.id] || [];
+  const tips = (s.tips || []).filter((t, i) => !rIdx.includes(i));
+  const remind = (s.tips || []).filter((t, i) => rIdx.includes(i)).concat(EXTRA_REMIND[s.id] || []);
+  // 介紹 = what the place is; 💡 實用資訊 = everything for planning (hours, tickets, reminders)
+  const passSite = PASS_SITE_IDS.includes(s.id);
+  const hasPrac = !!(STRIKE_IDS.includes(s.id) || s.warn || remind.length || s.hours || s.when || s.stay || s.price || s.pass || passSite);
+  drawer.innerHTML = `
+    <div class="d-top"><span class="cat">${esc(CAT[s.cat].label)}</span><button class="close" id="d-close" aria-label="關閉">×</button></div>
+    <h3 id="d-name">${esc(s.name)}</h3>
+    <p class="latin">${esc(s.latin)}</p>
+    <div class="d-actions">${s.cat !== "base" ? `<button class="visit-btn" id="d-visit" aria-pressed="${visited.has(s.id)}">${visited.has(s.id) ? "✓ 已去過（點一下取消）" : "標記為已去過"}</button>` : ""}<span class="d-icons"><a class="icon-act" href="${esc(gmapUrl(s))}" target="_blank" rel="noopener" aria-label="在 Google 地圖開啟" data-tip="Google 地圖" title="Google 地圖"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5a6.5 6.5 0 0 0-6.5 6.5c0 4.9 6.5 12.5 6.5 12.5s6.5-7.6 6.5-12.5A6.5 6.5 0 0 0 12 2.5zm0 9a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z" fill="currentColor"/></svg></a><button class="icon-act" type="button" id="d-share" data-url="${esc(gmapUrl(s))}" data-name="${esc(s.name)}" aria-label="分享 Google 地圖連結" data-tip="分享" title="分享"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5.5" r="2.6" fill="currentColor"/><circle cx="6" cy="12" r="2.6" fill="currentColor"/><circle cx="18" cy="18.5" r="2.6" fill="currentColor"/><path d="M8.3 10.8 15.7 6.7M8.3 13.2l7.4 4.1" stroke="currentColor" stroke-width="2" fill="none"/></svg></button><a class="icon-act report" href="${esc(reportUrl(s))}" target="_blank" rel="noopener" aria-label="匿名回報這個景點的錯誤" data-tip="回報錯誤" title="回報錯誤"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 20.5h20L12 3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 9.5v5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="17.3" r="1.3" fill="currentColor"/></svg></a></span><span class="share-note" id="d-share-note" role="status" aria-live="polite"></span></div>
+    ${hasPrac ? `<div class="rt-tabs" role="tablist"><button class="rt-tab" role="tab" data-tab="info" aria-selected="true">介紹</button><button class="rt-tab" role="tab" data-tab="tips" aria-selected="false">💡 實用資訊${s.warn ? '<span class="tab-alert" aria-label="有重要提醒">!</span>' : ""}</button></div>
+    <div class="rt-panel" data-panel="tips" hidden>
+      ${s.warn ? `<div class="warn">⚠ ${esc(s.warn)}</div>` : ""}
+      <dl>
+      ${STRIKE_IDS.includes(s.id) ? `<div><dt>罷工查詢</dt><dd>義大利常有火車、公車罷工，出發前先查：<br><a class="site" href="https://www.theitalystrike.com/" target="_blank" rel="noopener">Italy Strike 罷工查詢 ↗</a><br><small>非官方整理，資料來自義大利交通部與交通業者公告；重要行程請再到官方網站確認</small><ul style="margin-top:8px"><li>罷工特別常見在<b>星期五</b>，其次是<b>星期一</b>，因為跟週末連在一起比較好動員。但這只是傾向，不是固定規則。</li><li>罷工時間的長度有慣例：<ul><li><b>鐵路</b>常是前一天 21:00 到當天 21:00，所以「週五罷工」可能從週四晚上就開始了。</li><li><b>地方交通</b>（羅馬 ATAC、威尼斯 ACTV 等）多是當天 24 小時或 4 小時，中間有保障時段。</li><li><b>航空</b>常是當天 24 小時，或某個時段 4～8 小時。</li></ul></li></ul></dd></div>` : ""}
+      ${s.hours ? `<div><dt>${s.cat === "base" ? "服務資訊" : "營業時間"}</dt><dd><ul>${s.hours.map(h => `<li>${esc(h)}</li>`).join("")}</ul></dd></div>` : ""}
+      ${s.when ? `<div><dt>合適旅遊時段</dt><dd>${esc(s.when)}</dd></div>` : ""}
+      ${s.stay ? `<div><dt>建議停留時間</dt><dd>${esc(s.stay)}</dd></div>` : ""}
+      ${s.price ? `<div><dt>票價</dt><dd>${esc(s.price)}</dd></div>` : ""}
+      ${s.pass ? `<div><dt>聯票包含</dt><dd><ul>${s.pass.map(p => `<li>${esc(p)}</li>`).join("")}</ul></dd></div>` : ""}
+      ${passSite ? `<div><dt>官方網站（聯票資訊）</dt><dd><a class="site" href="https://www.museocattedralelucca.it/en/" target="_blank" rel="noopener">museocattedralelucca.it ↗</a></dd></div>` : ""}
+      ${remind.length ? `<div><dt>小提醒</dt><dd><ul>${remind.map(t => `<li>${esc(t)}</li>`).join("")}</ul></dd></div>` : ""}
+      </dl>
+    </div>` : ""}
+    <div class="rt-panel" data-panel="info">
+    ${s.warn ? `<button class="warn-jump" type="button">⚠ 有開放時間限制，點這裡看「實用資訊」</button>` : ""}
+    <dl>
+      <div><dt>特色</dt><dd>${esc(s.feature)}</dd></div>
+      ${tips.length ? `<div><dt>看點</dt><dd><ul>${tips.map(t => `<li>${esc(t)}</li>`).join("")}</ul></dd></div>` : ""}
+    </dl></div>`;
+  drawer.hidden = false; scrim.hidden = false;
+  document.getElementById("d-close").addEventListener("click", closeSpot);
+  bindTabs();
+  document.getElementById("d-share")?.addEventListener("click", e => shareLink(e.currentTarget));
+  document.getElementById("d-visit")?.addEventListener("click", () => {
+    if (visited.has(s.id)) visited.delete(s.id); else visited.add(s.id);
+    saveVisited(); applyVisited();
+    if (visited.has(s.id) && !showDone) closeSpot(); else openSpot(s.id);
+  });
+  document.getElementById("d-close").focus();
+}
+function closeSpot() {
+  drawer.hidden = true; scrim.hidden = true;
+  SPOTS.forEach(x => x.g.classList.remove("active"));
+  if (lastFocus && lastFocus.focus) lastFocus.focus();
+}
+scrim.addEventListener("click", closeSpot);
+// small screens: one tap anywhere in the sheet (outside links/buttons) closes it
+drawer.addEventListener("click", e => {
+  if (!mapView.mq.matches) return;
+  if (e.target.closest("a, button, input, select, textarea, summary, [role=button]")) return;
+  if (window.getSelection && String(window.getSelection())) return;
+  closeSpot();
+});
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !drawer.hidden) closeSpot(); });
+</script>
+
+
+</body></html>

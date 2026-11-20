@@ -1,0 +1,1327 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>羅馬景點地圖</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&family=Cormorant+Garamond:ital,wght@1,500;1,600&display=swap">
+<style>
+/* Layout: Rome plan drawn from Google Maps coordinates (SVG, 1 unit = 2.2 m); labels as stone tablets; details open in a side drawer / bottom sheet */
+:root {
+  --bg: #E7E6E0; --paper: #F7F6F2; --ink: #22262A; --muted: #676B66; --line: #CBC9C0;
+  --park: #DCE3C8; --park-edge: #A3B27A; --river: #BCD3DE; --street: #D8D5CA;
+  --paid: #A3282D; --free: #3A5880; --open: #57772F;
+  --warn-bg: #F6E7D5; --warn-fg: #8A4A12; --shadow: rgba(30,32,28,.12);
+  --f-display: "Noto Serif TC", "Songti TC", "PMingLiU", serif;
+  --f-body: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  --f-latin: "Cormorant Garamond", "Garamond", "Times New Roman", serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #15171A; --paper: #1E2124; --ink: #E9E7E2; --muted: #9C9F99; --line: #353A3D;
+  --park: #26301F; --park-edge: #4D5C35; --river: #24394A; --street: #2C3033;
+  --paid: #E26A68; --free: #85A7D3; --open: #A2C473;
+  --warn-bg: #3A2A19; --warn-fg: #F0B678; --shadow: rgba(0,0,0,.4); color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #15171A; --paper: #1E2124; --ink: #E9E7E2; --muted: #9C9F99; --line: #353A3D;
+  --park: #26301F; --park-edge: #4D5C35; --river: #24394A; --street: #2C3033;
+  --paid: #E26A68; --free: #85A7D3; --open: #A2C473;
+  --warn-bg: #3A2A19; --warn-fg: #F0B678; --shadow: rgba(0,0,0,.4); color-scheme: dark }
+
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.65; margin: 0; }
+.wrap { max-width: 1400px; margin: 0 auto; padding-block: 28px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 16px 32px; margin-bottom: 18px; }
+.eyebrow { font-family: var(--f-latin); font-style: italic; font-size: 20px; color: var(--paid); line-height: 1; }
+h1 { font-family: var(--f-display); font-size: clamp(26px, 4vw, 38px); line-height: 1.25; margin: 6px 0 4px; text-wrap: balance; letter-spacing: .02em; }
+.sub { color: var(--muted); margin: 0; font-size: 14px; }
+.filters { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { font: 500 13px var(--f-body); display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--paper); color: var(--ink); cursor: pointer; }
+.chip .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c); }
+.chip[aria-pressed="false"] { opacity: .45; }
+.chip:focus-visible, .spot:focus-visible, .close:focus-visible { outline: 2px solid var(--free); outline-offset: 2px; }
+.chip[hidden] { display: none; }
+.chip.dist { border-color: var(--ink); font-weight: 700; }
+.chip.dist[aria-pressed="false"] { opacity: 1; }
+.chip.dist[aria-pressed="true"] { background: var(--ink); color: var(--paper); opacity: 1; }
+.chip.dist svg { width: 14px; height: 14px; }
+.dist-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin: 0 0 10px; font-size: 13.5px; background: var(--paper); border: 1px solid var(--line); border-left: 3px solid var(--ink); padding: 8px 12px; border-radius: 4px; }
+.dist-bar p { margin: 0; flex: 1 1 320px; min-width: 0; }
+.seg { display: inline-flex; border: 1.5px solid var(--ink); border-radius: 999px; overflow: hidden; flex: none; }
+.seg-btn { font: 700 13px var(--f-body); padding: 5px 14px; background: var(--paper); color: var(--ink); border: 0; cursor: pointer; }
+.seg-btn[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+.seg-btn:focus-visible { outline: 2px solid var(--free); outline-offset: -3px; }
+.p2p-line { stroke: var(--paid); stroke-width: 4; stroke-dasharray: 2 8; stroke-linecap: round; fill: none; }
+.p2p-pill { fill: var(--paid); }
+.p2p-text { font: 700 26px var(--f-body); fill: var(--paper); font-variant-numeric: tabular-nums; }
+#map.dist .t-name { font-size: 26px; }
+#map.dist .t-more { display: none; }
+.edge line { stroke: var(--ink); stroke-opacity: .6; stroke-width: 3.5; stroke-dasharray: 2 7; stroke-linecap: round; }
+.edge .conn { stroke-width: 1.2; stroke-dasharray: none; stroke-opacity: .4; }
+.edge rect { fill: var(--paper); stroke: var(--line); stroke-width: 1.2; }
+.edge text { font: 500 19px var(--f-body); fill: var(--ink); font-variant-numeric: tabular-nums; }
+.edge.dim { opacity: .12; }
+.edge:not(.on) { display: none; }
+#map.dist .spot.picked .tab { stroke-width: 3.5; fill: var(--bg); }
+.chip.sup .dot { background: none; border: 2px dashed var(--c); width: 8px; height: 8px; }
+
+.mapbox { position: relative; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.mapbox svg { display: block; width: 100%; height: auto; }
+.zoom { display: none; position: absolute; right: 10px; bottom: 10px; flex-direction: column; gap: 6px; }
+.zoom button { width: 42px; height: 42px; border-radius: 8px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font: 500 22px/1 var(--f-body); box-shadow: 0 2px 8px var(--shadow); cursor: pointer; }
+.zoom button:focus-visible { outline: 2px solid var(--free); outline-offset: 2px; }
+.mobile-only { display: none; }
+@media (max-width: 1240px) {
+  .mapbox svg { touch-action: none; }
+  .zoom { display: flex; }
+  .mobile-only { display: inline; font-weight: 700; color: var(--ink); }
+}
+.hint { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px; font-size: 12.5px; color: var(--muted); margin-top: 8px; }
+
+.spot { cursor: pointer; }
+.spot .tab { fill: var(--paper); stroke: var(--c); stroke-width: 1.8; transition: fill .15s; }
+.spot:hover .tab, .spot.active .tab { fill: var(--bg); }
+.spot.active .tab { stroke-width: 3.5; }
+.spot .pin { fill: var(--c); stroke: var(--paper); stroke-width: 3; }
+.spot .leader { stroke: var(--c); stroke-width: 1.6; fill: none; }
+.spot .t-name { font: 700 28px var(--f-body); fill: var(--ink); }
+.spot .t-wed { font: 500 21px var(--f-body); fill: var(--ink); font-variant-numeric: tabular-nums; }
+.spot .t-time { font: 400 21px var(--f-body); fill: var(--muted); font-variant-numeric: tabular-nums; }
+.spot .t-price { font: 700 21px var(--f-body); fill: var(--c); font-variant-numeric: tabular-nums; }
+.spot.dim { opacity: .12; pointer-events: none; }
+.spot.gone { display: none; }
+.area polygon { fill: var(--c); fill-opacity: .13; stroke: var(--c); stroke-width: 3; stroke-dasharray: 12 8; stroke-linejoin: round; }
+.area.dim { opacity: .12; }
+
+.scrim { position: fixed; inset: 0; background: rgba(10,12,14,.35); z-index: 20; }
+.drawer { position: fixed; z-index: 21; background: var(--paper); color: var(--ink); box-shadow: 0 10px 40px var(--shadow);
+  top: 0; right: 0; bottom: 0; width: min(420px, 100%); overflow-y: auto; box-sizing: border-box; overscroll-behavior: contain;
+  padding: calc(22px + env(safe-area-inset-top, 0px)) max(24px, env(safe-area-inset-right, 0px)) calc(28px + env(safe-area-inset-bottom, 0px)) 24px; }
+@media (max-width: 640px) {
+  .drawer { top: auto; left: 0; width: 100%; max-height: 82vh; max-height: 82dvh; border-radius: 14px 14px 0 0;
+    padding: 20px max(18px, env(safe-area-inset-right, 0px)) calc(28px + env(safe-area-inset-bottom, 0px)) max(18px, env(safe-area-inset-left, 0px)); }
+}
+.d-top { display: flex; justify-content: space-between; align-items: start; gap: 12px; }
+.cat { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .08em; color: var(--c); border: 1px solid var(--c); padding: 2px 9px; border-radius: 999px; }
+.close { flex: none; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font-size: 20px; line-height: 1; cursor: pointer; }
+.drawer h3 { font-family: var(--f-display); font-size: 26px; line-height: 1.3; margin: 12px 0 0; text-wrap: balance; }
+.latin { font-family: var(--f-latin); font-style: italic; font-size: 19px; color: var(--muted); margin: 2px 0 18px; }
+.stars { margin: -8px 0 16px; color: var(--paid); font-size: 17px; letter-spacing: .12em; display: flex; align-items: center; gap: 10px; }
+.stars span { font-size: 12px; font-weight: 700; letter-spacing: .1em; color: var(--muted); }
+.stars i { font-style: normal; color: var(--line); }
+.warn { background: var(--warn-bg); color: var(--warn-fg); font-weight: 500; font-size: 14px; padding: 9px 12px; border-radius: 4px; margin-bottom: 16px; }
+dl { margin: 0; display: grid; gap: 14px; }
+dt { font-size: 12px; font-weight: 700; letter-spacing: .1em; color: var(--muted); }
+dd { margin: 2px 0 0; font-variant-numeric: tabular-nums; }
+dd ul { margin: 0; padding-left: 1.1em; }
+.site { color: var(--free); font-weight: 500; text-underline-offset: 3px; word-break: break-all; }
+@media (prefers-reduced-motion: no-preference) {
+  .drawer:not([hidden]) { animation: slide .22s ease-out; }
+  @keyframes slide { from { transform: translateX(24px); opacity: 0; } }
+  @media (max-width: 640px) { @keyframes slide { from { transform: translateY(30px); opacity: 0; } } }
+}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow">Roma · Lazio</div>
+      <h1>羅馬景點地圖</h1>
+      <p class="sub">2027/1/26（二）– 2/3（三）｜點地圖上的景點，查看完整介紹</p>
+    </div>
+    <div class="filters" role="group" aria-label="篩選類別">
+      <button class="chip" data-cat="paid" aria-pressed="true" style="--c:var(--paid)"><span class="dot"></span>需購票景點</button>
+      <button class="chip" data-cat="free" aria-pressed="true" style="--c:var(--free)"><span class="dot"></span>免費景點</button>
+      <button class="chip" data-cat="open" aria-pressed="true" style="--c:var(--open)"><span class="dot"></span>全天開放</button>
+      <button class="chip dist" id="f-dist" aria-pressed="false"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="13" r="2" fill="currentColor"/><circle cx="13" cy="3" r="2" fill="currentColor"/><path d="M4.5 11.5 L11.5 4.5" stroke="currentColor" stroke-width="1.6" stroke-dasharray="1.5 2.5" stroke-linecap="round"/></svg>只看名稱與距離</button>
+      <button class="chip sup" id="f-sup" hidden aria-pressed="false" style="--c:var(--muted)"><span class="dot"></span>補充景點</button>
+    </div>
+  </header>
+
+  <div class="dist-bar" id="dist-note" hidden><div class="seg" role="group" aria-label="距離顯示方式"><button class="seg-btn" data-sub="p2p" aria-pressed="true">點到點</button><button class="seg-btn" data-sub="all" aria-pressed="false">全部顯示</button></div><p id="dist-text">先點起點，會顯示它到相鄰景點的距離；再點終點，就畫出兩點之間的距離與步行時間。點空白處重新選。步行距離以直線距離 ×1.3 估算，步速每分鐘 80 公尺；實際路線請以 Google 地圖導航為準。</p></div>
+  <div class="mapbox">
+    <svg id="map" viewBox="-99 67 2466 2244" role="img" aria-label="羅馬市中心景點分布圖">
+      <defs>
+        <pattern id="hatch" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <line x1="0" y1="0" x2="0" y2="14" stroke="var(--line)" stroke-width="1" opacity=".5"/>
+        </pattern>
+      </defs>
+      <rect x="-99" y="67" width="2466" height="2244" fill="var(--paper)"/>
+      <g id="base"></g>
+      <g id="edges" hidden></g>
+      <g id="spots"></g>
+    </svg>
+    <div class="zoom">
+      <button id="z-in" aria-label="放大">+</button>
+      <button id="z-out" aria-label="縮小">−</button>
+      <button id="z-reset" aria-label="顯示整張地圖">⤢</button>
+    </div>
+  </div>
+  <div class="hint">
+    <span class="mobile-only">雙指縮放、單指拖曳，點景點看介紹</span>
+    <span>景點依 Google 地圖座標標示；台伯河、公園與街道為簡化示意</span>
+    <span>營業時間為旅程期間（1–2 月冬季）的時間；營業時間與票價出發前請再到官網確認</span>
+  </div>
+</div>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" hidden role="dialog" aria-modal="true" aria-labelledby="d-name"></aside>
+
+<script>
+const CAT = {
+  paid: { label: "需購票／有營業時限", color: "var(--paid)" },
+  free: { label: "免費景點", color: "var(--free)" },
+  open: { label: "全天開放", color: "var(--open)" },
+  base: { label: "住宿與交通", color: "var(--ink)" }
+};
+const SPOTS = [
+{
+"id": "vaticani",
+"cat": "paid",
+"x": 231.3,
+"y": 706.7,
+"lx": 49.2,
+"ly": 547.5,
+"slx": 131.5,
+"sly": 648.0,
+"name": "梵蒂岡博物館",
+"latin": "Musei Vaticani",
+"feature": "歷代教宗累積五百年的收藏，展線長達數公里，從古希臘羅馬雕刻、拉斐爾房間一路走到西斯汀小堂。",
+"sHours": "週一至六 08:00–20:00（週日休）",
+"sTime": "08:00 開門第一批",
+"sPrice": "€20（官網預約 +€5）",
+"warn": "一定要提早預約門票，熱門時段要搶早鳥票。週日休館；1/31 是 1 月最後一個週日，09:00–14:00 免費開放（最後入場 12:30），需預約且人潮極多",
+"tips": [
+"人潮：週一、週六人多，週二、週四人少。",
+"皮奧–克萊孟博物館：《勞孔群像》《望景樓的阿波羅》等古典雕刻名作。",
+"地圖畫廊：一百多公尺長廊，金色拱頂下是 16 世紀繪製的義大利各地地圖壁畫。",
+"拉斐爾房間：《雅典學院》就在這裡。",
+"西斯汀小堂包含在同一張門票內，天頂的《創世紀》和《最後的審判》是重頭戲。"
+],
+"when": "平日 08:00 第一批入場，先跟著指標直奔西斯汀小堂，再回頭慢慢看；或下午 14:00 後團客較少。",
+"stay": "約 3～4 小時",
+"hours": [
+"週一至週六 08:00–20:00（最後入場 18:00）",
+"週日休館",
+"每月最後一個週日 09:00–14:00 免費開放（最後入場 12:30），旅程中為 1/31",
+"天主教節日另有閉館，出發前請查官網 2027 年開閉館行事曆"
+],
+"price": "全票 €20；官網預約「Salta la fila」另加 €5（共 €25）。門票實名，入場會核對證件。",
+"site": [
+"museivaticani.va",
+"https://www.museivaticani.va/content/museivaticani/it/organizza-visita/tariffe-e-biglietti.html"
+],
+"stars": 5,
+"fromHotel": "步行約 30 分鐘（約 2～2.4 公里），或搭公車約 15 分鐘",
+"pass": [
+"梵蒂岡博物館各館",
+"西斯汀小堂"
+]
+},
+{
+"id": "sistina",
+"cat": "paid",
+"x": 263.0,
+"y": 885.2,
+"lx": 112.3,
+"ly": 726.0,
+"slx": 260.5,
+"sly": 906.2,
+"name": "西斯汀小堂",
+"latin": "Cappella Sistina",
+"feature": "教宗選舉（Conclave）舉行的地方。米開朗基羅的天頂畫《創世紀》與祭壇牆《最後的審判》都在這裡。",
+"sHours": "同梵蒂岡博物館（週日休）",
+"sTime": "入館後先直奔",
+"sPrice": "博物館門票含",
+"warn": "小堂內禁止拍照、需保持安靜",
+"tips": [
+"天頂畫九幅故事從祭壇端開始依序是創世到諾亞，《創造亞當》在中段。",
+"《最後的審判》右下角的地獄判官米諾斯，是以批評裸體畫的教廷司儀為原型。",
+"進門後先找中央空區站定再抬頭看，比貼牆邊走更看得清楚。"
+],
+"when": "早上開門後第一個抵達，人最少、最安靜。",
+"stay": "約 20～30 分鐘",
+"hours": [
+"隨梵蒂岡博物館開放：週一至週六 08:00–20:00（最後入場 18:00）",
+"週日休館（1/31 免費日除外）"
+],
+"price": "包含在梵蒂岡博物館門票內，不單獨售票（票價見梵蒂岡博物館）。",
+"stars": 5,
+"fromHotel": "同梵蒂岡博物館，步行約 30 分鐘"
+},
+{
+"id": "borghese",
+"cat": "paid",
+"x": 1681.4,
+"y": 317.2,
+"lx": 1560.4,
+"ly": 336.4,
+"slx": 1568.6,
+"sly": 258.5,
+"name": "博爾蓋塞美術館",
+"latin": "Galleria Borghese",
+"feature": "如果你喜歡巴洛克雕刻，這裡就是天堂。17 世紀樞機主教西皮奧內·博爾蓋塞的私人收藏館，每天嚴格限制進場人數，逛起來安靜、有品質。",
+"sHours": "09:00–19:00（週一休）",
+"sTime": "09:00 或 15:00 場次",
+"sPrice": "€13（+€2 預約費）",
+"warn": "必須提早 1～2 個月在官網預約門票，每場限 2 小時、現場不賣票；週一休館；大包包須寄物",
+"tips": [
+"貝尼尼《阿波羅與達芙妮》：大理石雕出皮膚變成樹皮、手指長出樹葉的半透明質感，精緻到讓人屏息。",
+"貝尼尼《普路同劫持普洛塞庇娜》：手指壓進大腿的肉感是必看細節。",
+"卡拉瓦喬多幅作品，例如《拿果籃的少年》《大衛與歌利亞頭顱》。",
+"位在鮑格才別墅公園內，環境非常清幽。"
+],
+"when": "09:00 第一場人最少；看完往西穿過公園林蔭道，走到 Pincio 平台看人民廣場。",
+"stay": "一場 2 小時（時間到須離場）",
+"hours": [
+"週二至週日 09:00–19:00（最後入場 17:00）",
+"週四可能延長至 21:00",
+"週一休館",
+"每小時一個入場時段，每場 2 小時"
+],
+"price": "全票 €13＋預約費 €2；TicketOne 等售票平台標示 €18（含手續費）。18–25 歲歐盟公民有優惠。",
+"stars": 5,
+"fromHotel": "約 2.4 公里，可穿過鮑格才別墅公園步行約 30 分鐘，或搭公車"
+},
+{
+"id": "castello",
+"cat": "paid",
+"x": 707.1,
+"y": 879.4,
+"lx": 563.6,
+"ly": 720.2,
+"slx": 721.3,
+"sly": 845.4,
+"name": "聖天使城堡",
+"latin": "Castel Sant'Angelo",
+"feature": "原本是 2 世紀哈德良皇帝的陵墓，後來改成教宗的堡壘、避難所與監獄，頂端立著大天使米迦勒銅像。",
+"sHours": "09:00–19:30（週一休）",
+"sTime": "15:00–17:15 看夕陽",
+"sPrice": "€18",
+"tips": [
+"城堡前的聖天使橋，兩側立著由貝尼尼設計、守護橋面的天使雕像。",
+"頂層天使露台可俯瞰台伯河與梵蒂岡，是看夕陽的絕佳位置。",
+"教宗寓所保留文藝復興壁畫，還有通往梵蒂岡的祕密通道 Passetto（另需預約導覽）。"
+],
+"when": "下午 15:00 入場，最後在頂層等日落（1 月底羅馬日落約 17:15）。",
+"stay": "約 1.5～2 小時",
+"hours": [
+"週二至週日 09:00–19:30（最後售票 18:30）",
+"週一休館"
+],
+"price": "全票 €18（網路預約可能另收預約費）；18–25 歲歐盟公民 €2。",
+"stars": 4,
+"fromHotel": "步行約 15–18 分鐘（約 1.3 公里）"
+},
+{
+"id": "colosseo",
+"cat": "paid",
+"x": 1684.7,
+"y": 1527.6,
+"lx": 1728.8,
+"ly": 1413.6,
+"slx": 1698.9,
+"sly": 1517.6,
+"name": "羅馬競技場",
+"latin": "Colosseo / Anfiteatro Flavio",
+"feature": "西元 80 年落成的弗拉維圓形劇場，可容納約五萬名觀眾，是古羅馬最具代表性的建築。",
+"sHours": "08:30–16:30（冬季）",
+"sTime": "08:30 開門第一場",
+"sPrice": "聯票 €18",
+"warn": "必須提早約一個月在官網搶票，現場排隊非常久。冬季 16:30 關門、15:30 最後入場；須實名預約入場時段，標準票館內最多停留 75 分鐘",
+"tips": [
+"親眼看見歷史課本上的鬥獸場；建議買聯票，競技場、隔壁的古羅馬廣場、帕拉丁山一起逛。",
+"標準 24h 票可上一、二層看全景。",
+"Full Experience 票可加看地下層與競技場地板（或頂層），名額少要早訂。",
+"看完從北側入口走進古羅馬廣場，避開競技場旁人最多的入口。"
+],
+"when": "08:30 第一場入場，接著走古羅馬廣場、帕拉丁山，整個上午到下午初一次走完。",
+"stay": "約 1～1.5 小時",
+"hours": [
+"冬季（10 月底至 3 月底）08:30–16:30，最後入場 15:30",
+"古羅馬廣場–帕拉丁山 09:00 開放"
+],
+"price": "24h 票 €18（含預約費）：競技場一次＋古羅馬廣場／帕拉丁山一次，24 小時內使用。Full Experience 票 €24（地下層＋競技場地板，或頂層），兩天內使用。",
+"site": [
+"colosseo.it",
+"https://colosseo.it/en/visita/orari-e-biglietti/"
+],
+"stars": 5,
+"fromHotel": "步行約 20–25 分鐘（約 2 公里，途經威尼斯廣場），或搭地鐵 B 線到 Colosseo 站",
+"pass": [
+"羅馬競技場（一、二層）",
+"古羅馬廣場",
+"帕拉丁山"
+]
+},
+{
+"id": "foro",
+"cat": "paid",
+"x": 1466.5,
+"y": 1432.7,
+"lx": 1216.7,
+"ly": 1398.9,
+"slx": 1480.7,
+"sly": 1422.7,
+"name": "古羅馬廣場",
+"latin": "Foro Romano",
+"feature": "古羅馬共和與帝國時期的政治、宗教與商業中心，神廟、凱旋門、元老院遺跡集中在一條聖道兩側。",
+"sHours": "09:00–16:30（冬季）",
+"sTime": "10:00–12:30",
+"sPrice": "聯票含",
+"warn": "冬季 16:30 關門、15:30 最後入場",
+"tips": [
+"凱撒神廟：凱撒遇刺後遺體在此火化，至今常有人獻花。",
+"提圖斯凱旋門與塞維魯凱旋門分別在聖道兩端。",
+"元老院議事堂 Curia Iulia 屋頂完整，可入內參觀。"
+],
+"when": "上午看完競技場後接著走，10:00～12:30 光線好。",
+"stay": "約 1.5～2 小時",
+"hours": [
+"冬季 09:00–16:30（最後入場 15:30）"
+],
+"price": "包含在羅馬競技場聯票內（票價見羅馬競技場）。",
+"site": [
+"colosseo.it",
+"https://colosseo.it/en/visita/orari-e-biglietti/"
+],
+"stars": 5,
+"fromHotel": "直線約 1.2 公里，步行約 20 分鐘"
+},
+{
+"id": "palatino",
+"cat": "paid",
+"x": 1508.3,
+"y": 1606.0,
+"lx": 1529.0,
+"ly": 1572.2,
+"slx": 1364.8,
+"sly": 1551.1,
+"name": "帕拉丁山",
+"latin": "Palatino",
+"feature": "傳說中羅慕路斯建城的地方，後來成為歷代皇帝興建宮殿的高級住宅區，英文 palace 一字就源自這裡。",
+"sHours": "09:00–16:30（冬季）",
+"sTime": "13:00–15:30",
+"sPrice": "聯票含",
+"warn": "冬季 16:30 關門、15:30 最後入場",
+"tips": [
+"法爾內塞花園觀景台可以從上方俯瞰整片古羅馬廣場。",
+"南側邊緣看得到馬克西穆斯競技場的長形跑道。",
+"奧古斯都之家週一不開、利維亞之家週二不開。"
+],
+"when": "午後 13:00～15:30，陽光斜照時從山上看廣場最立體。",
+"stay": "約 1～1.5 小時",
+"hours": [
+"冬季 09:00–16:30（最後入場 15:30）"
+],
+"price": "包含在羅馬競技場聯票內（票價見羅馬競技場）。",
+"site": [
+"colosseo.it",
+"https://colosseo.it/en/visita/orari-e-biglietti/"
+],
+"stars": 5,
+"fromHotel": "直線約 1.6 公里，步行約 25 分鐘"
+},
+{
+"id": "pantheon",
+"cat": "paid",
+"x": 1106.2,
+"y": 1103.9,
+"lx": 986.2,
+"ly": 1123.1,
+"slx": 1120.9,
+"sly": 1099.5,
+"name": "萬神殿",
+"latin": "Pantheon / Santa Maria ad Martyres",
+"feature": "保存最完整的古羅馬建築，西元 2 世紀哈德良時期重建。高 43 公尺的圓頂至今仍是世界最大的無鋼筋混凝土穹頂。",
+"sHours": "09:00–19:00（每日）",
+"sTime": "11:30–13:00 看光柱",
+"sPrice": "€7",
+"warn": "週末假日必須提前上網預約；平日可現場排隊，刷卡或付現都可以。彌撒時間只開放給信眾",
+"tips": [
+"陽光從圓頂正中央的圓孔（Oculus）灑下來，晴天中午光柱會在牆上緩慢移動，光影非常神聖。",
+"文藝復興畫家拉斐爾長眠於此。",
+"下雨時雨水直接落下，看得到地板的排水孔。"
+],
+"when": "晴天 11:30～13:00 光柱最清楚；想避開人潮就 09:00 開門入場。",
+"stay": "約 30 分鐘",
+"hours": [
+"每日 09:00–19:00（最後入場約 18:30～18:45，各來源略有不同）"
+],
+"price": "全票 €7（2026/7/1 起由 €5 調漲）；18–25 歲歐盟公民 €2；未滿 18 歲免費。平日可現場買票，週末假日須網路預約。",
+"stars": 5,
+"fromHotel": "無敵近！步行約 4 分鐘（約 350 公尺），再往南走就是鮮花廣場"
+},
+{
+"id": "trevi",
+"cat": "paid",
+"x": 1348.8,
+"y": 986.8,
+"lx": 1143.6,
+"ly": 827.6,
+"slx": 1363.0,
+"sly": 976.8,
+"name": "特雷維噴泉",
+"latin": "Fontana di Trevi",
+"feature": "1762 年完成的巴洛克噴泉，以宮殿立面為背景，海神與海馬雕像是羅馬最有名的畫面。",
+"sHours": "收費 09:00–22:00（一、五 11:30 起）",
+"sTime": "07:00–08:00／23:00 後",
+"sPrice": "€2（收費時段）",
+"tips": [
+"傳說背對噴泉、右手拿硬幣從左肩往後丟，就能保佑你重返羅馬。",
+"收費只限走下階梯、靠近水池的區域，外圍廣場隨時免費看。",
+"白天人潮像跨年現場，離飯店這麼近，一定要挑清晨或深夜去。"
+],
+"when": "清晨 07:00～08:00 或深夜 23:00 後散步過去，沒有人潮、還能看到波光粼粼的靜謐許願池；這兩個時段也不用付 €2。",
+"stay": "約 15～20 分鐘",
+"hours": [
+"收費時段：週二、三、四、六、日 09:00–22:00",
+"週一、週五 11:30–22:00（上午清潔）",
+"最後入場 21:00；收費時段以外可免費進入"
+],
+"price": "進入水池區 €2（羅馬居民、幼童免費）。可現場刷卡或上網購票。",
+"stars": 5,
+"fromHotel": "極近！步行約 6 分鐘（約 550 公尺）"
+},
+{
+"id": "colonna",
+"cat": "paid",
+"x": 1402.5,
+"y": 1156.7,
+"lx": 1481.6,
+"ly": 1190.0,
+"slx": 1253.5,
+"sly": 1099.5,
+"name": "科隆納宮",
+"latin": "Galleria Colonna / Palazzo Colonna",
+"feature": "電影《羅馬假期》最後赫本公主接見記者、宣告「羅馬最讓我難忘」的那間無比奢華的巴洛克大廳，就是科隆納宮的畫廊。金碧輝煌的程度完全不輸凡爾賽宮，還收藏大量文藝復興時期的珍貴畫作。",
+"sHours": "週六 09:15–13:15（週五僅導覽）",
+"sTime": "1/30（六）上午",
+"sPrice": "€15–25",
+"warn": "它非常傲嬌，一週只在週六上午 09:15–13:15（最後入場）對大眾開放；週五上午僅限預約的團體官方導覽。旅程中只有 1/30（六）能去，一定要把握",
+"tips": [
+"電影《羅馬假期》結尾的記者會就在大廳拍攝。",
+"大廳台階上至今卡著一顆 1849 年羅馬共和保衛戰的砲彈。",
+"卡拉契《吃豆子的人》是館藏代表作。"
+],
+"when": "1/30 週六 09:30 左右入場，看完走 5 分鐘到特雷維噴泉。",
+"stay": "約 1～1.5 小時",
+"hours": [
+"週六 09:15–13:15（最後入場）",
+"週五只開放預約制導覽",
+"其他日子不開放"
+],
+"price": "一般門票約 €15～€25 不等（依參觀路線，是否含伊莎貝爾公主公寓）。非官網資料，以官網為準。",
+"stars": 4,
+"fromHotel": "約 950 公尺，靠近威尼斯廣場，步行約 12 分鐘"
+},
+{
+"id": "traiano",
+"cat": "paid",
+"x": 1459.3,
+"y": 1253.7,
+"lx": 1484.8,
+"ly": 1366.2,
+"slx": 1473.5,
+"sly": 1243.7,
+"name": "圖拉真市集",
+"latin": "Mercati di Traiano – Museo dei Fori Imperiali",
+"feature": "2 世紀圖拉真皇帝興建的半圓形多層商業建築群，常被稱為世界第一座購物中心，現在是帝國廣場博物館。",
+"sHours": "09:30–19:30（每日）",
+"sTime": "10:00–12:00",
+"sPrice": "約 €13",
+"tips": [
+"爬到頂層可以俯瞰圖拉真廣場、紀功柱和威尼斯廣場的紀念堂。",
+"館內保留古羅馬街道 Via Biberatica 與一間間店鋪。"
+],
+"when": "上午 10:00～12:00 順光，可接著從威尼斯廣場往古羅馬廣場走。",
+"stay": "約 1 小時",
+"hours": [
+"每日 09:30–19:30"
+],
+"price": "非羅馬居民全票約 €13，特展期間會加價。第三方彙整資料，以官網為準。",
+"fromHotel": "直線約 910 公尺，步行約 15 分鐘"
+},
+{
+"id": "massimo",
+"cat": "paid",
+"x": 1922.5,
+"y": 959.7,
+"lx": 1785.7,
+"ly": 800.5,
+"slx": 1729.0,
+"sly": 900.2,
+"name": "羅馬國家博物館",
+"latin": "Museo Nazionale Romano – Palazzo Massimo",
+"feature": "羅馬國家博物館最重要的分館馬西莫宮，就在特米尼車站正對面，收藏古羅馬雕刻、壁畫與馬賽克。",
+"sHours": "09:00–19:00（週一休）",
+"sTime": "抵達日下午",
+"sPrice": "四館聯票約 €15",
+"tips": [
+"青銅像《休息中的拳擊手》，臉上的傷痕與腫脹耳朵非常寫實。",
+"利維亞別墅的花園壁畫整間搬進館內，四面牆都是果樹與小鳥。",
+"地下樓層的錢幣館收藏歷代羅馬錢幣。"
+],
+"when": "1/26（二）抵達放好行李後的下午，或最後一天往車站前順路。",
+"stay": "約 1.5～2 小時",
+"hours": [
+"週二至週日 09:00–19:00（最後入場 18:00）",
+"週一休館"
+],
+"price": "羅馬國家博物館聯票（馬西莫宮、戴克里先浴場、阿爾坦普斯宮）一週內各館入場一次，全票約 €15。各來源票價不一，以官網為準。",
+"fromHotel": "直線約 1.7 公里，步行約 30 分鐘"
+},
+{
+"id": "popolochurch",
+"cat": "free",
+"x": 1082.5,
+"y": 455.7,
+"lx": 928.2,
+"ly": 296.5,
+"slx": 928.4,
+"sly": 396.7,
+"name": "人民聖母教堂",
+"latin": "Basilica di Santa Maria del Popolo",
+"feature": "人民廣場北側的文藝復興教堂，一間教堂裡就有卡拉瓦喬、拉斐爾、貝尼尼三位大師的作品。",
+"sHours": "08:30–12:00、16:00–18:00",
+"sTime": "10:30–12:00",
+"sPrice": "免費",
+"warn": "12:00–16:00 午休關門；09:45–10:30 彌撒時段不開放參觀；週日只開 16:30–18:00",
+"tips": [
+"切拉西禮拜堂：卡拉瓦喬《聖保羅皈依》《聖彼得被釘十字架》面對面掛著。",
+"基吉禮拜堂由拉斐爾設計，貝尼尼雕像也在這裡，是電影《天使與魔鬼》的場景。",
+"禮拜堂燈光要投幣才會亮，備幾枚 €1 硬幣。"
+],
+"when": "上午 10:30～12:00（避開彌撒），看完上 Pincio 平台。",
+"stay": "約 20～30 分鐘",
+"hours": [
+"週一至週六 08:30–09:45、10:30–12:00、16:00–18:00",
+"週日 16:30–18:00",
+"以上為 Google 地圖資料，非官方"
+],
+"price": "免費入場。",
+"fromHotel": "直線約 1.2 公里，步行約 20 分鐘"
+},
+{
+"id": "luigi",
+"cat": "free",
+"x": 1025.9,
+"y": 1053.5,
+"lx": 841.9,
+"ly": 829.0,
+"slx": 1018.9,
+"sly": 1152.7,
+"name": "聖王路易堂",
+"latin": "San Luigi dei Francesi",
+"feature": "一座低調但內藏無價之寶的教堂。法國在羅馬的國家教堂，左側最後一間孔塔雷利禮拜堂（Contarelli Chapel）珍藏卡拉瓦喬的三幅傳世巨作。",
+"sHours": "09:30–12:45、14:30–18:45",
+"sTime": "10:00–12:00",
+"sPrice": "免費",
+"warn": "每天約 12:45–14:30 午休關門；週六上午到 12:15，週日上午 11:30 才開。全年無休館日",
+"tips": [
+"卡拉瓦喬聖馬太三部曲：《聖馬太蒙召》《聖馬太與天使》《聖馬太殉教》。",
+"投一枚 €1 硬幣，禮拜堂燈光就會亮起，強烈的明暗對比（Chiaroscuro）戲劇張力會在眼前炸開。"
+],
+"when": "上午 10:00～12:00，可和萬神殿、納沃納廣場排在同一段散步。",
+"stay": "約 20～30 分鐘",
+"hours": [
+"週一至週五 09:30–12:45、14:30–18:45",
+"週六 09:30–12:15、14:30–18:45",
+"週日 11:30–12:45、14:30–18:45",
+"無休館日，每日約 12:45–14:30 午休"
+],
+"price": "免費入場。",
+"stars": 4,
+"fromHotel": "步行只要約 6 分鐘，就在萬神殿附近，隨時可以散步過去"
+},
+{
+"id": "maggiore",
+"cat": "free",
+"x": 1917.3,
+"y": 1155.0,
+"lx": 1938.0,
+"ly": 1121.2,
+"slx": 1917.4,
+"sly": 1170.0,
+"name": "聖母大殿",
+"latin": "Basilica Papale di Santa Maria Maggiore",
+"feature": "羅馬四座特級宗座聖殿之一，保存 5 世紀的馬賽克，融合早期基督教、羅曼式到巴洛克各時代的裝飾。",
+"sHours": "07:00–18:30（每日）",
+"sTime": "08:00–10:00",
+"sPrice": "免費",
+"warn": "入口有安檢；肩膀與膝蓋需遮住",
+"tips": [
+"中殿兩側與凱旋拱門上的 5 世紀馬賽克，是羅馬最古老的一批。",
+"金色格子天花板，傳說用了哥倫布從美洲帶回的第一批黃金。",
+"教宗方濟各長眠於此。"
+],
+"when": "早上 08:00～10:00 人少；離特米尼車站很近，可和國家博物館排同一天。",
+"stay": "約 30～45 分鐘",
+"hours": [
+"每日 07:00–18:30（Google 地圖資料，非官方）"
+],
+"price": "免費入場。",
+"fromHotel": "直線約 1.7 公里，步行約 30 分鐘"
+},
+{
+"id": "bocca",
+"cat": "free",
+"x": 1285.5,
+"y": 1635.2,
+"lx": 1157.4,
+"ly": 1654.4,
+"slx": 1231.3,
+"sly": 1649.9,
+"name": "真理之口",
+"latin": "Bocca della Verità – Santa Maria in Cosmedin",
+"feature": "科斯梅丁聖母教堂門廊下的大理石面具，傳說說謊的人把手伸進去會被咬斷，因電影《羅馬假期》而聞名。",
+"sHours": "09:30–18:00",
+"sTime": "09:30 開門／16:30 後",
+"sPrice": "免費（自由捐獻）",
+"tips": [
+"拍照要排隊，每組時間很短，開門或傍晚前隊伍最短。",
+"不想排隊可以直接從正門進教堂，裡面有聖瓦倫丁的頭骨聖髑。"
+],
+"when": "09:30 開門或 16:30 後；可接在帕拉丁山之後順路走過來。",
+"stay": "約 15～20 分鐘",
+"hours": [
+"每日 09:30–18:00（Google 地圖資料，非官方；冬季可能提早關門）"
+],
+"price": "免費，歡迎自由捐獻。",
+"fromHotel": "直線約 1.5 公里，步行約 25 分鐘"
+},
+{
+"id": "villaborghese",
+"cat": "open",
+"x": 1426.7,
+"y": 333.9,
+"lx": 1323.5,
+"ly": 352.4,
+"slx": 1259.6,
+"sly": 274.9,
+"name": "鮑格才別墅公園",
+"latin": "Villa Borghese",
+"feature": "羅馬市中心最大的公園，博爾蓋塞美術館、Pincio 平台都在園內。",
+"sPrice": "免費",
+"tips": [
+"可租雙人協力車或在小湖划船。",
+"從美術館往西走，一路下坡到 Pincio 平台。"
+],
+"when": "參觀博爾蓋塞美術館前後散步。",
+"stay": "約 1 小時",
+"hours": [
+"公園白天開放",
+"天黑後不建議逗留"
+],
+"price": "免費。",
+"fromHotel": "直線約 1.6 公里，步行約 25 分鐘"
+},
+{
+"id": "pincio",
+"cat": "open",
+"x": 1146.4,
+"y": 473.0,
+"lx": 1165.5,
+"ly": 460.5,
+"slx": 1183.3,
+"sly": 482.6,
+"name": "Pincio 平台",
+"latin": "Terrazza del Pincio",
+"feature": "鮑格才別墅公園西南角的觀景台，正下方是人民廣場，遠方可以看到聖彼得大教堂圓頂。",
+"sPrice": "免費",
+"tips": [
+"日落時常有街頭音樂家演奏。",
+"從人民廣場東側階梯上來約 5 分鐘。"
+],
+"when": "16:30～17:15 看日落（1 月底日落約 17:15）。",
+"stay": "約 20～30 分鐘",
+"hours": [
+"全天開放"
+],
+"price": "免費。",
+"fromHotel": "直線約 1.1 公里，步行約 20 分鐘"
+},
+{
+"id": "popolo",
+"cat": "open",
+"x": 1081.3,
+"y": 478.3,
+"lx": 1004.5,
+"ly": 496.8,
+"slx": 1171.2,
+"sly": 338.2,
+"name": "人民廣場",
+"latin": "Piazza del Popolo",
+"feature": "古羅馬北方入城口，廣場中央立著埃及方尖碑，南側一對幾乎一樣的雙子教堂夾著科爾索大道。",
+"sPrice": "免費",
+"tips": [
+"從這裡沿科爾索大道一路往南就是購物主街。",
+"北側城門 Porta del Popolo 外側是 16 世紀立面。"
+],
+"when": "上午搭配人民聖母教堂，或傍晚從 Pincio 下來。",
+"stay": "約 15 分鐘",
+"hours": [
+"全天開放"
+],
+"price": "免費。",
+"fromHotel": "直線約 1.1 公里，步行約 20 分鐘"
+},
+{
+"id": "spagna",
+"cat": "open",
+"x": 1311.7,
+"y": 746.5,
+"lx": 1330.3,
+"ly": 663.4,
+"slx": 1325.9,
+"sly": 736.5,
+"name": "西班牙階梯",
+"latin": "Scalinata di Trinità dei Monti",
+"feature": "因電影《羅馬假期》奧黛麗·赫本而聞名全球的 135 級巴洛克階梯，連接西班牙廣場與山上的聖三一教堂，感受羅馬的時尚與浪漫。",
+"sPrice": "免費",
+"tips": [
+"現在禁止坐在階梯上、也不能在上面吃東西，會被開罰。",
+"階梯前方是著名的破船噴泉（Barcaccia）。",
+"正對面的康多提大道（Via dei Condotti）精品店林立。"
+],
+"when": "清晨 08:00 前拍空景；或傍晚逛街時經過。",
+"stay": "約 20 分鐘",
+"hours": [
+"全天開放"
+],
+"price": "免費。",
+"stars": 4,
+"fromHotel": "步行約 10 分鐘（約 800 公尺）"
+},
+{
+"id": "navona",
+"cat": "open",
+"x": 963.2,
+"y": 1076.0,
+"lx": 778.6,
+"ly": 992.9,
+"slx": 795.0,
+"sly": 1066.0,
+"name": "納沃納廣場",
+"latin": "Piazza Navona",
+"feature": "巴洛克時期最美的廣場，沿著古羅馬圖密善競技場的長橢圓形狀建成，周圍滿是街頭藝人、畫家和露天咖啡座，歷史與生活感完美融合。",
+"sPrice": "免費",
+"tips": [
+"中央是貝尼尼的四河噴泉，對面是博羅米尼設計的聖依搦斯堂。",
+"廣場上的餐廳偏貴，往周邊小巷走價格比較親切。"
+],
+"when": "傍晚到夜間點燈後最有氣氛；早上 08:00 前拍空景。",
+"stay": "約 20～30 分鐘",
+"hours": [
+"全天開放"
+],
+"price": "免費。",
+"stars": 4,
+"fromHotel": "步行約 7 分鐘（約 600 公尺）"
+},
+{
+"id": "campo",
+"cat": "open",
+"x": 929.3,
+"y": 1255.5,
+"lx": 868.1,
+"ly": 1274.0,
+"slx": 929.4,
+"sly": 1270.5,
+"name": "鮮花廣場",
+"latin": "Campo de' Fiori",
+"feature": "羅馬少數沒有教堂的廣場，白天是市場，晚上變成熱鬧的餐酒館區。",
+"sPrice": "免費",
+"tips": [
+"早市約 07:00～14:00（週日沒有），有蔬果、香料、乾燥義大利麵。",
+"中央是哲學家布魯諾的雕像，他在 1600 年於此被處以火刑。"
+],
+"when": "上午逛市場，或晚上來吃晚餐。",
+"stay": "約 30 分鐘",
+"hours": [
+"全天開放",
+"市場週一至週六上午"
+],
+"price": "免費。",
+"fromHotel": "直線約 760 公尺，步行約 10 分鐘"
+},
+{
+"id": "venezia",
+"cat": "open",
+"x": 1321.0,
+"y": 1247.4,
+"lx": 1273.0,
+"ly": 1267.0,
+"slx": 1152.8,
+"sly": 1237.4,
+"name": "威尼斯廣場",
+"latin": "Piazza Venezia",
+"feature": "羅馬的交通中心，正面是白色大理石的維克多·艾曼紐二世紀念堂，當地人戲稱「結婚蛋糕」。",
+"sPrice": "免費",
+"tips": [
+"紀念堂可免費登上前段平台；頂樓觀景電梯需另外購票。",
+"旁邊就是卡比托利歐山與圖拉真市集。"
+],
+"when": "往返古羅馬廣場時順路經過。",
+"stay": "約 15～30 分鐘",
+"hours": [
+"廣場全天開放"
+],
+"price": "廣場免費。",
+"fromHotel": "直線約 690 公尺，步行約 10 分鐘"
+},
+{
+"id": "gianicolo",
+"cat": "open",
+"x": 508.6,
+"y": 1467.5,
+"lx": 433.4,
+"ly": 1486.0,
+"slx": 340.4,
+"sly": 1457.5,
+"name": "賈尼科洛山",
+"latin": "Passeggiata del Gianicolo",
+"feature": "羅馬當地的「約會聖地」，也是俯瞰羅馬全景、看落日與點燈最完美的高度。坐在這裡吹風看夕陽，是羅馬最浪漫的時刻。",
+"sPrice": "免費",
+"tips": [
+"山上的巨型噴泉 Fontanone（Fontana dell'Acqua Paola）比許願池安靜、開闊，前面就是觀景台。",
+"每天中午 12:00 會鳴放一響禮炮。",
+"可從聖天使城堡沿台伯河畔散步過來。"
+],
+"when": "傍晚看日落，下山直接進特拉斯提弗列吃晚餐。",
+"stay": "約 30～45 分鐘",
+"hours": [
+"全天開放"
+],
+"price": "免費。",
+"stars": 4,
+"fromHotel": "步行約 25 分鐘"
+},
+{
+"id": "trastevere",
+"cat": "open",
+"x": 855.7,
+"y": 1553.5,
+"lx": 766.5,
+"ly": 1572.0,
+"slx": 775.5,
+"sly": 1568.2,
+"name": "特拉斯提弗列",
+"latin": "Trastevere（越台伯河區）",
+"feature": "台伯河對岸的古老街區。白天有著常春藤攀爬的老牆、石板路和精緻的工藝小店；晚上搖身一變成為羅馬最棒的美食聖地。",
+"sPrice": "免費",
+"tips": [
+"小酒館（Trattoria）價格比市中心便宜，坐在街邊吃一盤正宗的羅馬培根蛋麵（Carbonara）或胡椒乳酪麵（Cacio e Pepe）。",
+"中心的越台伯河聖母大殿，立面與後殿有 12～13 世紀金色馬賽克。",
+"晚餐 19:30 後才開始熱鬧，熱門餐廳要先訂位。"
+],
+"when": "傍晚從賈尼科洛山下來，晚餐時段 19:00 以後。",
+"stay": "散步加晚餐約 2～3 小時",
+"hours": [
+"街區全天開放",
+"餐廳多在 19:00 後營業"
+],
+"price": "免費。",
+"areaPts": [
+[
+854.9,
+1432.3
+],
+[
+952.9,
+1502.9
+],
+[
+1065.8,
+1608.8
+],
+[
+1020.6,
+1729.8
+],
+[
+809.7,
+1729.8
+],
+[
+711.8,
+1598.7
+],
+[
+741.9,
+1487.7
+]
+],
+"stars": 5,
+"fromHotel": "約 2 公里，步行約 25 分鐘"
+},
+{
+"id": "sanpietro",
+"cat": "free",
+"x": 242.4,
+"y": 924.6,
+"lx": 92.0,
+"ly": 943.8,
+"slx": 61.9,
+"sly": 940.1,
+"name": "聖彼得大教堂",
+"latin": "Basilica di San Pietro",
+"feature": "世界最小國家梵蒂岡的中心、天主教的權力核心，也是全世界最大的教堂之一，由米開朗基羅、貝尼尼等人接力完成。",
+"sHours": "每日 07:00 起（週三上午常關）",
+"sTime": "07:00 開門排隊",
+"sPrice": "免費（登圓頂另購票）",
+"warn": "免費入場但安檢排隊人潮極多，建議清早 7 點就去排；週三上午教宗公開接見時常關閉或限制進入；肩膀與膝蓋需遮住",
+"tips": [
+"人潮：週三、週日人多，週二、週四、週五人少。",
+"入口右側第一個禮拜堂：米開朗基羅的大理石雕刻傑作《聖殤》。",
+"主祭壇上方是貝尼尼的青銅華蓋。",
+"登上圓頂可以俯瞰鑰匙形狀的聖彼得廣場（可搭電梯到一半，再爬樓梯上頂）。"
+],
+"when": "清晨 07:00 開門就排隊，可接著去梵蒂岡博物館或聖天使城堡。",
+"stay": "大教堂約 1 小時；加登圓頂約 2 小時",
+"hours": [
+"每日 07:00 起開放",
+"冬季關門時間各來源不同（約 17:00～19:00），出發前請查官網",
+"週三上午教宗公開接見時可能關閉，約 12:30 後開放",
+"圓頂另有開放時間，最後入場約關門前 45 分鐘"
+],
+"price": "大教堂免費。登圓頂另購票，樓梯或電梯價格不同，約 €10～€22（第三方資料，以官網為準）。",
+"stars": 5,
+"fromHotel": "步行約 30 分鐘（約 2 公里），或搭公車約 15 分鐘"
+},
+{
+"id": "caracalla",
+"cat": "paid",
+"x": 1692.5,
+"y": 2091.0,
+"lx": 1579.2,
+"ly": 2110.2,
+"slx": 1612.3,
+"sly": 2105.7,
+"name": "卡拉卡拉浴場",
+"latin": "Terme di Caracalla",
+"feature": "如果嫌競技場人太多，來這裡會讓你感受到什麼叫「空間的震撼」。古羅馬時期能容納約 1,600 人同時入浴的巨型公共浴場，如今只剩紅磚遺址，但直衝雲霄的巨型拱頂殘壁和地上精美的馬賽克拼貼，會讓你深刻佩服古羅馬的工程美學。觀光客極少，非常安靜好逛。",
+"sHours": "09:00–16:30（週一休）",
+"sTime": "10:00–14:00",
+"sPrice": "€8",
+"warn": "週一休館；售票 15:30 截止，官方建議至少在關門前 1 小時入場",
+"tips": [
+"遺址多半只剩牆體，極度需要 AR 導覽或語音導覽，才看得懂當年的冷水池、熱水池和健身房配置。",
+"地上保留大片黑白與彩色馬賽克地板。"
+],
+"when": "上午 10:00～14:00 光線好；可接在羅馬競技場、帕拉丁山之後往南走。",
+"stay": "約 1～1.5 小時",
+"hours": [
+"週二至週日 09:00–16:30（售票至 15:30）",
+"週一休館"
+],
+"price": "全票 €8；特展期間加 €2（€10）。",
+"stars": 4,
+"fromHotel": "約 3.1 公里，在羅馬競技場再往南約 1.2 公里；建議搭地鐵 B 線到 Circo Massimo 站"
+},
+{
+"id": "hotel",
+"cat": "base",
+"x": 1146.2,
+"y": 986.4,
+"lx": 1136.8,
+"ly": 1006.6,
+"slx": 905.0,
+"sly": 909.4,
+"name": "Hotel Nazionale Roma",
+"latin": "Piazza di Monte Citorio, 131, Roma",
+"feature": "住宿飯店，位在義大利眾議院旁的蒙特奇托里奧廣場。直線距離：萬神殿約 270 公尺、特雷維噴泉約 450 公尺、西班牙階梯約 640 公尺、羅馬競技場約 1.7 公里、特米尼車站約 2.0 公里。",
+"sPrice": "我的住宿 1/26–2/3",
+"hours": [
+"電話 +39 06 695001"
+]
+},
+{
+"id": "termini",
+"cat": "base",
+"x": 2036.6,
+"y": 968.9,
+"lx": 1933.4,
+"ly": 987.4,
+"slx": 1943.4,
+"sly": 910.2,
+"name": "羅馬特米尼車站",
+"latin": "Stazione di Roma Termini",
+"feature": "羅馬最大的火車站，地鐵 A、B 線交會。往返機場的 Leonardo Express 也從這裡發車。距飯店直線約 2.0 公里，計程車約 10～15 分鐘，或搭 40、64 號公車。",
+"sPrice": "火車總站"
+}
+];
+const EDGES = [{"a": [1082.5, 455.7], "b": [1081.3, 478.3], "box": [954.5, 450.0, 1065.3, 480.0], "anc": [1081.8, 468.8], "text": "50 m・1 分", "ids": ["popolochurch", "popolo"]}, {"a": [263.0, 885.2], "b": [242.4, 924.6], "box": [124.9, 862.8, 246.3, 892.8], "anc": [249.4, 911.2], "text": "150 m・2 分", "ids": ["sistina", "sanpietro"]}, {"a": [1146.4, 473.0], "b": [1081.3, 478.3], "box": [1055.9, 494.5, 1177.3, 524.5], "anc": [1113.8, 475.6], "text": "200 m・2 分", "ids": ["pincio", "popolo"]}, {"a": [1025.9, 1053.5], "b": [963.2, 1076.0], "box": [916.3, 1000.8, 1037.7, 1030.8], "anc": [994.6, 1064.8], "text": "200 m・2 分", "ids": ["luigi", "navona"]}, {"a": [1106.2, 1103.9], "b": [1025.9, 1053.5], "box": [1042.7, 1047.0, 1164.1, 1077.0], "anc": [1085.3, 1090.8], "text": "250 m・3 分", "ids": ["pantheon", "luigi"]}, {"a": [1402.5, 1156.7], "b": [1459.3, 1253.7], "box": [1370.2, 1190.2, 1491.6, 1220.2], "anc": [1430.9, 1205.2], "text": "300 m・4 分", "ids": ["colonna", "traiano"]}, {"a": [1922.5, 959.7], "b": [2036.6, 968.9], "box": [1897.9, 981.7, 2019.2, 1011.7], "anc": [1961.3, 962.8], "text": "350 m・4 分", "ids": ["massimo", "termini"]}, {"a": [1402.5, 1156.7], "b": [1321.0, 1247.4], "box": [1262.4, 1152.3, 1383.8, 1182.3], "anc": [1361.8, 1202.1], "text": "350 m・4 分", "ids": ["colonna", "venezia"]}, {"a": [1106.2, 1103.9], "b": [1146.2, 986.4], "box": [1092.2, 1007.8, 1213.5, 1037.8], "anc": [1135.8, 1017.0], "text": "350 m・4 分", "ids": ["pantheon", "hotel"]}, {"a": [1025.9, 1053.5], "b": [1146.2, 986.4], "box": [1000.0, 959.5, 1121.4, 989.5], "anc": [1086.1, 1020.0], "text": "400 m・5 分", "ids": ["luigi", "hotel"]}, {"a": [1348.8, 986.8], "b": [1402.5, 1156.7], "box": [1315.0, 1056.8, 1436.3, 1086.8], "anc": [1375.7, 1071.8], "text": "500 m・6 分", "ids": ["trevi", "colonna"]}, {"a": [1466.5, 1432.7], "b": [1508.3, 1606.0], "box": [1426.7, 1504.3, 1548.1, 1534.3], "anc": [1487.4, 1519.3], "text": "500 m・6 分", "ids": ["foro", "palatino"]}, {"a": [1466.5, 1432.7], "b": [1459.3, 1253.7], "box": [1402.2, 1328.2, 1523.6, 1358.2], "anc": [1462.9, 1343.2], "text": "500 m・6 分", "ids": ["foro", "traiano"]}, {"a": [231.3, 706.7], "b": [263.0, 885.2], "box": [186.5, 781.0, 307.8, 811.0], "anc": [247.2, 796.0], "text": "500 m・6 分", "ids": ["vaticani", "sistina"]}, {"a": [963.2, 1076.0], "b": [929.3, 1255.5], "box": [885.6, 1150.8, 1006.9, 1180.8], "anc": [946.2, 1165.8], "text": "500 m・6 分", "ids": ["navona", "campo"]}, {"a": [1684.7, 1527.6], "b": [1508.3, 1606.0], "box": [1535.8, 1551.8, 1657.2, 1581.8], "anc": [1596.5, 1566.8], "text": "550 m・7 分", "ids": ["colosseo", "palatino"]}, {"a": [1922.5, 959.7], "b": [1917.3, 1155.0], "box": [1859.2, 1042.3, 1980.6, 1072.3], "anc": [1919.9, 1057.3], "text": "550 m・7 分", "ids": ["massimo", "maggiore"]}, {"a": [1348.8, 986.8], "b": [1146.2, 986.4], "box": [1186.8, 971.6, 1308.2, 1001.6], "anc": [1247.5, 986.6], "text": "600 m・8 分", "ids": ["trevi", "hotel"]}, {"a": [1508.3, 1606.0], "b": [1285.5, 1635.2], "box": [1336.2, 1605.6, 1457.6, 1635.6], "anc": [1396.9, 1620.6], "text": "650 m・8 分", "ids": ["palatino", "bocca"]}, {"a": [1348.8, 986.8], "b": [1311.7, 746.5], "box": [1269.6, 851.6, 1390.9, 881.6], "anc": [1330.2, 866.6], "text": "700 m・9 分", "ids": ["trevi", "spagna"]}, {"a": [1681.4, 317.2], "b": [1426.7, 333.9], "box": [1493.4, 310.5, 1614.7, 340.5], "anc": [1554.1, 325.5], "text": "750 m・9 分", "ids": ["borghese", "villaborghese"]}, {"a": [929.3, 1255.5], "b": [855.7, 1553.5], "box": [826.5, 1389.5, 958.5, 1419.5], "anc": [892.5, 1404.5], "text": "900 m・11 分", "ids": ["campo", "trastevere"]}, {"a": [1426.7, 333.9], "b": [1146.4, 473.0], "box": [1220.6, 388.4, 1352.6, 418.4], "anc": [1286.6, 403.4], "text": "900 m・11 分", "ids": ["villaborghese", "pincio"]}, {"a": [1146.4, 473.0], "b": [1311.7, 746.5], "box": [1149.8, 572.9, 1281.8, 602.9], "anc": [1215.8, 587.9], "text": "900 m・11 分", "ids": ["pincio", "spagna"]}, {"a": [707.1, 879.4], "b": [963.2, 1076.0], "box": [769.2, 962.7, 901.2, 992.7], "anc": [835.2, 977.7], "text": "900 m・11 分", "ids": ["castello", "navona"]}, {"a": [508.6, 1467.5], "b": [855.7, 1553.5], "box": [613.1, 1495.5, 751.2, 1525.5], "anc": [682.2, 1510.5], "text": "1.0 km・12 分", "ids": ["gianicolo", "trastevere"]}, {"a": [1684.7, 1527.6], "b": [1917.3, 1155.0], "box": [1732.0, 1326.3, 1870.0, 1356.3], "anc": [1801.0, 1341.3], "text": "1.2 km・16 分", "ids": ["colosseo", "maggiore"]}, {"a": [263.0, 885.2], "b": [707.1, 879.4], "box": [309.4, 868.7, 447.5, 898.7], "anc": [378.5, 883.7], "text": "1.2 km・16 分", "ids": ["sistina", "castello"]}, {"a": [1508.3, 1606.0], "b": [1692.5, 2091.0], "box": [1531.4, 1833.5, 1669.4, 1863.5], "anc": [1600.4, 1848.5], "text": "1.5 km・19 分", "ids": ["palatino", "caracalla"]}];
+const BASE = {"streets": [{"d": [[1096.0, 504.3], [1205.2, 882.6], [1280.5, 1134.7], [1306.9, 1225.5]], "name": "Via del Corso", "tx": 1125.6, "ty": 700.7, "rot": 73.9}, {"d": [[1355.8, 1260.8], [1450.0, 1361.7], [1600.6, 1477.7]], "name": "", "tx": 0, "ty": 0, "rot": 0}, {"d": [[1442.5, 1195.2], [1600.6, 1084.3], [1732.5, 983.4], [1826.6, 897.7]], "name": "Via Nazionale", "tx": 1507.9, "ty": 1137.1, "rot": -35.0}, {"d": [[1920.8, 1069.2], [1751.3, 1235.6], [1570.5, 1361.7]], "name": "Via Cavour", "tx": 1812.1, "ty": 1161.9, "rot": -44.5}, {"d": [[406.8, 922.9], [659.1, 922.9]], "name": "Via della Conciliazione", "tx": 469.9, "ty": 912.9, "rot": 0.0}, {"d": [[670.4, 1008.6], [847.4, 1094.4], [1016.9, 1225.5], [1111.0, 1245.7]], "name": "", "tx": 0, "ty": 0, "rot": 0}, {"d": [[1111.0, 504.3], [1291.8, 721.2]], "name": "Via del Babuino", "tx": 1181.4, "ty": 629.4, "rot": 50.2}], "tiber": [[726.9, -126.1], [809.7, 126.1], [866.2, 327.8], [937.8, 529.5], [1001.8, 706.0], [952.9, 832.1], [866.2, 912.8], [726.9, 953.2], [651.6, 1008.6], [598.8, 1109.5], [685.5, 1260.8], [866.2, 1412.1], [998.0, 1472.6], [1111.0, 1513.0], [1197.7, 1573.5], [1205.2, 1729.8], [1141.2, 1891.2], [1043.2, 2042.5]], "park": [[1114.8, 469.0], [1118.6, 277.4], [1337.0, 116.0], [1732.5, 136.2], [1807.8, 353.0], [1563.0, 580.0], [1280.5, 564.8]], "vat": [[0.0, 680.8], [226.0, 655.6], [339.0, 806.9], [376.6, 933.0], [320.1, 1008.6], [94.2, 1059.1], [-49.0, 907.8]], "river": {"x": 470.77705299124506, "y": 1159.9318181816232, "text": "台伯河 Tevere"}, "scale": 227.3, "vatlbl": {"x": -71.0, "y": 864.5}};
+
+const NS = "http://www.w3.org/2000/svg";
+const el = (tag, attrs = {}, parent) => {
+  const n = document.createElementNS(NS, tag);
+  for (const k in attrs) n.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(n);
+  return n;
+};
+const pts = a => a.map(p => p.join(",")).join(" ");
+const path = a => "M" + a.map(p => p.join(" ")).join(" L");
+
+/* ---- Base map ---- */
+const base = document.getElementById("base");
+el("polygon", { points: pts(BASE.vat), fill: "url(#hatch)", stroke: "var(--line)", "stroke-width": 2, "stroke-dasharray": "6 6" }, base);
+const vt = el("text", { x: BASE.vatlbl.x, y: BASE.vatlbl.y, "text-anchor": "middle", transform: `rotate(-90 ${BASE.vatlbl.x} ${BASE.vatlbl.y})`, "font-family": "Noto Sans TC, sans-serif", "font-size": 18, "letter-spacing": "4", fill: "var(--muted)" }, base);
+vt.textContent = "梵蒂岡城國";
+el("polygon", { points: pts(BASE.park), fill: "var(--park)", stroke: "var(--park-edge)", "stroke-width": 2, "stroke-linejoin": "round" }, base);
+BASE.streets.forEach(s => el("path", { d: path(s.d), fill: "none", stroke: "var(--street)", "stroke-width": 12, "stroke-linecap": "round", "stroke-linejoin": "round" }, base));
+el("path", { d: path(BASE.tiber), fill: "none", stroke: "var(--river)", "stroke-width": 26, "stroke-linecap": "round", "stroke-linejoin": "round" }, base);
+const rl = el("text", { x: BASE.river.x, y: BASE.river.y, "font-family": "Noto Sans TC, sans-serif", "font-size": 19, "font-weight": 500, fill: "var(--free)", opacity: .8 }, base);
+rl.textContent = BASE.river.text;
+BASE.streets.forEach(s => {
+  if (!s.name) return;
+  const t = el("text", { x: s.tx, y: s.ty, transform: `rotate(${s.rot} ${s.tx} ${s.ty})`,
+    "font-family": "Cormorant Garamond, Garamond, serif", "font-style": "italic", "font-size": 19, fill: "var(--muted)" }, base);
+  t.textContent = s.name;
+});
+// compass + scale bar
+const [VX, VY, VW, VH] = "-99 67 2466 2244".split(" ").map(Number);
+const comp = el("g", { transform: `translate(${VX + VW - 70} ${VY + 80})` }, base);
+el("path", { d: "M0 -38 L11 0 L0 -8 L-11 0 Z", fill: "var(--ink)" }, comp);
+const nT = el("text", { x: 0, y: 24, "text-anchor": "middle", "font-family": "Cormorant Garamond, serif", "font-size": 24, "font-weight": 600, fill: "var(--ink)" }, comp);
+nT.textContent = "N";
+const sc = el("g", { transform: `translate(${VX + VW - 60 - BASE.scale} ${VY + VH - 40})` }, base);
+el("rect", { x: 0, y: 0, width: BASE.scale / 2, height: 8, fill: "var(--ink)" }, sc);
+el("rect", { x: BASE.scale / 2, y: 0, width: BASE.scale / 2, height: 8, fill: "var(--paper)", stroke: "var(--ink)", "stroke-width": 1.5 }, sc);
+[["0", 0], ["250", BASE.scale / 2], ["500 m", BASE.scale]].forEach(([t, x]) => {
+  const tt = el("text", { x, y: -8, "text-anchor": x === BASE.scale ? "start" : "middle", "font-family": "Noto Sans TC, sans-serif", "font-size": 15, fill: "var(--muted)" }, sc);
+  tt.textContent = t;
+});
+
+/* ---- Spots ---- */
+const layer = document.getElementById("spots");
+const areaLayer = el("g", {}, layer);
+const syncArea = () => SPOTS.forEach(s => { if (s.areaEl) s.areaEl.classList.toggle("dim", s.g.classList.contains("dim")); });
+SPOTS.forEach(s => {
+  const allDay = s.cat === "open" || s.cat === "base";
+  const g = el("g", { class: "spot", tabindex: 0, role: "button", "data-id": s.id, "data-cat": s.cat,
+    "aria-label": allDay ? `${s.name}，${s.sPrice}` : `${s.name}，${s.sHours}，適合 ${s.sTime}，${s.sPrice}`, style: `--c:${CAT[s.cat].color}` }, layer);
+  if (s.areaPts) {
+    s.areaEl = el("g", { class: "area", style: `--c:${CAT[s.cat].color}` }, areaLayer);
+    el("polygon", { points: pts(s.areaPts) }, s.areaEl);
+  }
+  const leader = el("path", { class: "leader" }, g);
+  const tab = el("rect", { class: "tab", x: s.lx, y: s.ly, rx: 4 }, g);
+  const t1 = el("text", { class: "t-name", x: s.lx + 13, y: s.ly + 36 }, g); t1.textContent = s.name;
+  let tw = null, t2 = null;
+  if (!allDay) {
+    tw = el("text", { class: "t-wed t-more", x: s.lx + 13, y: s.ly + 68 }, g); tw.textContent = s.sHours;
+    t2 = el("text", { class: "t-time t-more", x: s.lx + 13, y: s.ly + 98 }, g); t2.textContent = "適合 " + s.sTime;
+  }
+  const t3 = el("text", { class: "t-price t-more", x: s.lx + 13, y: s.ly + (allDay ? 66 : 128) }, g); t3.textContent = s.sPrice;
+  s.H = allDay ? 82 : 140;
+  if (s.cat === "base") el("rect", { class: "pin", x: s.x - 12, y: s.y - 12, width: 24, height: 24, rx: 3 }, g);
+  else el("circle", { class: "pin", cx: s.x, cy: s.y, r: 12 }, g);
+  s.g = g; s.tab = tab; s.leader = leader; s.t1 = t1; s.texts = [t1, tw, t2, t3].filter(Boolean); s.H0 = s.H;
+  const act = () => distMode ? pickSpot(s.id) : openSpot(s.id);
+  g.addEventListener("click", e => { e.stopPropagation(); act(); });
+  g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); act(); } });
+});
+let distMode = false;
+function sizeTabs() {
+  SPOTS.forEach(s => {
+    const lx = distMode ? s.slx : s.lx, ly = distMode ? s.sly : s.ly, H = distMode ? 44 : s.H0;
+    const shown = distMode ? [s.t1] : s.texts;
+    let w = 0;
+    shown.forEach(t => { try { w = Math.max(w, t.getComputedTextLength()); } catch (e) { w = Math.max(w, 200); } });
+    if (!w) w = 200;
+    const W = w + (distMode ? 24 : 26);
+    s.tab.setAttribute("x", lx); s.tab.setAttribute("y", ly);
+    s.tab.setAttribute("width", W); s.tab.setAttribute("height", H);
+    s.t1.setAttribute("x", lx + (distMode ? 12 : 13)); s.t1.setAttribute("y", ly + (distMode ? 31 : 36));
+    const cx = Math.max(lx, Math.min(s.x, lx + W));
+    const cy = Math.max(ly, Math.min(s.y, ly + H));
+    s.leader.setAttribute("d", `M${s.x} ${s.y} L${cx} ${cy}`);
+  });
+}
+sizeTabs();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(sizeTabs);
+
+/* ---- Distance mode ---- */
+const edgeLayer = document.getElementById("edges");
+EDGES.forEach(e => {
+  const g = el("g", { class: "edge" }, edgeLayer);
+  el("line", { x1: e.a[0], y1: e.a[1], x2: e.b[0], y2: e.b[1] }, g);
+  if (e.box) {
+    const cx = (e.box[0] + e.box[2]) / 2, cy = (e.box[1] + e.box[3]) / 2;
+    if (Math.hypot(cx - e.anc[0], cy - e.anc[1]) > 20) el("line", { class: "conn", x1: e.anc[0], y1: e.anc[1], x2: cx, y2: cy }, g);
+    el("rect", { x: e.box[0], y: e.box[1], width: e.box[2] - e.box[0], height: e.box[3] - e.box[1], rx: 15 }, g);
+    const t = el("text", { x: cx, y: cy + 7, "text-anchor": "middle" }, g); t.textContent = e.text;
+  }
+  e.g = g;
+});
+const svg = document.getElementById("map");
+document.getElementById("f-dist").addEventListener("click", ev => {
+  distMode = !distMode;
+  ev.currentTarget.setAttribute("aria-pressed", distMode);
+  svg.classList.toggle("dist", distMode);
+  edgeLayer.toggleAttribute("hidden", !distMode);
+  document.getElementById("dist-note").hidden = !distMode;
+  pickSpot(null);
+  sizeTabs();
+});
+let picked = null, pairEnd = null, sub = "p2p";
+const M_PER_UNIT = 2.2;
+const NOTES = { p2p: "先點起點，會顯示它到相鄰景點的距離；再點終點，就畫出兩點之間的距離與步行時間。點空白處重新選。", all: "顯示所有相鄰景點之間的步行距離與時間。" }, NOTE_TAIL = "步行距離以直線距離 ×1.3 估算，步速每分鐘 80 公尺；實際路線請以 Google 地圖導航為準。";
+const p2pLine = el("g", {}); svg.insertBefore(p2pLine, document.getElementById("spots"));
+const p2pLabel = el("g", {}, svg);
+function walkText(units) {
+  const m = units * M_PER_UNIT * 1.3;
+  const w = m < 100 ? Math.round(m / 10) * 10 : Math.round(m / 50) * 50;
+  return (w < 1000 ? w + " m" : (w / 1000).toFixed(1) + " km") + "・" + Math.max(1, Math.round(w / 80)) + " 分";
+}
+function renderDist() {
+  SPOTS.forEach(s => s.g.classList.toggle("picked", sub === "p2p" && (s.id === picked || s.id === pairEnd)));
+  EDGES.forEach(e => e.g.classList.toggle("on", sub === "all" || (!!picked && !pairEnd && e.ids.includes(picked))));
+  p2pLine.replaceChildren(); p2pLabel.replaceChildren();
+  if (sub !== "p2p" || !picked || !pairEnd) return;
+  const a = SPOTS.find(s => s.id === picked), b = SPOTS.find(s => s.id === pairEnd);
+  el("line", { class: "p2p-line", x1: a.x, y1: a.y, x2: b.x, y2: b.y }, p2pLine);
+  const cx = (a.x + b.x) / 2, cy = (a.y + b.y) / 2;
+  const pill = el("rect", { class: "p2p-pill" }, p2pLabel);
+  const t = el("text", { class: "p2p-text", x: cx, y: cy + 9.4, "text-anchor": "middle" }, p2pLabel);
+  t.textContent = a.name + " → " + b.name + "　" + walkText(Math.hypot(b.x - a.x, b.y - a.y));
+  let w = 300; try { w = t.getComputedTextLength() + 32; } catch (e) {}
+  pill.setAttribute("x", cx - w / 2); pill.setAttribute("y", cy - 44 / 2);
+  pill.setAttribute("width", w); pill.setAttribute("height", 44); pill.setAttribute("rx", 44 / 2);
+}
+function pickSpot(id) {
+  if (id === null) { picked = pairEnd = null; }
+  else if (sub !== "p2p") return;
+  else if (!picked || pairEnd) { picked = id; pairEnd = null; }
+  else if (id === picked) { picked = null; }
+  else { pairEnd = id; }
+  renderDist();
+}
+document.querySelectorAll(".seg-btn").forEach(b => b.addEventListener("click", () => {
+  sub = b.dataset.sub;
+  document.querySelectorAll(".seg-btn").forEach(x => x.setAttribute("aria-pressed", x === b));
+  document.getElementById("dist-text").textContent = NOTES[sub] + NOTE_TAIL;
+  pickSpot(null);
+}));
+svg.addEventListener("click", () => { if (distMode && sub === "p2p" && picked) pickSpot(null); });
+const syncEdges = () => EDGES.forEach(e => e.g.classList.toggle("dim", e.ids.some(id => SPOTS.find(s => s.id === id).g.classList.contains("dim"))));
+
+/* ---- Filters ---- */
+document.querySelectorAll(".chip[data-cat]").forEach(ch => {
+  ch.addEventListener("click", () => {
+    ch.setAttribute("aria-pressed", ch.getAttribute("aria-pressed") === "true" ? "false" : "true");
+    const on = new Set([...document.querySelectorAll('.chip[data-cat][aria-pressed="true"]')].map(c => c.dataset.cat));
+    SPOTS.forEach(s => s.g.classList.toggle("dim", s.cat !== "base" && !on.has(s.cat)));
+    syncArea(); syncEdges();
+  });
+});
+function applySup() {
+  const showSup = document.getElementById("f-sup").getAttribute("aria-pressed") === "true";
+  SPOTS.forEach(s => s.g.classList.toggle("gone", !!s.sup && !showSup));
+}
+document.getElementById("f-sup").addEventListener("click", e => {
+  e.currentTarget.setAttribute("aria-pressed", e.currentTarget.getAttribute("aria-pressed") === "true" ? "false" : "true"); applySup();
+});
+applySup();
+
+/* ---- Mobile pinch zoom ---- */
+(() => {
+  const svg = document.getElementById("map");
+  const b = svg.viewBox.baseVal;
+  const full = { x: b.x, y: b.y, w: b.width, h: b.height };
+  let vb = { ...full };
+  const mq = window.matchMedia("(max-width: 1240px)");
+  const apply = () => svg.setAttribute("viewBox", `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
+  const clampW = w => Math.min(full.w, Math.max(full.w / 8, w));
+  const clamp = () => {
+    vb.w = clampW(vb.w); vb.h = vb.w * full.h / full.w;
+    vb.x = Math.min(full.x + full.w - vb.w, Math.max(full.x, vb.x));
+    vb.y = Math.min(full.y + full.h - vb.h, Math.max(full.y, vb.y));
+  };
+  const zoomAt = (f, px, py) => {
+    const nw = clampW(vb.w / f);
+    vb.x = px - (px - vb.x) * nw / vb.w;
+    vb.y = py - (py - vb.y) * nw / vb.w;
+    vb.w = nw; clamp(); apply();
+  };
+  const center = arr => arr.reduce((a, p) => ({ x: a.x + p.x / arr.length, y: a.y + p.y / arr.length }), { x: 0, y: 0 });
+  const dist = arr => arr.length > 1 ? Math.hypot(arr[0].x - arr[1].x, arr[0].y - arr[1].y) : 0;
+  const pts = new Map();
+  let g0 = null, moved = false;
+  const begin = () => {
+    const arr = [...pts.values()];
+    g0 = { vb: { ...vb }, r: svg.getBoundingClientRect(), c: center(arr), d: dist(arr) };
+  };
+  svg.addEventListener("pointerdown", e => {
+    if (!mq.matches) return;
+    if (pts.size === 0) moved = false;
+    pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    begin();
+  });
+  window.addEventListener("pointermove", e => {
+    if (!g0 || !pts.has(e.pointerId)) return;
+    pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    const arr = [...pts.values()], c = center(arr), d = dist(arr);
+    const { r, vb: v0 } = g0;
+    const w = clampW(g0.d > 0 && d > 0 ? v0.w * g0.d / d : v0.w);
+    const sx = v0.x + (g0.c.x - r.left) / r.width * v0.w;
+    const sy = v0.y + (g0.c.y - r.top) / r.height * v0.h;
+    vb.w = w; vb.h = w * full.h / full.w;
+    vb.x = sx - (c.x - r.left) / r.width * vb.w;
+    vb.y = sy - (c.y - r.top) / r.height * vb.h;
+    clamp(); apply();
+    if (arr.length > 1 || Math.hypot(c.x - g0.c.x, c.y - g0.c.y) > 6) moved = true;
+  });
+  const end = e => { if (!pts.delete(e.pointerId)) return; if (pts.size) begin(); else g0 = null; };
+  window.addEventListener("pointerup", end);
+  window.addEventListener("pointercancel", end);
+  svg.addEventListener("click", e => { if (moved) { e.stopPropagation(); e.preventDefault(); moved = false; } }, true);
+  const mid = () => [vb.x + vb.w / 2, vb.y + vb.h / 2];
+  document.getElementById("z-in").addEventListener("click", () => zoomAt(1.6, ...mid()));
+  document.getElementById("z-out").addEventListener("click", () => zoomAt(1 / 1.6, ...mid()));
+  const reset = () => { vb = { ...full }; apply(); };
+  document.getElementById("z-reset").addEventListener("click", reset);
+  if (mq.addEventListener) mq.addEventListener("change", reset); else mq.addListener(reset);
+})();
+
+/* ---- Drawer ---- */
+const drawer = document.getElementById("drawer"), scrim = document.getElementById("scrim");
+let lastFocus = null;
+const esc = t => String(t).replace(/[&<>"]/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[m]));
+const list = a => `<ul>${a.map(t => `<li>${esc(t)}</li>`).join("")}</ul>`;
+function openSpot(id) {
+  const s = SPOTS.find(x => x.id === id); if (!s) return;
+  lastFocus = document.activeElement;
+  SPOTS.forEach(x => x.g.classList.toggle("active", x.id === id));
+  drawer.style.setProperty("--c", CAT[s.cat].color);
+  drawer.innerHTML = `
+    <div class="d-top"><span class="cat">${esc(CAT[s.cat].label)}</span><button class="close" id="d-close" aria-label="關閉">×</button></div>
+    <h3 id="d-name">${esc(s.name)}</h3>
+    <p class="latin">${esc(s.latin)}</p>
+    ${s.stars ? `<p class="stars" aria-label="必去指數 ${s.stars} 顆星"><span>必去指數</span>${"★".repeat(s.stars)}<i>${"★".repeat(5 - s.stars)}</i></p>` : ""}
+    ${s.warn ? `<div class="warn">⚠ ${esc(s.warn)}</div>` : ""}
+    <dl>
+      <div><dt>特色</dt><dd>${esc(s.feature)}</dd></div>
+      ${s.tips ? `<div><dt>看點</dt><dd>${list(s.tips)}</dd></div>` : ""}
+      ${s.hours ? `<div><dt>${s.cat === "base" ? "服務資訊" : "營業時間"}</dt><dd>${list(s.hours)}</dd></div>` : ""}
+      ${s.when ? `<div><dt>合適旅遊時段</dt><dd>${esc(s.when)}</dd></div>` : ""}
+      ${s.stay ? `<div><dt>建議停留時間</dt><dd>${esc(s.stay)}</dd></div>` : ""}
+      ${s.fromHotel ? `<div><dt>從飯店出發</dt><dd>${esc(s.fromHotel)}</dd></div>` : ""}
+      ${s.price ? `<div><dt>票價</dt><dd>${esc(s.price)}</dd></div>` : ""}
+      ${s.site ? `<div><dt>官方網站</dt><dd><a class="site" href="${esc(s.site[1])}" target="_blank" rel="noopener">${esc(s.site[0])} ↗</a></dd></div>` : ""}
+      ${s.pass ? `<div><dt>聯票包含</dt><dd>${list(s.pass)}</dd></div>` : ""}
+    </dl>`;
+  drawer.hidden = false; scrim.hidden = false;
+  document.getElementById("d-close").addEventListener("click", closeSpot);
+  document.getElementById("d-close").focus();
+}
+function closeSpot() {
+  drawer.hidden = true; scrim.hidden = true;
+  SPOTS.forEach(x => x.g.classList.remove("active"));
+  if (lastFocus && lastFocus.focus) lastFocus.focus();
+}
+scrim.addEventListener("click", closeSpot);
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !drawer.hidden) closeSpot(); });
+</script>
+
+</body></html>

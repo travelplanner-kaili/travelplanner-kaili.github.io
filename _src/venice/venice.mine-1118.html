@@ -1,0 +1,1003 @@
+<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="color-scheme" content="light dark">
+<title>威尼斯景點地圖</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&family=Cormorant+Garamond:ital,wght@1,500;1,600&display=swap">
+<style>
+[hidden] { display: none !important; }
+:root {
+  color-scheme: light dark;
+  --bg: #E7E6E0; --paper: #F7F6F2; --ink: #22262A; --muted: #676B66; --line: #CBC9C0;
+  --water: #CFDDE3; --shore: #A9BCC4; --land: #F7F6F2;
+  --lm-stone: #E8CFA4; --lm-mid: #C4A06C; --lm-dark: #9C7A4E; --lm-hole: #6E5233; --lm-edge: #FFFDF8; --lm-light: #F4E7CE; --lm-pink: #EBC3B5; --lm-gold: #D9A93A; --lm-wood: #A87545; --lm-steel: #C0392B; --lm-glass: #BFE0EC; --street: #D8D5CA;
+  --paid: #A3282D; --free: #3A5880; --open: #57772F; --ferry: #0E7C86;
+  --warn-bg: #F6E7D5; --warn-fg: #8A4A12; --shadow: rgba(30,32,28,.12);
+  --f-display: "Noto Serif TC", "Songti TC", "PMingLiU", serif;
+  --f-body: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  --f-latin: "Cormorant Garamond", "Garamond", "Times New Roman", serif;
+  box-sizing: border-box;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #15171A; --paper: #1E2124; --ink: #E9E7E2; --muted: #9C9F99; --line: #353A3D;
+  --water: #1F5A70; --shore: #6FA6BA; --land: #2A2D30;
+  --lm-stone: #CDB088; --lm-mid: #9E7F55; --lm-dark: #6E5536; --lm-hole: #3B2C1C; --lm-edge: #EFE6D6; --lm-light: #DCCBAA; --lm-pink: #C99A8B; --lm-gold: #C29433; --lm-wood: #8A5E36; --lm-steel: #D9604F; --lm-glass: #4E8FAA; --street: #2C3033;
+  --paid: #E26A68; --free: #85A7D3; --open: #A2C473; --ferry: #3FB6C0;
+  --warn-bg: #3A2A19; --warn-fg: #F0B678; --shadow: rgba(0,0,0,.4); color-scheme: dark } }
+html, body { margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.65; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-block: 28px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 16px 32px; margin-bottom: 18px; }
+.eyebrow { font-family: var(--f-latin); font-style: italic; font-size: 20px; color: var(--paid); line-height: 1; }
+h1 { font-family: var(--f-display); font-size: clamp(26px, 4vw, 38px); line-height: 1.25; margin: 6px 0 4px; letter-spacing: .02em; }
+.sub { color: var(--muted); margin: 0; font-size: 14px; }
+.sub b { color: var(--warn-fg); }
+.filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.chip { font: 500 13px var(--f-body); display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--paper); color: var(--ink); cursor: pointer; }
+.chip .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c); }
+.chip[aria-pressed="false"] { opacity: .45; }
+.chip:focus-visible, .close:focus-visible { outline: 2px solid var(--free); outline-offset: 2px; }
+.chip-group { display: inline-flex; flex-wrap: wrap; gap: 6px; padding-right: 8px; margin-right: 2px; border-right: 1px solid var(--line); }
+.chip-group:last-of-type { border-right: 0; }
+.chip.tier[data-tier="推薦"] .dot { background: none; border: 2.5px solid var(--c); width: 7px; height: 7px; }
+.chip.sup .dot { background: none; border: 2px dashed var(--c); width: 8px; height: 8px; }
+.chip[data-cat="free"] .dot { background: linear-gradient(90deg, var(--free) 50%, var(--open) 50%); }
+.chip.cold .dot { background: linear-gradient(90deg, var(--c) 50%, transparent 50%); border: 1.5px solid var(--c); width: 8px; height: 8px; }
+.chip.done { border-style: dashed; border-color: var(--open); }
+.chip.done[aria-pressed="false"] { opacity: 1; }
+.chip.done[aria-pressed="true"] { background: var(--open); color: var(--paper); border-style: solid; }
+
+.mapbox { position: relative; background: var(--water); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.mapbox svg { display: block; width: 100%; height: auto; }
+.zoom { display: flex; position: absolute; right: 10px; bottom: 10px; flex-direction: column; gap: 6px; }
+.zoom button { width: 42px; height: 42px; border-radius: 8px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font: 500 22px/1 var(--f-body); box-shadow: 0 2px 8px var(--shadow); cursor: pointer; }
+.mobile-only { display: none; }
+.desktop-only { display: inline; font-weight: 700; color: var(--ink); }
+@media (max-width: 860px) {
+  .mapbox { height: 70vh; height: min(70dvh, 900px); }
+  .mapbox svg { touch-action: none; height: 100%; }
+  .mobile-only { display: inline; font-weight: 700; color: var(--ink); }
+  .desktop-only { display: none; }
+}
+.hint { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px; font-size: 12.5px; color: var(--muted); margin-top: 8px; }
+
+/* base map */
+.b-water { font-family: var(--f-latin); font-style: italic; fill: #5E7F8E; letter-spacing: .04em; pointer-events: none; }
+.b-dist { font-family: var(--f-body); font-weight: 700; fill: var(--muted); opacity: .38; letter-spacing: .18em; pointer-events: none; }
+.b-scale { font: 15px var(--f-body); fill: var(--muted); }
+@media (prefers-color-scheme: dark) { .b-water { fill: #B5D6E2; } }
+
+/* spots */
+.spot { cursor: pointer; }
+.spot .tab { fill: var(--paper); stroke: var(--c); stroke-width: 1.6; transition: fill .15s; }
+.spot:hover .tab, .spot.active .tab { fill: var(--bg); }
+.spot.active .tab { stroke-width: 3; }
+.spot .pin { fill: var(--c); stroke: var(--paper); stroke-width: 3; }
+.spot .leader { stroke: var(--c); stroke-width: 1.4; fill: none; }
+.spot .t-name { font: 700 19px var(--f-body); fill: var(--ink); }
+.spot .t-wed { font: 500 14.5px var(--f-body); fill: var(--ink); font-variant-numeric: tabular-nums; }
+.spot .t-price { font: 700 14.5px var(--f-body); fill: var(--c); font-variant-numeric: tabular-nums; }
+.spot.rec .t-name { font-size: 17px; }
+.spot.rec .t-wed, .spot.rec .t-price { font-size: 13px; }
+.spot.is-sup .t-name { font-size: 15px; font-weight: 500; }
+.spot.is-sup .t-price { font-size: 12px; fill: var(--open); }
+.spot .t-price.free7 { fill: var(--open); }
+.spot.is-sup .tab { stroke-dasharray: 6 4; }
+.spot.is-sup .pin { stroke-width: 2.5; }
+.spot.base .t-name { font-size: 16px; }
+.spot.gone { display: none; }
+/* traghetti: transport, so they look different from sights: teal outline, bigger boat, dashed crossing line */
+.spot.ferry .cross { stroke: var(--ferry); stroke-width: 4; stroke-dasharray: 3 6; stroke-linecap: round; fill: none; }
+.spot.ferry .cross-end { fill: var(--ferry); stroke: var(--paper); stroke-width: 2; }
+.spot.dim { opacity: .28; }
+.spot.visited { opacity: .45; }
+.spot.visited .tab { stroke-dasharray: 5 4; }
+.spot.hide-v, .area.hide-v, .edge.hide-v { display: none; }
+#map.dist .t-more, #map.names .t-more { display: none; }
+#map.dist .spot.picked .tab { stroke-width: 3; fill: var(--bg); }
+.area polygon { fill: var(--c); fill-opacity: .13; stroke: var(--c); stroke-width: 3; stroke-dasharray: 10 7; stroke-linejoin: round; }
+.area.dim { opacity: .2; } .area.gone { display: none; }
+#map [tabindex]:focus, #map [tabindex]:focus-visible { outline: none; }
+#map .spot:focus-visible .tab { stroke-width: 4; }
+
+/* user-marked streets */
+.st-band { fill: none; stroke: #E8862A; stroke-opacity: .45; stroke-width: 11; stroke-linecap: round; stroke-linejoin: round; }
+.st-name { font: italic 800 17px var(--f-body); fill: #C8641A; paint-order: stroke; stroke: var(--land); stroke-width: 4; stroke-linejoin: round; pointer-events: none; }
+.shop-street { cursor: pointer; pointer-events: auto; }
+.shop-street:hover, .shop-street:focus-visible { text-decoration: underline; outline: none; }
+@media (prefers-color-scheme: dark) { .st-name { fill: #F0A35C; } }
+.st-name.st-orig { font: italic 600 13px var(--f-latin), var(--f-body); letter-spacing: .02em; }
+/* paper-cut landmarks */
+.lm-shadow { fill: var(--ink); opacity: .16; }
+.lm-depth { fill: var(--lm-dark); }
+.lm-stone { fill: var(--lm-stone); stroke: var(--lm-edge); stroke-width: 1.6; stroke-linejoin: round; }
+.lm-band { stroke: var(--lm-mid); stroke-width: 1.6; fill: none; }
+.lm-hole { fill: var(--lm-hole); }
+.lm .lm-mid { fill: var(--lm-mid); stroke: var(--lm-edge); stroke-width: 1.2; stroke-linejoin: round; }
+.lm-light { fill: var(--lm-light); stroke: var(--lm-edge); stroke-width: 1.2; stroke-linejoin: round; }
+.lm-pink { fill: var(--lm-pink); stroke: var(--lm-edge); stroke-width: 1.2; stroke-linejoin: round; }
+.lm-gold { fill: var(--lm-gold); }
+.lm-wood { fill: var(--lm-wood); stroke: var(--lm-edge); stroke-width: 1.2; stroke-linejoin: round; }
+.lm-steel { fill: none; stroke: var(--lm-steel); stroke-width: 2.6; stroke-linecap: round; }
+.lm-glass { fill: var(--lm-glass); stroke: var(--lm-edge); stroke-width: 1; }
+.lm-gondola { fill: #1E2124; stroke: var(--lm-edge); stroke-width: 1; stroke-linejoin: round; }
+.lm-figure { fill: #1E2124; } .lm-figure-s { stroke: #1E2124; stroke-width: 2.2; stroke-linecap: round; fill: none; }
+.lm-oar { stroke: var(--lm-wood); stroke-width: 1.6; stroke-linecap: round; }
+.lm-pass { fill: var(--paid); } .lm-pass-s { stroke: var(--paid); stroke-width: 2.6; stroke-linecap: round; }
+@media (prefers-color-scheme: dark) { .lm-gondola, .lm-figure { fill: #0B0C0E; } .lm-figure-s { stroke: #0B0C0E; } }
+.lm-waterline { fill: none; stroke: var(--shore); stroke-width: 1.6; stroke-linecap: round; }
+.spot .pin.icon-base { stroke-width: 2; }
+.spot.active .lm, .spot:hover .lm { filter: drop-shadow(0 0 3px var(--c)); }
+/* distance */
+.dist-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin: 0 0 10px; font-size: 13.5px; background: var(--paper); border: 1px solid var(--line); border-left: 3px solid var(--ink); padding: 8px 12px; border-radius: 4px; }
+.dist-bar p { margin: 0; flex: 1 1 320px; min-width: 0; }
+.p2p-line { stroke: var(--paid); stroke-width: 3; stroke-dasharray: 2 8; stroke-linecap: round; fill: none; }
+.p2p-pill { fill: var(--paid); }
+.p2p-text { font: 700 16px var(--f-body); fill: var(--paper); font-variant-numeric: tabular-nums; }
+.p2p-card { position: absolute; left: 12px; top: 12px; z-index: 2; max-width: calc(100% - 24px); box-sizing: border-box; display: flex; flex-direction: column; gap: 2px; padding: 10px 16px; border-radius: 12px; background: var(--paid); color: var(--paper); box-shadow: 0 4px 16px var(--shadow); pointer-events: none; }
+.p2p-route { font: 500 15px/1.4 var(--f-body); overflow-wrap: anywhere; }
+.p2p-dist { font: 700 28px/1.2 var(--f-body); font-variant-numeric: tabular-nums; }
+.p2p-dist small { font-size: 14px; font-weight: 500; margin-left: 6px; }
+@media (max-width: 640px) { .p2p-card { left: 8px; right: 8px; top: 8px; max-width: none; padding: 8px 14px; } .p2p-dist { font-size: 24px; } }
+@media (max-width: 860px) { .p2p-lbl { display: none; } }
+.edge line { stroke: var(--ink); stroke-opacity: .6; stroke-width: 3; stroke-dasharray: 2 6; stroke-linecap: round; }
+.edge rect { fill: var(--paper); stroke: var(--line); stroke-width: 1; }
+.edge text { font: 500 15px var(--f-body); fill: var(--ink); font-variant-numeric: tabular-nums; }
+.edge:not(.on) { display: none; }
+/* long-press radius */
+#map { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+.rad-circle { fill: var(--paid); fill-opacity: .07; stroke: var(--paid); stroke-width: 2.5; stroke-dasharray: 10 7; pointer-events: none; }
+.rad-ring { fill: none; stroke: var(--paid); stroke-opacity: .35; stroke-width: 1.5; stroke-dasharray: 4 6; pointer-events: none; }
+.spot.rad-out, .area.rad-out { opacity: .13 !important; }
+.spot.rad-center .tab { stroke-width: 3.5; }
+.rad-card { position: absolute; left: 12px; top: 12px; z-index: 2; max-width: min(360px, calc(100% - 84px)); box-sizing: border-box; padding: 9px 14px; border-radius: 12px;
+  background: var(--paper); color: var(--ink); border: 2px solid var(--paid); box-shadow: 0 4px 16px var(--shadow); font: 500 13px/1.5 var(--f-body); }
+.mapbox.fs .rad-card { top: auto; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
+.rad-card b { font-size: 16px; color: var(--paid); }
+.rad-card .rad-x { margin-left: 8px; border: 0; background: none; color: var(--muted); font: 700 13px var(--f-body); cursor: pointer; padding: 2px 4px; text-decoration: underline; }
+
+/* drawer */
+.scrim { position: fixed; inset: 0; background: rgba(10,12,14,.35); z-index: 20; }
+.drawer { position: fixed; z-index: 21; background: var(--paper); color: var(--ink); box-shadow: 0 10px 40px var(--shadow);
+  top: 0; right: 0; bottom: 0; width: min(420px, 100%); overflow-y: auto; box-sizing: border-box; overscroll-behavior: contain;
+  padding: calc(22px + env(safe-area-inset-top, 0px)) max(24px, env(safe-area-inset-right, 0px)) calc(28px + env(safe-area-inset-bottom, 0px)) 24px; }
+@media (max-width: 640px) {
+  .drawer::before { content: ""; display: block; width: 44px; height: 5px; border-radius: 3px; background: var(--line); margin: -8px auto 12px; }
+  .drawer { top: auto; left: 0; width: 100%; max-height: 82vh; max-height: 82dvh; border-radius: 14px 14px 0 0;
+    padding: 20px max(18px, env(safe-area-inset-right, 0px)) calc(28px + env(safe-area-inset-bottom, 0px)) max(18px, env(safe-area-inset-left, 0px)); }
+}
+.d-top { display: flex; justify-content: space-between; align-items: start; gap: 12px; }
+.cat { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .08em; color: var(--c); border: 1px solid var(--c); padding: 2px 9px; border-radius: 999px; }
+.close { flex: none; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font-size: 20px; line-height: 1; cursor: pointer; }
+.drawer h3 { font-family: var(--f-display); font-size: 26px; line-height: 1.3; margin: 12px 0 0; }
+.latin { font-family: var(--f-latin); font-style: italic; font-size: 19px; color: var(--muted); margin: 2px 0 14px; }
+.d-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 16px; }
+.visit-btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 16px; border-radius: 999px; border: 1.5px solid var(--open); background: var(--paper); color: var(--open); font: 700 14px var(--f-body); cursor: pointer; }
+.visit-btn[aria-pressed="true"] { background: var(--open); color: var(--paper); }
+.d-icons { display: inline-flex; gap: 8px; }
+.icon-act { display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid var(--free); color: var(--free); background: var(--paper); cursor: pointer; padding: 0; text-decoration: none; }
+.icon-act svg { width: 20px !important; height: 20px !important; }
+.icon-act.report { border-color: var(--paid); color: var(--paid); }
+.share-note { font-size: 13px; color: var(--muted); }
+.share-note input { font: 12px var(--f-body); width: min(260px, 60vw); }
+.rt-tabs { display: flex; margin: 4px 0 18px; border-bottom: 1px solid var(--line); }
+.rt-tab { font: 700 15px var(--f-body); padding: 9px 12px; white-space: nowrap; background: none; border: 0; border-bottom: 3px solid transparent; margin-bottom: -1px; color: var(--muted); cursor: pointer; }
+.rt-tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--c, var(--ink)); }
+.rt-panel[data-panel="tips"] > ul { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 10px; line-height: 1.7; }
+.tab-alert { display: inline-grid; place-items: center; width: 18px; height: 18px; margin-left: 6px; border-radius: 50%; background: var(--warn-fg); color: var(--warn-bg); font-size: 12px; font-weight: 800; vertical-align: 2px; }
+.warn-jump { display: block; width: 100%; text-align: left; font: 600 14px var(--f-body); padding: 9px 12px; margin: 0 0 16px; border-radius: 4px; border: 0; background: var(--warn-bg); color: var(--warn-fg); cursor: pointer; }
+.warn { background: var(--warn-bg); color: var(--warn-fg); font-weight: 500; font-size: 14px; padding: 9px 12px; border-radius: 4px; margin-bottom: 16px; }
+dl { margin: 0; display: grid; gap: 14px; }
+dt { font-size: 12px; font-weight: 700; letter-spacing: .1em; color: var(--muted); }
+dd { margin: 2px 0 0; font-variant-numeric: tabular-nums; }
+dd ul { margin: 0; padding-left: 1.1em; }
+.site { color: var(--free); font-weight: 500; text-underline-offset: 3px; word-break: break-all; }
+@media (prefers-reduced-motion: no-preference) {
+  .drawer:not([hidden]) { animation: slide .22s ease-out; }
+  @keyframes slide { from { transform: translateX(24px); opacity: 0; } }
+}
+
+/* full screen + icon buttons */
+.fs-bar { display: none; }
+#z-full { display: none; font-size: 18px; }
+@media (max-width: 860px) { #z-full { display: block; } }
+.mapbox.fs { position: fixed; inset: 0; z-index: 15; height: 100vh; height: 100dvh; border: 0; border-radius: 0; display: flex; flex-direction: column; }
+.mapbox.fs .fs-bar { display: flex; position: relative; flex: none; order: -1; z-index: 4; align-items: center; gap: 8px;
+  padding: calc(8px + env(safe-area-inset-top, 0px)) max(10px, env(safe-area-inset-right, 0px)) 8px max(10px, env(safe-area-inset-left, 0px));
+  background: var(--paper); border-bottom: 1px solid var(--line); box-shadow: 0 2px 10px var(--shadow); }
+.mapbox.fs svg { flex: 1 1 auto; min-height: 0; height: auto !important; }
+.mapbox.fs .zoom { bottom: calc(16px + env(safe-area-inset-bottom, 0px)); }
+.mapbox.fs #z-full { display: none !important; }
+@media (max-width: 640px) { .zoom { right: 8px; gap: 5px; } .zoom button { width: 36px; height: 36px; font-size: 19px; opacity: .92; } }
+.mapbox.fs .p2p-card { top: auto; bottom: 12px; }
+body.fs-on { overflow: hidden; }
+.fs-title { flex: 1; min-width: 0; font: 700 16px var(--f-display); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fs-btn { flex: none; font: 700 14px var(--f-body); padding: 7px 12px; border-radius: 999px; border: 1.5px solid var(--ink); background: var(--paper); color: var(--ink); cursor: pointer; }
+.fs-btn[aria-expanded="true"] { background: var(--ink); color: var(--paper); }
+.fs-panel { position: absolute; left: 0; right: 0; z-index: 4; max-height: 60%; overflow-y: auto; box-sizing: border-box;
+  padding: 10px max(10px, env(safe-area-inset-right, 0px)) 12px max(10px, env(safe-area-inset-left, 0px));
+  background: var(--paper); border-bottom: 1px solid var(--line); box-shadow: 0 6px 14px var(--shadow); }
+.fs-dist { position: absolute; left: 0; right: 0; z-index: 3; padding: 0 8px; }
+.fs-dist .dist-bar { margin: 6px 0 0; }
+.view-btns { order: 99; display: inline-flex; gap: 8px; }
+body.fs-on .view-btns { display: none !important; }
+.icon-btn { position: relative; display: inline-grid; place-items: center; width: 38px; height: 38px; padding: 0; border-radius: 50%; border: 1.5px solid var(--ink); background: var(--paper); color: var(--ink); cursor: pointer; }
+.icon-btn svg { display: block; width: 20px !important; height: 20px !important; }
+.icon-btn[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+.fs-bar .icon-btn { flex: none; width: 36px; height: 36px; }
+.view-btns .fs-open { display: none; }
+@media (max-width: 860px) { body:not(.fs-on) .view-btns .fs-open { display: inline-grid; } .mapbox:not(.fs) { height: 82vh; height: min(84dvh, 1000px); } }
+.icon-btn[data-tip]::after { content: attr(data-tip); position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%); z-index: 30;
+  white-space: nowrap; font: 700 13px var(--f-body); padding: 5px 10px; border-radius: 6px; background: var(--ink); color: var(--paper);
+  box-shadow: 0 2px 8px var(--shadow); pointer-events: none; opacity: 0; transition: opacity .12s; }
+.view-btns .icon-btn:first-child[data-tip]::after { left: 0; transform: none; }
+.fs-bar .icon-btn:last-child[data-tip]::after { left: auto; right: 0; transform: none; }
+@media (hover: hover) { .icon-btn[data-tip]:hover::after { opacity: 1; } }
+.icon-btn.tip-show[data-tip]::after { opacity: 1; }
+#z-full svg { margin: auto; width: 18px !important; height: 18px !important; display: block; }
+/* 全螢幕 on every screen size, desktop too */
+body:not(.fs-on) .view-btns .fs-open { display: inline-grid !important; }
+#z-full { display: block; }
+
+.foot-report { color: var(--paid); font-weight: 700; }
+
+/* 使用方式 Q&A under the map */
+.faq { margin-top: 28px; border-top: 1px solid var(--line); padding-top: 18px; }
+.faq-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; margin-bottom: 12px; }
+.faq h2 { font-family: var(--f-display); font-size: 22px; margin: 0; }
+.faq-note { font-size: 13px; color: var(--muted); margin: 0; }
+.faq-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 10px 24px; margin: 0; padding: 0; list-style: none; }
+.faq-item { min-width: 0; padding: 10px 0; border-bottom: 1px dashed var(--line); }
+.faq-q { font-weight: 700; margin: 0 0 3px; display: flex; gap: 8px; }
+.faq-q .n { flex: none; color: var(--paid); font-variant-numeric: tabular-nums; }
+.faq-a { margin: 0; color: var(--ink); font-size: 14.5px; line-height: 1.75; padding-left: 2.4em; }
+.ic { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--ink); color: var(--ink); background: var(--paper); vertical-align: -6px; margin: 0 2px; }
+.ic svg { width: 14px !important; height: 14px !important; display: block; }
+.ic.ic-walk { border-color: var(--route); color: var(--route); }
+.ic.ic-shop { border-color: var(--open); color: var(--open); }
+.ic.ic-act { border-color: var(--free); color: var(--free); }
+.ic.ic-warn { border-color: var(--paid); color: var(--paid); }
+
+/* 我去的日子 */
+.chip-group.days { align-items: center; gap: 4px; }
+.days-lbl { font: 700 12.5px var(--f-body); color: var(--muted); margin-right: 2px; white-space: nowrap; }
+.chip.day { width: 30px; height: 30px; padding: 0; justify-content: center; border-radius: 50%; font: 700 14px var(--f-body); border-color: var(--ink); }
+.chip.day[aria-pressed="true"] { background: var(--ink); color: var(--paper); opacity: 1; }
+.chip.day[aria-pressed="false"] { opacity: .5; }
+.spot .day-off { fill: var(--paid) !important; font-weight: 700; }
+</style></head><body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow">Venezia · Veneto</div>
+      <h1>威尼斯景點地圖</h1>
+      <p class="sub">2027/2/5（五）14:55 抵達～2/7（日），2/8 一早離開・標籤時間為這三天的營業時間・<b>適逢嘉年華（1/23～2/9）</b></p>
+    </div>
+    <div class="filters" role="group" aria-label="篩選">
+      <span class="view-btns"><button class="icon-btn fs-open" id="fs-open" type="button" aria-label="全螢幕" data-tip="全螢幕"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 20h6M12 16v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7.5 9.5V7.5h2M16.5 9.5V7.5h-2M7.5 12.5v2h2M16.5 12.5v2h-2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button><button class="icon-btn names-btn" type="button" aria-pressed="false" aria-label="簡潔模式：地圖只顯示景點名稱" data-tip="簡潔模式"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="12" r="3.2" fill="currentColor"/></svg></button><button class="icon-btn dist-btn" id="f-dist" type="button" aria-pressed="false" aria-label="距離模式" data-tip="距離模式"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="13" r="2" fill="currentColor"/><circle cx="13" cy="3" r="2" fill="currentColor"/><path d="M4.5 11.5 L11.5 4.5" stroke="currentColor" stroke-width="1.6" stroke-dasharray="1.5 2.5" stroke-linecap="round"/></svg></button></span>
+      <span class="chip-group" role="group" aria-label="景點層級"><button class="chip tier" data-tier="主要" aria-pressed="true" style="--c:var(--ink)"><span class="dot"></span>主要景點</button><button class="chip tier" data-tier="推薦" aria-pressed="true" style="--c:var(--ink)"><span class="dot"></span>推薦</button><button class="chip tier sup" id="f-sup" data-tier="次要" aria-pressed="true" style="--c:var(--muted)"><span class="dot"></span>次要</button></span>
+      <span class="chip-group days" role="group" aria-label="星期幾去：景點框只顯示這幾天的營業時間"><span class="days-lbl">星期幾去</span><button class="chip day" type="button" data-day="0" aria-pressed="false" aria-label="星期一">一</button><button class="chip day" type="button" data-day="1" aria-pressed="false" aria-label="星期二">二</button><button class="chip day" type="button" data-day="2" aria-pressed="false" aria-label="星期三">三</button><button class="chip day" type="button" data-day="3" aria-pressed="false" aria-label="星期四">四</button><button class="chip day" type="button" data-day="4" aria-pressed="true" aria-label="星期五">五</button><button class="chip day" type="button" data-day="5" aria-pressed="true" aria-label="星期六">六</button><button class="chip day" type="button" data-day="6" aria-pressed="true" aria-label="星期日">日</button></span><span class="chip-group" role="group" aria-label="景點類型"><button class="chip" data-cat="paid" aria-pressed="true" style="--c:var(--paid)"><span class="dot"></span>需購票景點</button><button class="chip" data-cat="free" aria-pressed="true" style="--c:var(--free)"><span class="dot"></span>免費景點</button><button class="chip cold" id="f-cold" aria-pressed="false" style="--c:var(--ink)" title="只看早上 9 點前或晚上 7 點後還能去的景點"><span class="dot"></span>冷門時段（9 點前或晚上 7 點後）</button></span>
+      <button class="chip done" id="f-done" hidden aria-pressed="false" title="去過的景點記在這台裝置的瀏覽器裡">顯示去過的景點（<span id="done-n">0</span>）</button>
+    </div>
+  </header>
+
+  <div class="dist-bar" id="dist-note" hidden><p id="dist-text"></p></div>
+  <div class="mapbox">
+    <svg id="map" viewBox="0 0 1328 1194" role="img" aria-label="威尼斯本島景點分布圖">
+      <g id="base"><rect x="-400" y="-400" width="2128.0" height="1993.8" fill="var(--water)"/>
+<line x1="-234.3" y1="364.8" x2="-917.9" y2="-232.1" stroke="var(--line)" stroke-width="10"/>
+<polygon points="-234.3,364.8 -58.6,210.0 117.2,143.7 273.4,88.4 429.6,22.1 585.9,-11.1 761.6,16.6 925.7,77.4 1042.8,176.9 1144.4,276.4 1277.2,337.1 1406.1,403.5 1542.8,475.3 1718.5,530.6 1874.8,641.1 2031.0,784.8 2159.9,972.8 2081.8,1149.6 1816.2,1116.5 1589.6,983.8 1386.5,884.3 1199.1,823.5 1062.4,806.9 964.7,812.5 910.0,834.6 972.5,884.3 925.7,967.2 800.7,1005.9 644.5,1033.5 449.2,1033.5 253.9,1005.9 97.6,956.2 -50.8,900.9 -167.9,795.9 -214.8,608.0 -261.7,458.7" fill="var(--land)" stroke="var(--shore)" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="-351.5,1083.3 253.9,1088.8 722.6,1099.9 1003.8,1138.6 1054.6,1215.9 644.5,1260.2 58.6,1282.3 -351.5,1227.0" fill="var(--land)" stroke="var(--shore)" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="1081.9,972.8 1249.8,978.3 1347.5,1061.2 1277.2,1144.1 1117.0,1116.5 1054.6,1039.1" fill="var(--land)" stroke="var(--shore)" stroke-width="3" stroke-linejoin="round"/>
+<path d="M58.6 541.6 L187.5 503.0 L269.5 464.3 L324.2 397.9 L367.1 342.7 L496.0 298.5 L605.4 265.3 L691.3 326.1 L792.9 414.5 L828.0 464.3 L874.9 541.6 L816.3 608.0 L706.9 668.8 L605.4 701.9 L511.7 757.2 L519.5 818.0 L593.7 878.8 L664.0 900.9 L742.1 906.4 L839.7 900.9" fill="none" stroke="var(--shore)" stroke-width="35" stroke-linecap="butt" stroke-linejoin="round"/>
+<path id="gc" d="M58.6 541.6 L187.5 503.0 L269.5 464.3 L324.2 397.9 L367.1 342.7 L496.0 298.5 L605.4 265.3 L691.3 326.1 L792.9 414.5 L828.0 464.3 L874.9 541.6 L816.3 608.0 L706.9 668.8 L605.4 701.9 L511.7 757.2 L519.5 818.0 L593.7 878.8 L664.0 900.9 L742.1 906.4 L839.7 900.9 L956.9 906.4" fill="none" stroke="var(--water)" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="769.4,873.3 925.7,840.1 953.0,928.5 820.2,906.4" fill="var(--water)"/>
+<text class="b-water" x="664.0" y="585.9" text-anchor="middle" font-size="20">Canal Grande</text>
+<text class="b-water" x="1132.7" y="945.1" text-anchor="middle" font-size="22">Bacino di San Marco</text>
+<text class="b-water" x="312.5" y="1072.2" text-anchor="middle" font-size="20">Canale della Giudecca</text>
+<text class="b-dist" x="781.2" y="127.1" text-anchor="middle" font-size="22">CANNAREGIO</text>
+<text class="b-dist" x="1210.8" y="442.2" text-anchor="middle" font-size="22">CASTELLO</text>
+<text class="b-dist" x="644.5" y="552.7" text-anchor="middle" font-size="20">SAN POLO</text>
+<text class="b-dist" x="214.8" y="431.1" text-anchor="middle" font-size="20">SANTA CROCE</text>
+<text class="b-dist" x="175.8" y="884.3" text-anchor="middle" font-size="22">DORSODURO</text>
+<text class="b-dist" x="449.2" y="1160.7" text-anchor="middle" font-size="20">GIUDECCA</text>
+<g transform="translate(1283.0 70)"><path d="M0 -38 L11 0 L0 -8 L-11 0 Z" fill="var(--ink)"/><text x="0" y="24" text-anchor="middle" font-family="Cormorant Garamond, serif" font-size="24" font-weight="600" fill="var(--ink)">N</text></g>
+<g transform="translate(30 1165.8)"><rect x="0" y="0" width="125.0" height="8" fill="var(--ink)"/><rect x="125.0" y="0" width="125.0" height="8" fill="var(--paper)" stroke="var(--ink)" stroke-width="1.5"/><text x="0" y="-8" text-anchor="middle" class="b-scale">0</text><text x="125.0" y="-8" text-anchor="middle" class="b-scale">250</text><text x="250.0" y="-8" class="b-scale">500 m</text></g>
+<path class="st-band" d="M910.8 578.7 L917.9 608.0 L929.6 630.1 L943.2 652.2 L972.5 677.1 L988.2 693.6 L994.0 729.6"/>
+<path class="st-band" d="M769.4 829.1 L808.5 822.4 L847.6 813.6 L882.7 804.2"/>
+<path class="st-band" d="M810.4 486.4 L824.9 501.9 L841.7 518.4 L861.2 533.4"/>
+<path class="st-band" d="M728.4 268.1 L765.5 295.7 L798.7 334.4 L839.7 359.3 L886.6 384.1 L923.7 395.2"/>
+<path class="st-band" d="M883.5 546.1 L897.5 563.8 L910.8 578.7"/></g>
+      <g id="areas"></g>
+      <g id="shop-labels"></g>
+      <g id="edges" hidden></g>
+      <g id="spots"></g>
+    </svg>
+    <div class="rad-card" id="rad-card" hidden aria-live="polite"></div>
+    <div class="p2p-card" id="p2p-card" hidden aria-live="polite"><span class="p2p-route" id="p2p-route"></span><span class="p2p-dist" id="p2p-dist"></span></div>
+    <div class="fs-bar" id="fs-bar"><span class="fs-title" id="fs-title"></span><button class="fs-btn" id="fs-menu" type="button" aria-expanded="false" aria-controls="fs-panel">☰ 篩選</button><button class="icon-btn" id="fs-exit" type="button" aria-pressed="true" aria-label="離開全螢幕" data-tip="離開全螢幕"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 20h6M12 16v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7.5 9.5V7.5h2M16.5 9.5V7.5h-2M7.5 12.5v2h2M16.5 12.5v2h-2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button><button class="icon-btn names-btn" type="button" aria-pressed="false" aria-label="簡潔模式：地圖只顯示景點名稱" data-tip="簡潔模式"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="12" r="3.2" fill="currentColor"/></svg></button><button class="icon-btn dist-btn" id="fs-dist-btn" type="button" aria-pressed="false" aria-label="距離模式" data-tip="距離模式"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="13" r="2" fill="currentColor"/><circle cx="13" cy="3" r="2" fill="currentColor"/><path d="M4.5 11.5 L11.5 4.5" stroke="currentColor" stroke-width="1.6" stroke-dasharray="1.5 2.5" stroke-linecap="round"/></svg></button></div>
+    <div class="fs-panel" id="fs-panel" hidden></div>
+    <div class="fs-dist" id="fs-dist"></div>
+    <div class="zoom">
+      <button id="z-full" aria-label="全螢幕地圖" title="全螢幕地圖"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 20h6M12 16v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7.5 9.5V7.5h2M16.5 9.5V7.5h-2M7.5 12.5v2h2M16.5 12.5v2h-2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+      <button id="z-in" aria-label="放大">+</button>
+      <button id="z-out" aria-label="縮小">−</button>
+      <button id="z-reset" aria-label="顯示整張地圖">⤢</button>
+    </div>
+  </div>
+  <div class="hint">
+    <span class="desktop-only">滑鼠：按住 Ctrl（Mac 可用 ⌘）滾動縮放、觸控板雙指縮放、雙擊空白處放大、放大後拖曳移動；在景點上按兩下看附近範圍</span>
+    <span class="mobile-only">單指拖曳移動、雙指縮放，點景點看介紹；介紹頁點一下就會關閉；長按景點看附近範圍</span>
+    <span>景點依實際座標標示；島嶼輪廓與大運河為簡化示意，小運河與巷弄未畫出</span>
+    <span><a class="foot-report" id="foot-report" href="#" target="_blank" rel="noopener">⚠ 發現錯誤？匿名回報給作者</a></span>
+  </div>
+  <section class="faq" id="faq" aria-labelledby="faq-h"><div class="faq-head"><h2 id="faq-h">使用方式</h2><p class="faq-note">連結不定時更新到出發前，2027 年 2 月之後停止更新。</p></div><ol class="faq-list"><li class="faq-item"><p class="faq-q"><span class="n">Q1</span><span>怎麼看某個景點的介紹？</span></p><p class="faq-a">點地圖上的景點框，旁邊會打開介紹：「介紹」寫景點有什麼好看，「💡 實用資訊」有營業時間、票價、預約、休館和嘉年華注意事項。橘色的路是購物街，點路名也會介紹那條路可以逛什麼。</p></li><li class="faq-item"><p class="faq-q"><span class="n">Q2</span><span>可以看某個地方周邊的景點嗎？</span></p><p class="faq-a">電腦版在景點上按兩下，會顯示方圓 100 公尺內的景點；再按兩下，再擴大 100 公尺。手機、平板等小螢幕改成長按景點、再長按一次擴大。點一下地圖空白處就會關掉。</p></li><li class="faq-item"><p class="faq-q"><span class="n">Q3</span><span>可以知道到某個景點要走多遠嗎？</span></p><p class="faq-a">按右上角的 <span class="ic "><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="13" r="2" fill="currentColor"/><circle cx="13" cy="3" r="2" fill="currentColor"/><path d="M4.5 11.5 L11.5 4.5" stroke="currentColor" stroke-width="1.6" stroke-dasharray="1.5 2.5" stroke-linecap="round"/></svg></span> 距離模式，先點起點、再點終點，就會顯示兩個景點間的距離和步行時間。（直線距離 ×1.3 估算；威尼斯巷子彎來彎去，過大運河要走橋或搭船，實際以 Google 地圖為準）</p></li><li class="faq-item"><p class="faq-q"><span class="n">Q4</span><span>地圖好亂，可以乾淨一點嗎？</span></p><p class="faq-a">可以。按右上角的 <span class="ic "><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="12" r="3.2" fill="currentColor"/></svg></span> 簡潔模式，框裡就只留名稱。需要快速看票價和營業時間時，再按一次 <span class="ic "><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="12" r="3.2" fill="currentColor"/></svg></span> 就會把完整資訊開回來。</p></li><li class="faq-item"><p class="faq-q"><span class="n">Q5</span><span>我只在威尼斯待兩天，可以只看最重要的景點嗎？</span></p><p class="faq-a">可以。景點依重要性分三層：「主要景點」「推薦」「次要」，在篩選列（手機在上方的「☰ 篩選」裡）點選要顯示哪幾層，依自己的需求開關。</p></li><li class="faq-item"><p class="faq-q"><span class="n">Q6</span><span>我只想去免費的景點？</span></p><p class="faq-a">可以。篩選列只留「免費景點」、把「需購票景點」關掉，要買票的景點就會變淡（還是可以點開看）。</p></li><li class="faq-item"><p class="faq-q"><span class="n">Q7</span><span>義大利景點開放時間很短，早上很早或晚上還能去哪裡？</span></p><p class="faq-a">篩選列選「冷門時段」，會突顯早上 9 點前或晚上 7 點後還能去的景點。</p></li><li class="faq-item"><p class="faq-q"><span class="n">Q8</span><span>我只有某幾天會去，可以只看那幾天的營業時間嗎？</span></p><p class="faq-a">可以。篩選列的「星期幾去」（預設是週五六日）點選星期幾（可以複選，例如只選二、四），景點框裡就只顯示那幾天的營業時間，有休館的會寫「週一休」；你選的日子全部都休館的景點會變淡，框裡寫「你選的日子休館」。選擇會記在你自己的手機或電腦。（節日、特殊活動這類臨時休館不會算進來，請看景點的實用資訊）</p></li><li class="faq-item"><p class="faq-q"><span class="n">Q9</span><span>想逛街買東西要去哪裡？</span></p><p class="faq-a">地圖上橘色的路就是購物街，點路名可以看介紹。</p></li><li class="faq-item"><p class="faq-q"><span class="n">Q10</span><span>去過的景點可以不要留在地圖上嗎？</span></p><p class="faq-a">可以。點景點，在介紹最上面按「標記為已去過」，那個景點就會從地圖上消失。想再看到時，篩選列會出現「顯示去過的景點」，按下去就會回到地圖上。（這個紀錄只存在你自己這台手機或電腦）</p></li><li class="faq-item"><p class="faq-q"><span class="n">Q11</span><span>這張地圖是你的，我可以客製成自己的嗎？</span></p><p class="faq-a">可以。用上面的「去過」功能，把自己不要的點關掉，這張地圖就變成你的囉。（一樣只存在你自己這台手機或電腦）</p></li><li class="faq-item"><p class="faq-q"><span class="n">Q12</span><span>手機上地圖太小？</span></p><p class="faq-a">按 <span class="ic "><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 20h6M12 16v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7.5 9.5V7.5h2M16.5 9.5V7.5h-2M7.5 12.5v2h2M16.5 12.5v2h-2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span> 全螢幕（手機一打開就是全螢幕）。地圖可以單指拖曳、雙指縮放，按右下角的 ⤢ 回到整張地圖。</p></li><li class="faq-item"><p class="faq-q"><span class="n">Q13</span><span>我還是想用 Google 地圖導航耶？</span></p><p class="faq-a">可以。打開景點介紹，上方的 <span class="ic ic-act"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5a6.5 6.5 0 0 0-6.5 6.5c0 4.9 6.5 12.5 6.5 12.5s6.5-7.6 6.5-12.5A6.5 6.5 0 0 0 12 2.5zm0 9a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z" fill="currentColor"/></svg></span> 就是 Google 地圖連結。</p></li><li class="faq-item"><p class="faq-q"><span class="n">Q14</span><span>可以把景點分享給朋友嗎？</span></p><p class="faq-a">可以。在景點介紹上方點 <span class="ic ic-act"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5.5" r="2.6" fill="currentColor"/><circle cx="6" cy="12" r="2.6" fill="currentColor"/><circle cx="18" cy="18.5" r="2.6" fill="currentColor"/><path d="M8.3 10.8 15.7 6.7M8.3 13.2l7.4 4.1" stroke="currentColor" stroke-width="2" fill="none"/></svg></span> 分享。</p></li><li class="faq-item"><p class="faq-q"><span class="n">Q15</span><span>發現資料有錯怎麼辦？</span></p><p class="faq-a">點景點介紹裡的 <span class="ic ic-warn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 20.5h20L12 3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 9.5v5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="17.3" r="1.3" fill="currentColor"/></svg></span> 回報，或頁面最下方的「⚠ 發現錯誤？匿名回報給作者」，不用留下任何個人資料。</p></li><li class="faq-item"><p class="faq-q"><span class="n">Q16</span><span>畫面怪怪的，字和底色都是白的？</span></p><p class="faq-a">通常是手機瀏覽器的「網頁深色模式」把顏色改亂了。Chrome：右上角「⋮」→「設定」→「主題」，取消勾選「盡可能為網站套用深色主題」；Samsung 瀏覽器：在設定裡關掉深色模式。改完重新整理。</p></li></ol></section>
+</div>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" hidden role="dialog" aria-modal="true" aria-labelledby="d-name"></aside>
+
+<script>
+const M_PER_UNIT = 2.0;
+const CAT = {
+  paid: { label: "需購票／有營業時限", color: "var(--paid)" },
+  free: { label: "免費景點", color: "var(--free)" },
+  open: { label: "全天開放", color: "var(--open)" },
+  base: { label: "交通", color: "var(--ink)" },
+  shop: { label: "購物街", color: "#D9741F" }
+};
+const ALL = [{"id": "sanmarco", "cat": "paid", "tier": "主要", "x": 1020.6, "y": 733.4, "lx": 1029.6, "ly": 642.8, "ux": 1029.6, "uy": 642.8, "nx": 1029.6, "ny": 684.8, "rows": [{"t": "聖馬可大教堂", "c": "t-name", "dy": 24}, {"t": "五六 09:30–17:15｜日 14:00–17:15", "c": "t-wed t-more", "dy": 44.0}, {"t": "€8 起・預約時段", "c": "t-price t-more", "dy": 65.0}], "H": 75, "Hs": 33, "name": "聖馬可大教堂", "latin": "Basilica di San Marco", "gq": "Basilica di San Marco", "hl": "五六 09:30–17:15｜日 14:00–17:15", "pl": "€8 起・預約時段", "feature": "威尼斯的精神中心，11 世紀依拜占庭樣式重建，五座圓頂下鋪滿金色馬賽克，被稱為「黃金教堂」。安葬著守護聖人聖馬可，也是千年共和國的國家禮拜堂。", "tips": ["內部約 8,000 平方公尺的金底馬賽克，抬頭看圓頂的《創世紀》與《耶穌升天》。", "黃金祭壇屏（Pala d'Oro）：鑲滿寶石與琺瑯的哥德式祭壇屏，需另購票。", "博物館與聖馬可之馬平台（Loggia dei Cavalli）：館內是四匹青銅駿馬的原件，走上立面平台可俯瞰聖馬可廣場。"], "hours": ["週一至週六 09:30–17:15（最後入場 16:45）", "週日與宗教節日 14:00–17:15（上午彌撒，觀光客不能進教堂；博物館 09:30 起開放）", "大型禮儀或主教出席時，開放時間可能變動"], "when": "週六 09:30 開門第一個時段（光線柔和、人最少）；週日只能下午進；週五 14:55 才到站，當天來不及。", "stay": "教堂本身約 30 分鐘；加黃金祭壇屏與博物館約 1～1.5 小時", "price": "官網票價：教堂 €10、教堂＋黃金祭壇屏 €20、教堂＋博物館 €20、全含（教堂、祭壇屏、博物館與平台）€30；個人購票自動打 8 折（教堂實付約 €8）。需在官網預約時段。", "site": "https://www.basilicasanmarco.it/", "warn": "週日上午不開放觀光；需預約入場時段，嘉年華期間時段容易額滿", "remind": ["入場要穿著端莊：肩膀與膝蓋要遮住，帽子要脫。", "大背包、行李不能帶進去，需寄放在附近的 Ateneo San Basso（廣場北側小獅廣場旁）。", "含教堂入場的票，6 個月內還能進安康聖母大殿的聖器室，不用再買。", "冬季若遇漲潮（acqua alta），前廊最先淹水，可能臨時關閉。"], "fromBase": "從聖馬可廣場出發：200 m・步行約 2 分（直線距離 ×1.3 估算；過大運河要走橋或搭船，實際以 Google 地圖為準）"}, {"id": "ducale", "cat": "paid", "tier": "主要", "x": 1052.6, "y": 779.3, "lx": 1066.6, "ly": 803.5, "ux": 1066.6, "uy": 803.5, "nx": 1068.2, "ny": 788.3, "rows": [{"t": "總督宮", "c": "t-name", "dy": 24}, {"t": "五六日 09:00–18:00", "c": "t-wed t-more", "dy": 44.0}, {"t": "聯票 €35", "c": "t-price t-more", "dy": 65.0}], "H": 75, "Hs": 33, "name": "總督宮", "latin": "Palazzo Ducale", "gq": "Palazzo Ducale", "hl": "五六日 09:00–18:00", "pl": "聯票 €35", "feature": "威尼斯共和國的權力核心：總督官邸、議會與法院都在這裡。粉白相間的哥德式立面面向潟湖，內部是威尼斯畫派最華麗的廳堂。", "tips": ["大議會廳（Sala del Maggior Consiglio）：長 53 公尺的大廳，牆上是丁托列托的巨作《天堂》。", "黃金階梯（Scala d'Oro）：天花板鍍金灰泥裝飾的正式樓梯。", "從宮內走過嘆息橋，進到新監獄的牢房，從橋上的小窗回望潟湖。"], "hours": ["11/1–3/31 每日 09:00–18:00（最後入場 17:00）", "12/25、1/1 休館"], "when": "09:00 一開門就進，趕在旅行團之前；或下午 15:00 以後人潮變少。", "stay": "約 2～2.5 小時", "price": "聖馬可廣場博物館聯票 €35（2026 年起票價），總督宮限指定日期，其餘三館 3 天內可用。", "site": "https://palazzoducale.visitmuve.it/", "links": [["聖馬可廣場博物館聯票（官方）", "https://www.visitmuve.it/"]], "pass_": ["總督宮（含嘆息橋與監獄）", "柯雷爾博物館", "國立考古博物館", "馬爾恰納國家圖書館紀念廳"], "warn": "最後入場 17:00；嘉年華週末建議先網路訂指定日期票", "remind": ["想避開總督宮門口的排隊，可以先從柯雷爾博物館入口用同一張聯票進場（第三方旅遊網站建議）。", "嘆息橋在參觀路線裡，不用另外買票。", "大型背包需寄物。"], "fromBase": "從聖馬可廣場出發：250 m・步行約 3 分（直線距離 ×1.3 估算；過大運河要走橋或搭船，實際以 Google 地圖為準）"}, {"id": "piazza", "cat": "open", "tier": "主要", "x": 953.0, "y": 757.2, "lx": 820, "ly": 712, "ux": 820, "uy": 712, "nx": 904.9, "ny": 795.8, "rows": [{"t": "聖馬可廣場", "c": "t-name", "dy": 24}], "H": 33, "Hs": 33, "name": "聖馬可廣場", "latin": "Piazza San Marco", "gq": "Piazza San Marco", "feature": "拿破崙口中「歐洲最美的客廳」。三面是長長的柱廊（舊、新行政官邸與拿破崙翼），一面是聖馬可大教堂，旁邊的小廣場直通潟湖岸。", "tips": ["時鐘塔（Torre dell'Orologio）：藍底金星鐘面，頂上兩個青銅摩爾人準點敲鐘。", "弗洛里安咖啡館（Caffè Florian，1720 年開業）與夸德里咖啡館的露天樂隊。", "小廣場（Piazzetta）的兩根花崗岩柱：聖馬可飛獅與聖提奧多爾，共和國時代的城市大門。"], "hours": ["廣場全天開放"], "when": "清晨 08:00 前拍空景；傍晚 17:00 日落後看點燈。嘉年華週末白天是面具人物聚集的主舞台。", "stay": "散步拍照約 20～30 分鐘；坐下喝咖啡約 1 小時", "price": "免費。", "remind": ["2/5～2/7 正逢 2027 威尼斯嘉年華（官方日期 1/23～2/9），週末是人潮最高峰；往年曾在聖馬可周邊實施單向人流管制，照現場指示走。", "廣場是全城地勢最低處，漲潮（acqua alta）時最先淹水，會架起高架步道。出發前可看威尼斯市府的潮汐預報。", "在廣場上不能坐在柱廊台階上吃東西、不能餵鴿子，違者會被罰款。", "柱廊咖啡館若有樂隊演奏，桌位會加收音樂費。"]}, {"id": "campanile", "cat": "paid", "tier": "主要", "x": 997.1, "y": 766.0, "lx": 990, "ly": 900, "ux": 990, "uy": 900, "nx": 758.9, "ny": 663.0, "rows": [{"t": "聖馬可鐘樓", "c": "t-name", "dy": 24}, {"t": "五六日 09:30–19:15", "c": "t-wed t-more", "dy": 44.0}, {"t": "€12", "c": "t-price t-more", "dy": 65.0}], "H": 75, "Hs": 33, "name": "聖馬可鐘樓", "latin": "Campanile di San Marco", "gq": "Campanile di San Marco", "hl": "五六日 09:30–19:15", "pl": "€12", "feature": "高 98.6 公尺，是威尼斯最高的建築。原塔在 1902 年突然倒塌，十年後「照原樣、在原地」重建。有電梯直達頂樓。", "tips": ["從頂樓俯瞰聖馬可大教堂的圓頂、總督宮屋頂、潟湖與對岸的聖喬治島。", "天氣晴朗（尤其北風過後）可以看到北方的阿爾卑斯山與多洛米蒂山。"], "hours": ["冬季 09:30 開門，最後入場 18:45，19:15 關閉（依官方 2023/24 冬季公告推估，出發前再確認）", "強風、濃霧時可能臨時關閉"], "when": "下午 16:30～17:20 日落前上去，可以看夕陽和點燈；或一早 09:30 人少。", "stay": "約 30～40 分鐘（含排電梯）", "price": "官網定價 €15，個人購票自動打 8 折，實付約 €12；需選日期時段。", "site": "https://www.basilicasanmarco.it/", "warn": "不能帶大背包與行李；冬季開放時間以官網公告為準", "remind": ["整點敲鐘時在頂樓非常大聲。", "背包需寄放在 Ateneo San Basso。", "2 月的日落約 17:20，想看夕陽要算好排隊時間。"], "fromBase": "從聖馬可廣場出發：100 m・步行約 1 分（直線距離 ×1.3 估算；過大運河要走橋或搭船，實際以 Google 地圖為準）"}, {"id": "sospiri", "cat": "open", "tier": "主要", "x": 1072.5, "y": 758.9, "lx": 1089.9, "ly": 737.7, "ux": 1089.9, "uy": 737.7, "nx": 1089.9, "ny": 737.7, "rows": [{"t": "嘆息橋", "c": "t-name", "dy": 24}], "H": 33, "Hs": 33, "name": "嘆息橋", "latin": "Ponte dei Sospiri", "gq": "Ponte dei Sospiri", "feature": "1600 年建成的白色石灰岩封閉拱橋，連接總督宮的審訊室與對面的新監獄。傳說囚犯走過橋時，從小窗看最後一眼威尼斯而嘆息。", "tips": ["最經典的拍攝點：站在臨潟湖的麥稈橋（Ponte della Paglia）上往運河裡拍。", "想從橋內走過，要買總督宮票，走參觀路線就會經過。"], "hours": ["外觀全天可看"], "when": "清晨或傍晚，麥稈橋上才擠得到前排。", "stay": "拍照約 10 分鐘", "price": "外觀免費；橋內含在總督宮聯票裡。", "remind": ["麥稈橋白天人潮非常擁擠，注意隨身財物。"], "fromBase": "從聖馬可廣場出發：300 m・步行約 4 分（直線距離 ×1.3 估算；過大運河要走橋或搭船，實際以 Google 地圖為準）"}, {"id": "rialto", "cat": "open", "tier": "主要", "x": 873.3, "y": 542.2, "lx": 893.3, "ly": 474.6, "ux": 893.3, "uy": 474.6, "nx": 893.3, "ny": 474.6, "rows": [{"t": "里亞托橋", "c": "t-name", "dy": 24}], "H": 33, "Hs": 33, "name": "里亞托橋", "latin": "Ponte di Rialto", "gq": "Ponte di Rialto", "feature": "大運河上最古老的橋，1591 年完成的石拱橋，橋上兩排店舖，連接聖馬可區與里亞托市場所在的聖保羅區，數百年來都是威尼斯的商業中心。", "tips": ["橋頂兩側的欄杆是看大運河的經典角度，南側可以看到運河轉彎。", "從橋下的 Riva del Vin、Riva del Carbon 河岸回望整座橋。"], "hours": ["全天開放", "橋上店舖約 10:00 開門"], "when": "清晨 08:00 前或晚上 19:00 後拍空景；傍晚燈光最美。", "stay": "約 15～20 分鐘", "price": "免費。", "remind": ["白天橋上非常擁擠，背包背前面。", "旁邊的里亞托市場只有早上營業，週日、週一沒有魚市，2/5 下午才抵達、週日休市，只能排在週六（2/6）早上。"], "fromBase": "從聖馬可廣場出發：600 m・步行約 8 分（直線距離 ×1.3 估算；過大運河要走橋或搭船，實際以 Google 地圖為準）"}, {"id": "accademia", "cat": "paid", "tier": "主要", "x": 569.5, "y": 925.2, "lx": 391.6, "ly": 841.2, "ux": 391.6, "uy": 841.2, "nx": 443.5, "ny": 940.8, "rows": [{"t": "學院美術館", "c": "t-name", "dy": 24}, {"t": "五六日 08:15–19:15", "c": "t-wed t-more", "dy": 44.0}, {"t": "€15（2/7 免費）", "c": "t-price t-more", "dy": 65.0}], "H": 75, "Hs": 33, "name": "學院美術館", "latin": "Gallerie dell'Accademia", "gq": "Gallerie dell'Accademia", "hl": "五六日 08:15–19:15", "pl": "€15（2/7 免費）", "feature": "收藏 14～18 世紀威尼斯畫派最完整的美術館：貝里尼、吉奧喬尼、提香、丁托列托、委羅內塞都在這裡。", "tips": ["吉奧喬尼《暴風雨》：至今仍解不開的謎樣構圖。", "委羅內塞《利未家的盛宴》：原本畫的是最後的晚餐，因被宗教裁判所質疑，畫家直接改了畫名。", "卡巴喬《聖烏蘇拉傳奇》系列：可以看到 15 世紀威尼斯街景與服裝。"], "hours": ["週二至週日 08:15–19:15（售票到 18:15）", "週一休館"], "when": "週六早上 08:15 開門，或週五下午抵達後（開到 19:15）；2/7（週日）是當月第一個週日免費入場，人會比較多。", "stay": "約 1.5～2 小時", "price": "全票 €15（2026 年度官方預算書資料）。2/7 是二月第一個週日，「博物館星期日」全民免費。", "site": "https://www.gallerieaccademia.it/", "remind": ["2/7（週日）看完往南走約 5 分鐘就是扎泰雷堤岸，可以接著去曬太陽、發呆。", "2/7（週日）免費日人潮多、可能要排隊，想好好看建議改在週六付費入場，或週五傍晚抵達後去（開到 19:15）。", "就在學院橋南端，可以和學院橋、佩姬古根漢美術館串在一起。", "達文西手稿《維特魯威人》屬於館藏，但平時不展出。"], "fromBase": "從聖馬可廣場出發：1.1 km・步行約 14 分（直線距離 ×1.3 估算；過大運河要走橋或搭船，實際以 Google 地圖為準）"}, {"id": "salute", "cat": "free", "tier": "主要", "x": 831.9, "y": 931.9, "lx": 697.2, "ly": 971.9, "ux": 697.2, "uy": 971.9, "nx": 858.9, "ny": 908.2, "rows": [{"t": "安康聖母大殿", "c": "t-name", "dy": 24}, {"t": "五六日 09:30–12:00、15:00–17:30", "c": "t-wed t-more", "dy": 44.0}], "H": 54, "Hs": 33, "name": "安康聖母大殿", "latin": "Basilica di Santa Maria della Salute", "gq": "Basilica di Santa Maria della Salute", "hl": "五六日 09:30–12:00、15:00–17:30", "feature": "1630 年大瘟疫奪走三分之一人口後，共和國許願興建的還願教堂。八角形巴洛克大圓頂佇立在大運河口，是威尼斯最具代表性的天際線。", "tips": ["聖器室裡有提香早期祭壇畫與多幅天花板畫，以及丁托列托《迦拿的婚宴》。", "教堂前的階梯是拍大運河口與對岸聖馬可的好位置。"], "hours": ["每日 09:30–12:00、15:00–17:30", "聖器室：週一至週六 10:00–12:00、15:00–17:00；週日 15:00–17:00"], "when": "下午 15:00～16:30，接著散步到海關角看夕陽。", "stay": "約 20～30 分鐘；加聖器室約 45 分鐘", "price": "教堂免費；聖器室約 €4～6（第三方資料）。持聖馬可大教堂的票 6 個月內可免費進聖器室。", "site": "https://basilicasalutevenezia.it/", "warn": "中午 12:00～15:00 關門", "remind": ["從聖馬可這岸過來最快的是搭貢多拉渡船（traghetto）或 1 號水上巴士到 Salute 站；走路要繞學院橋。"], "fromBase": "從聖馬可廣場出發：550 m・步行約 7 分（直線距離 ×1.3 估算；過大運河要走橋或搭船，實際以 Google 地圖為準）"}, {"id": "guggenheim", "cat": "paid", "tier": "主要", "x": 705.8, "y": 942.4, "lx": 516.2, "ly": 951.4, "ux": 516.2, "uy": 951.4, "nx": 623.5, "ny": 959.8, "rows": [{"t": "佩姬古根漢美術館", "c": "t-name", "dy": 24}, {"t": "五六日 10:00–18:00", "c": "t-wed t-more", "dy": 44.0}, {"t": "€17", "c": "t-price t-more", "dy": 65.0}], "H": 75, "Hs": 33, "name": "佩姬古根漢美術館", "latin": "Collezione Peggy Guggenheim", "gq": "Peggy Guggenheim Collection", "hl": "五六日 10:00–18:00", "pl": "€17", "feature": "美國收藏家佩姬・古根漢的故居，一層樓的白色宅邸就在大運河邊，收藏 20 世紀歐美現代藝術：畢卡索、達利、馬格利特、波洛克、康丁斯基。", "tips": ["臨大運河的露台：馬里諾・馬里尼的騎馬雕塑《城市天使》面向運河。", "雕塑花園與佩姬和她的愛犬們的墓。"], "hours": ["每日 10:00–18:00（最後入場 17:00）", "週二與 12/25 休館"], "when": "上午 10:00 開門或下午 15:00 後，和學院美術館排在同一天。", "stay": "約 1.5 小時", "price": "全票 €17（2026/5/1 起）；70 歲以上 €14。", "site": "https://www.guggenheim-venice.it/", "remind": ["週二休館（我們的日子週五～週日都有開）。", "館內咖啡館官網公告維修中，出發前看一下是否恢復營業。"], "fromBase": "從聖馬可廣場出發：800 m・步行約 10 分（直線距離 ×1.3 估算；過大運河要走橋或搭船，實際以 Google 地圖為準）"}, {"id": "sangiorgio", "cat": "paid", "tier": "主要", "x": 1158.1, "y": 1030.8, "lx": 1075.8, "ly": 1048.2, "ux": 1075.8, "uy": 1048.2, "nx": 1071.1, "ny": 979.8, "rows": [{"t": "聖喬治馬焦雷教堂", "c": "t-name", "dy": 24}, {"t": "五六日 08:30–18:00", "c": "t-wed t-more", "dy": 44.0}, {"t": "鐘樓 約 €8", "c": "t-price t-more", "dy": 65.0}], "H": 75, "Hs": 33, "name": "聖喬治馬焦雷教堂", "latin": "San Giorgio Maggiore", "gq": "Chiesa di San Giorgio Maggiore", "hl": "五六日 08:30–18:00", "pl": "鐘樓 約 €8", "feature": "聖馬可廣場正對面小島上的白色教堂，帕拉底歐設計的文藝復興傑作。鐘樓有電梯，是看聖馬可廣場全景最好的位置，人比聖馬可鐘樓少很多。", "tips": ["鐘樓頂：正面看總督宮、聖馬可鐘樓與大運河口，背面是朱代卡島與潟湖。", "丁托列托晚年的《最後的晚餐》與《收集嗎哪》，在主祭壇兩側。"], "hours": ["冬季（11 月～3 月）08:30–18:00，中午不休息", "鐘樓最後上樓為關門前 20 分鐘"], "when": "下午 15:30～17:00，看夕陽照在聖馬可這一岸。", "stay": "約 45 分鐘～1 小時（含水上巴士）", "price": "教堂免費；鐘樓約 €8（第三方資料，以現場為準）。", "site": "https://www.abbaziasangiorgio.it/", "remind": ["要搭 2 號水上巴士到 San Giorgio 站（從 San Zaccaria 一站，約 3 分鐘）。", "宗教儀式進行時暫停參觀與上鐘樓。"], "fromBase": "從聖馬可廣場出發：900 m・步行約 11 分（直線距離 ×1.3 估算；過大運河要走橋或搭船，實際以 Google 地圖為準）"}, {"id": "frari", "cat": "paid", "tier": "主要", "x": 498.8, "y": 605.2, "lx": 209.5, "ly": 521.2, "ux": 209.5, "uy": 521.2, "nx": 430.8, "ny": 554.2, "rows": [{"t": "榮耀聖母聖殿", "c": "t-name", "dy": 24}, {"t": "五六 09:00–18:00｜日 13:00–18:00", "c": "t-wed t-more", "dy": 44.0}, {"t": "約 €8", "c": "t-price t-more", "dy": 65.0}], "H": 75, "Hs": 33, "name": "榮耀聖母聖殿", "latin": "Basilica di Santa Maria Gloriosa dei Frari", "gq": "Basilica dei Frari", "hl": "五六 09:00–18:00｜日 13:00–18:00", "pl": "約 €8", "feature": "方濟會的哥德式紅磚大教堂，威尼斯最大的教堂之一。提香的兩幅祭壇巨作至今仍在原本為它們設計的位置，提香本人也長眠於此。", "tips": ["主祭壇：提香《聖母升天》，鮮紅色的聖母從唱詩班屏風的拱門中一眼就能看到。", "提香《佩薩羅家族的聖母》，在左側走道。", "聖器室：喬凡尼・貝里尼的三聯祭壇畫；另有卡諾瓦的金字塔形紀念墓與多那太羅的木雕施洗約翰。"], "hours": ["週一至週六 09:00–18:00", "週日與宗教節日 13:00–18:00", "最後入場為關門前 30 分鐘"], "when": "週六上午，接著走 3 分鐘到聖洛可大會堂；週五下午從火車站走往市區時也順路（開到 18:00）。", "stay": "約 45 分鐘～1 小時", "price": "約 €8（第三方資料），現場或官網購票；不包含在 Chorus 教堂通票內。", "site": "https://www.basilicadeifrari.it/", "warn": "週日下午 13:00 才開放", "remind": ["和聖洛可大會堂相距不到 200 公尺，可以排在同一個上午。"], "fromBase": "從聖馬可廣場出發：1.2 km・步行約 16 分（直線距離 ×1.3 估算；過大運河要走橋或搭船，實際以 Google 地圖為準）"}, {"id": "sanrocco", "cat": "paid", "tier": "推薦", "x": 425.7, "y": 627.3, "lx": 356.4, "ly": 644.7, "ux": 356.4, "uy": 644.7, "nx": 441.3, "ny": 636.3, "rows": [{"t": "聖洛可大會堂", "c": "t-name", "dy": 22}, {"t": "五六日 09:30–17:30", "c": "t-wed t-more", "dy": 40.1}, {"t": "€12", "c": "t-price t-more", "dy": 59.1}], "H": 69, "Hs": 31, "name": "聖洛可大會堂", "latin": "Scuola Grande di San Rocco", "gq": "Scuola Grande di San Rocco", "hl": "五六日 09:30–17:30", "pl": "€12", "feature": "被稱為「威尼斯的西斯汀禮拜堂」：丁托列托花了二十多年，在這座兄弟會會堂裡畫了六十多幅作品，全部留在原位。", "tips": ["二樓大廳天花板滿是丁托列托的舊約故事，館方提供手持鏡子，低頭從鏡子裡看就不用仰頭。", "接待室（Sala dell'Albergo）：丁托列托的《耶穌被釘十字架》，寬超過 12 公尺。"], "hours": ["每日 09:30–17:30（最後入場 17:00）", "12/25、1/1、復活節休館"], "when": "上午 10:00 左右，接在榮耀聖母聖殿之後。", "stay": "約 1 小時", "price": "全票 €12；大會堂＋旁邊聖洛可教堂聯票 €14（官網）。可刷卡，不用預約。", "site": "https://www.scuolagrandesanrocco.org/", "remind": ["鏡子在大廳入口處自取。", "從火車站或羅馬廣場走過來約 8～10 分鐘。"], "fromBase": "從聖馬可廣場出發：1.4 km・步行約 18 分（直線距離 ×1.3 估算；過大運河要走橋或搭船，實際以 Google 地圖為準）"}, {"id": "fenice", "cat": "paid", "tier": "推薦", "x": 780.8, "y": 777.1, "lx": 618, "ly": 745, "ux": 618, "uy": 745, "nx": 639.2, "ny": 797.1, "rows": [{"t": "鳳凰歌劇院", "c": "t-name", "dy": 22}, {"t": "約 09:30–18:00", "c": "t-wed t-more", "dy": 40.1}, {"t": "€12", "c": "t-price t-more", "dy": 59.1}], "H": 69, "Hs": 31, "name": "鳳凰歌劇院", "latin": "Teatro La Fenice", "gq": "Teatro La Fenice", "hl": "約 09:30–18:00", "pl": "€12", "feature": "1792 年開幕的歌劇院，兩度被大火燒毀又重建（最近一次 1996 年，2003 年重新開幕），名字正是「浴火鳳凰」。威爾第的《茶花女》《弄臣》都在這裡首演。", "tips": ["金色五層包廂的觀眾席與皇家包廂。", "阿波羅廳（Sale Apollinee）與瑪麗亞・卡拉絲的紀念展。"], "hours": ["白天開放參觀，約 09:30–18:00", "因排練、演出常臨時調整，出發前查官網的參觀日曆"], "when": "上午 09:30 開門或下午 14:00 後；晚上若有演出可以考慮買票看戲。", "stay": "約 45 分鐘", "price": "自助參觀（含語音導覽）約 €12（第三方資料）。", "site": "https://www.teatrolafenice.it/", "warn": "參觀時間常因排練變動，當天先確認", "remind": ["語音導覽可下載官方 app 用自己的手機聽，記得帶耳機。"], "fromBase": "從聖馬可廣場出發：450 m・步行約 6 分（直線距離 ×1.3 估算；過大運河要走橋或搭船，實際以 Google 地圖為準）"}, {"id": "bovolo", "cat": "paid", "tier": "推薦", "x": 806.9, "y": 717.4, "lx": 764, "ly": 632, "ux": 764, "uy": 632, "nx": 822.5, "ny": 726.4, "rows": [{"t": "蝸牛階梯", "c": "t-name", "dy": 22}, {"t": "五六日 09:30–17:30", "c": "t-wed t-more", "dy": 40.1}, {"t": "約 €9", "c": "t-price t-more", "dy": 59.1}], "H": 69, "Hs": 31, "name": "蝸牛階梯", "latin": "Scala Contarini del Bovolo", "gq": "Scala Contarini del Bovolo", "hl": "五六日 09:30–17:30", "pl": "約 €9", "feature": "藏在小庭院裡的 15 世紀末螺旋外梯，五層拱廊像蝸牛殼一樣盤旋而上（bovolo 是威尼斯方言的「蝸牛」）。頂樓可以看到聖馬可的屋頂與鐘樓。", "tips": ["庭院裡仰拍整座螺旋拱廊。", "頂樓圓頂小亭：360 度的紅瓦屋頂與聖馬可鐘樓。"], "hours": ["冬季每日 09:30–17:30（最後入場 17:00；2025/26 冬季資料）", "13:30–14:00 不能上樓（第三方資料）"], "when": "上午開門時或下午 16:30 前後，光線斜照拱廊。", "stay": "約 30 分鐘", "price": "全票約 €9（第三方資料）。", "remind": ["入口在 Campo Manin 旁的小巷，跟著黃色指標走。", "容量有限，嘉年華期間建議先網路買票。"], "fromBase": "從聖馬可廣場出發：400 m・步行約 5 分（直線距離 ×1.3 估算；過大運河要走橋或搭船，實際以 Google 地圖為準）"}, {"id": "mercato", "cat": "free", "tier": "推薦", "x": 786.2, "y": 463.2, "lx": 592.6, "ly": 393.4, "ux": 592.6, "uy": 393.4, "nx": 670.2, "ny": 478.8, "rows": [{"t": "里亞托市場", "c": "t-name", "dy": 22}, {"t": "五六 07:30–12:00｜日休", "c": "t-wed t-more", "dy": 40.1}], "H": 50, "Hs": 31, "name": "里亞托市場", "latin": "Mercato di Rialto / Pescheria", "gq": "Mercato di Rialto", "hl": "五六 07:30–12:00｜日休", "feature": "從 11 世紀就在這裡的市民菜市場：新哥德式拱廊下的魚市（Pescheria）和蔬果市場（Erbaria），潟湖的漁獲和小島種的蔬菜都在這裡。", "tips": ["魚市拱廊下的潟湖海鮮：蜘蛛蟹、墨魚、小蝦。", "市場周邊的小酒館（bacaro）一早就有 cicchetti 下酒小點和 ombra 小杯酒。"], "hours": ["蔬果市場：週一至週六約 07:30–13:00", "魚市：週二至週六約 07:30–12:00（週日、週一休）"], "when": "只能排週六（2/6）08:00～10:00：週五下午才抵達、週日休市，11:00 後攤販開始收攤。", "stay": "約 30～45 分鐘", "price": "免費。", "warn": "只有早上營業，週日全休", "remind": ["不要直接用手摸商品，請攤販拿。", "可以搭 1 號水上巴士到 Rialto Mercato 站，下船就是市場。"], "fromBase": "從聖馬可廣場出發：900 m・步行約 11 分（直線距離 ×1.3 估算；過大運河要走橋或搭船，實際以 Google 地圖為準）"}, {"id": "pontacc", "cat": "open", "tier": "推薦", "x": 593.7, "y": 876.0, "lx": 602.7, "ly": 891.6, "ux": 602.7, "uy": 891.6, "nx": 609.3, "ny": 885.0, "rows": [{"t": "學院橋", "c": "t-name", "dy": 22}], "H": 31, "Hs": 31, "name": "學院橋", "latin": "Ponte dell'Accademia", "gq": "Ponte dell'Accademia", "feature": "大運河上的木造拱橋，連接聖馬可區與硬壤區（Dorsoduro）。橋頂往東看，是大運河盡頭安康聖母大殿的經典畫面。", "tips": ["橋頂東望：大運河、兩岸宮殿與安康聖母大殿的圓頂。"], "hours": ["全天開放"], "when": "日落前後（2 月約 17:20），或清晨。", "stay": "拍照約 10 分鐘", "price": "免費。", "fromBase": "從聖馬可廣場出發：1.0 km・步行約 12 分（直線距離 ×1.3 估算；過大運河要走橋或搭船，實際以 Google 地圖為準）"}, {"id": "dogana", "cat": "open", "tier": "推薦", "x": 898.3, "y": 956.2, "lx": 978.0, "ly": 1002.2, "ux": 978.0, "uy": 1002.2, "nx": 913.9, "ny": 965.2, "rows": [{"t": "海關角", "c": "t-name", "dy": 22}], "H": 31, "Hs": 31, "name": "海關角", "latin": "Punta della Dogana", "gq": "Punta della Dogana", "feature": "大運河與朱代卡運河交會的三角尖端，17 世紀的海關大樓頂上有金球與命運女神風向標。站在尖端，左邊聖馬可、右邊聖喬治島，整個聖馬可灣一覽無遺。", "tips": ["尖端岸邊：聖馬可灣 270 度的水岸全景。", "回頭看安康聖母大殿的大圓頂。"], "hours": ["戶外岸邊全天開放", "館內（皮諾收藏館）展覽空檔休館，下一檔 2027/3/21 才開"], "when": "傍晚 16:30～17:30，看夕陽與對岸點燈。", "stay": "約 15～20 分鐘", "price": "戶外免費。", "site": "https://www.pinaultcollection.com/palazzograssi/", "warn": "館內在我們旅程期間不開放（2027/3/21 起才有新展）", "remind": ["岸邊沒有欄杆，注意腳下與潮濕石面。"], "fromBase": "從聖馬可廣場出發：550 m・步行約 7 分（直線距離 ×1.3 估算；過大運河要走橋或搭船，實際以 Google 地圖為準）"}, {"id": "acquaalta", "cat": "free", "tier": "推薦", "x": 1121.0, "y": 556.0, "lx": 1047.1, "ly": 488.0, "ux": 1047.1, "uy": 488.0, "nx": 1138.4, "ny": 535.8, "rows": [{"t": "沉沒書店", "c": "t-name", "dy": 22}, {"t": "五六日 09:00–19:30", "c": "t-wed t-more", "dy": 40.1}], "H": 50, "Hs": 31, "name": "沉沒書店", "latin": "Libreria Acqua Alta", "gq": "Libreria Acqua Alta", "hl": "五六日 09:00–19:30", "feature": "為了對付漲潮，老闆把舊書放在浴缸、獨木舟和一艘貢多拉裡。後院有一座用舊書疊成的樓梯，可以爬上去看運河。店裡還住著幾隻貓。", "tips": ["店中央的貢多拉書架。", "後院的「書本樓梯」，爬上去看後面的小運河。"], "hours": ["每日約 09:00–19:30（第三方資料）"], "when": "早上 09:00 開門或晚上 18:30 後，中午常要排隊。", "stay": "約 20 分鐘", "price": "免費入場。", "remind": ["店內空間窄，背包背前面；拍照之外也可以買張明信片支持一下。"], "fromBase": "從聖馬可廣場出發：700 m・步行約 9 分（直線距離 ×1.3 估算；過大運河要走橋或搭船，實際以 Google 地圖為準）"}, {"id": "zanipolo", "cat": "paid", "tier": "推薦", "x": 1107.7, "y": 457.6, "lx": 1027.9, "ly": 224.4, "ux": 1027.9, "uy": 224.4, "nx": 1028.7, "ny": 386.6, "rows": [{"t": "聖若望及保祿大殿", "c": "t-name", "dy": 22}, {"t": "五六 09:00–17:45｜日 12:00–17:45", "c": "t-wed t-more", "dy": 40.1}, {"t": "€3.5", "c": "t-price t-more", "dy": 59.1}], "H": 69, "Hs": 31, "name": "聖若望及保祿大殿", "latin": "Basilica dei Santi Giovanni e Paolo", "gq": "Basilica dei Santi Giovanni e Paolo", "hl": "五六 09:00–17:45｜日 12:00–17:45", "pl": "€3.5", "feature": "道明會的哥德式大教堂，威尼斯人暱稱 San Zanipolo。共有 25 位總督長眠於此，被稱為「總督的萬神殿」。", "tips": ["教堂外廣場：維洛及奧的科萊奧尼騎馬銅像，文藝復興騎馬像的代表作。", "旁邊大理石錯視立面的聖馬可大會堂（今為市立醫院）。", "喬凡尼・貝里尼的《聖文森特・費雷祭壇畫》。"], "hours": ["週一至週六 09:00–17:45", "週日與宗教節日 12:00–17:45"], "when": "下午，可以和奇蹟聖母堂、沉沒書店一起走。", "stay": "約 30～40 分鐘", "price": "€3.5（第三方資料引述官網）。", "site": "https://santigiovanniepaolo.it/", "warn": "週日中午 12:00 才開放參觀", "fromBase": "從聖馬可廣場出發：900 m・步行約 11 分（直線距離 ×1.3 估算；過大運河要走橋或搭船，實際以 Google 地圖為準）"}, {"id": "miracoli", "cat": "paid", "tier": "推薦", "x": 1008.9, "y": 503.0, "lx": 940.6, "ly": 364.5, "ux": 940.6, "uy": 364.5, "nx": 1026.3, "ny": 482.8, "rows": [{"t": "奇蹟聖母堂", "c": "t-name", "dy": 22}, {"t": "五六 10:30–16:30｜日休", "c": "t-wed t-more", "dy": 40.1}, {"t": "€3", "c": "t-price t-more", "dy": 59.1}], "H": 69, "Hs": 31, "name": "奇蹟聖母堂", "latin": "Santa Maria dei Miracoli", "gq": "Chiesa di Santa Maria dei Miracoli", "hl": "五六 10:30–16:30｜日休", "pl": "€3", "feature": "1481–89 年由皮耶特羅・隆巴爾多打造的小教堂，裡外全部包覆彩色大理石，像一個珠寶盒，是威尼斯人最愛的婚禮教堂。", "tips": ["從對岸小橋看整座教堂貼著運河的側面。", "內部天花板 50 格先知與聖人畫像。"], "hours": ["週一至週六 10:30–16:30（部分資料有中午休息）", "週日不開放參觀（Chorus 教堂週日休）"], "when": "週六下午（週五 16:30 就關、週日不開），與聖若望及保祿大殿串連。", "stay": "約 20 分鐘", "price": "€3；或 Chorus 教堂通票約 €12（第三方資料）。", "site": "https://www.chorusvenezia.org/", "warn": "週日不開放；營業時間以現場公告為準", "fromBase": "從聖馬可廣場出發：700 m・步行約 9 分（直線距離 ×1.3 估算；過大運河要走橋或搭船，實際以 Google 地圖為準）"}, {"id": "correr", "cat": "paid", "tier": "次要", "x": 902.2, "y": 776.5, "lx": 911.2, "ly": 792.1, "ux": 911.2, "uy": 792.1, "nx": 1001.2, "ny": 648.5, "rows": [{"t": "柯雷爾博物館", "c": "t-name", "dy": 20}, {"t": "2/7 考古館免費", "c": "t-price t-more", "dy": 36.2}], "H": 46, "Hs": 29, "name": "柯雷爾博物館", "latin": "Museo Correr", "gq": "Museo Correr", "hl": "五六日 10:00–17:00", "pl": "2/7 考古館免費", "feature": "位在聖馬可廣場西側的拿破崙翼，展示威尼斯共和國的歷史、地圖、錢幣與卡諾瓦的雕塑，還有茜茜公主住過的皇家寓所。", "tips": ["德・巴爾巴里 1500 年的威尼斯鳥瞰木刻地圖。", "卡諾瓦早期雕塑《代達洛斯與伊卡洛斯》。", "連通的國立考古博物館與馬爾恰納圖書館紀念廳。"], "hours": ["11/1–3/31 每日 10:00–17:00（最後入場 16:00）"], "when": "總督宮之後的隔天上午，或下午 14:00～16:00 人少時。", "stay": "約 1～1.5 小時", "price": "包含在總督宮的聖馬可廣場博物館聯票內（票價見總督宮）。", "site": "https://correr.visitmuve.it/", "pass_": ["總督宮（含嘆息橋與監獄）", "柯雷爾博物館", "國立考古博物館", "馬爾恰納國家圖書館紀念廳"], "remind": ["聯票在總督宮使用後 3 天內可進柯雷爾博物館。", "2/7（第一個週日）「博物館星期日」：同棟的國立考古博物館與馬爾恰納圖書館紀念廳免費開放 10:00–18:00，入口改在小廣場 17 號，不用預約（往年資料）；柯雷爾博物館本身是市立的，不免費。"], "fromBase": "從聖馬可廣場出發：150 m・步行約 2 分（直線距離 ×1.3 估算；過大運河要走橋或搭船，實際以 Google 地圖為準）"}, {"id": "riva", "cat": "open", "tier": "次要", "x": 1203.0, "y": 787.6, "lx": 1212.0, "ly": 743.0, "ux": 1212.0, "uy": 743.0, "nx": 1212.0, "ny": 743.0, "rows": [{"t": "斯拉夫人堤岸", "c": "t-name", "dy": 20}], "H": 29, "Hs": 29, "name": "斯拉夫人堤岸", "latin": "Riva degli Schiavoni", "gq": "Riva degli Schiavoni", "feature": "從總督宮往東延伸的寬闊水岸大道，因昔日達爾馬提亞（斯拉夫）商人在此停泊而得名，面對聖馬可灣與聖喬治島。", "tips": ["沿岸往東散步到軍械庫與綠園城堡區，越走人越少。"], "hours": ["全天開放"], "when": "日落時分（2 月約 17:20）。", "stay": "散步約 20～30 分鐘", "price": "免費。", "fromBase": "從聖馬可廣場出發：650 m・步行約 8 分（直線距離 ×1.3 估算；過大運河要走橋或搭船，實際以 Google 地圖為準）"}, {"id": "stefano", "cat": "open", "tier": "次要", "x": 613.6, "y": 763.3, "lx": 633.6, "ly": 699.7, "ux": 633.6, "uy": 699.7, "nx": 631.0, "ny": 753.5, "rows": [{"t": "聖斯德望廣場", "c": "t-name", "dy": 20}], "H": 29, "Hs": 29, "name": "聖斯德望廣場", "latin": "Campo Santo Stefano", "gq": "Campo Santo Stefano", "feature": "聖馬可區最大的廣場之一，介於學院橋與聖馬可之間，有咖啡館和冰淇淋店，是走路途中歇腳的好地方。", "tips": ["聖斯德望教堂的船底形木造天花板與傾斜的鐘樓。"], "hours": ["廣場全天開放"], "when": "從學院橋走往聖馬可的途中。", "stay": "約 15 分鐘", "price": "免費。", "fromBase": "從聖馬可廣場出發：900 m・步行約 11 分（直線距離 ×1.3 估算；過大運河要走橋或搭船，實際以 Google 地圖為準）"}, {"id": "margherita", "cat": "open", "tier": "次要", "x": 383.9, "y": 766.6, "lx": 247.9, "ly": 782.2, "ux": 247.9, "uy": 782.2, "nx": 320.4, "ny": 719.6, "rows": [{"t": "聖瑪格麗特廣場", "c": "t-name", "dy": 20}], "H": 29, "Hs": 29, "name": "聖瑪格麗特廣場", "latin": "Campo Santa Margherita", "gq": "Campo Santa Margherita", "feature": "大學區的長形廣場，學生和在地人聚集，傍晚喝一杯 Spritz、吃 cicchetti 價格比聖馬可親民許多。", "tips": ["傍晚的開胃酒時段（aperitivo），坐在露天座看在地生活。"], "hours": ["廣場全天開放", "酒吧多營業到深夜"], "when": "傍晚 17:30 之後。", "stay": "約 30 分鐘～1 小時", "price": "免費。", "fromBase": "從聖馬可廣場出發：1.5 km・步行約 19 分（直線距離 ×1.3 估算；過大運河要走橋或搭船，實際以 Google 地圖為準）"}, {"id": "zattere", "cat": "open", "tier": "次要", "x": 484.3, "y": 997.6, "lx": 378.3, "ly": 1013.2, "ux": 378.3, "uy": 1013.2, "nx": 502.3, "ny": 983.1, "rows": [{"t": "扎泰雷堤岸", "c": "t-name", "dy": 20}], "H": 29, "Hs": 29, "name": "扎泰雷堤岸", "latin": "Fondamenta delle Zattere", "gq": "Fondamenta Zattere ai Gesuati", "feature": "硬壤區南岸、面對朱代卡運河的長堤，整天曬得到太陽，是威尼斯人冬天散步的地方。", "tips": ["Gelateria Nico 的榛果巧克力冰淇淋 Gianduiotto（在地老店）。", "對岸朱代卡島上帕拉底歐的救主堂。"], "hours": ["全天開放"], "when": "中午到下午，陽光最暖。", "stay": "散步約 30 分鐘", "price": "免費。", "remind": ["2/7（日）建議接在學院美術館後面：看完往南走約 5 分鐘就到，曬太陽、喝咖啡坐一下，再慢慢回去準備 17:00 的歌劇。", "堤岸邊有幾處可以坐下來看運河的地方，是威尼斯少數能悠閒發呆的水岸。"], "fromBase": "從聖馬可廣場出發：1.4 km・步行約 17 分（直線距離 ×1.3 估算；過大運河要走橋或搭船，實際以 Google 地圖為準）"}, {"id": "giudecca", "cat": "open", "tier": "次要", "x": 746.0, "y": 1182.8, "lx": 660.0, "ly": 1135.8, "ux": 660.0, "uy": 1135.8, "nx": 660.0, "ny": 1135.8, "rows": [{"t": "朱代卡島（下次再去）", "c": "t-name", "dy": 20}], "H": 29, "Hs": 29, "name": "朱代卡島（下次再去）", "latin": "Isola della Giudecca", "gq": "Chiesa del Santissimo Redentore", "feature": "扎泰雷堤岸對面的長條島，以住宅區為主，遊客比主島少很多。帕拉底歐設計的救主堂（Il Redentore）就在岸邊。", "tips": ["沿北岸的堤岸散步，回看對岸硬壤區與扎泰雷的景色。", "救主堂的白色立面。"], "hours": ["島上街道全天開放"], "when": "這次時間有限，建議留到下次來威尼斯再去。", "stay": "約 1～2 小時", "price": "上島免費，但渡輪要用公船票或交通通行證，不是免費的。", "remind": ["從扎泰雷搭公船（2 號或 4.1／4.2 號線）過去，約 5 分鐘。", "網路上說「完全沒有遊客」有點誇張，只是遊客比較少。", "從這裡看到的是對岸扎泰雷、硬壤區；想看聖馬可那一側的經典全景，聖喬治島的鐘樓比較好。"], "fromBase": "從聖馬可廣場出發：1.2 km・步行約 16 分（直線距離 ×1.3 估算；過大運河要走橋或搭船，實際以 Google 地圖為準）"}, {"id": "ghetto", "cat": "open", "tier": "次要", "x": 499.9, "y": 171.3, "lx": 466.4, "ly": 124.3, "ux": 466.4, "uy": 124.3, "nx": 466.4, "ny": 124.3, "rows": [{"t": "猶太區", "c": "t-name", "dy": 20}], "H": 29, "Hs": 29, "name": "猶太區", "latin": "Ghetto di Venezia", "gq": "Campo del Ghetto Novo", "feature": "1516 年設立，世界上第一個被稱為 Ghetto 的猶太人居住區。因空間有限，房子越蓋越高，是威尼斯少見的「高樓」。", "tips": ["新猶太區廣場（Campo del Ghetto Novo）與周圍的猶太會堂外觀。", "猶太烘焙坊的傳統甜點。"], "hours": ["街區全天開放", "週六（安息日）許多店家與相關設施不營業"], "when": "週五下午或週日白天（週六安息日多數店家休息）。", "stay": "約 30 分鐘", "price": "免費。", "remind": ["2/5（五）14:55 到站後可以直接從這區開始：火車站走過來約 10 分鐘，逛完接米塞里科迪亞堤岸或 Strada Nova，一路往里亞托方向走，順路不趕。", "這一帶是在地人生活的街區，很適合關掉導航隨便走；但 2 月約 17:30 就天黑，迷路最好排在白天。", "出發前先下載離線地圖，手機帶行動電源；遇到漲水時有些巷子會走不通。"], "fromBase": "從聖馬可廣場出發：1.9 km・步行約 24 分（直線距離 ×1.3 估算；過大運河要走橋或搭船，實際以 Google 地圖為準）"}, {"id": "misericordia", "cat": "open", "tier": "次要", "x": 648.4, "y": 193.4, "lx": 577.4, "ly": 146.4, "ux": 577.4, "uy": 146.4, "nx": 577.4, "ny": 146.4, "rows": [{"t": "米塞里科迪亞堤岸", "c": "t-name", "dy": 20}], "H": 29, "Hs": 29, "name": "米塞里科迪亞堤岸", "latin": "Fondamenta della Misericordia / degli Ormesini", "gq": "Fondamenta della Misericordia", "feature": "卡納雷吉歐區的運河岸邊，整排小酒館與餐廳，傍晚是在地人喝開胃酒、吃 cicchetti 的地方。", "tips": ["沿運河一家家小酒館站著吃 cicchetti 配一小杯 ombra。"], "hours": ["街道全天開放", "酒館多從傍晚開到深夜"], "when": "傍晚 18:00 之後。", "stay": "約 1 小時", "price": "免費。", "fromBase": "從聖馬可廣場出發：1.6 km・步行約 21 分（直線距離 ×1.3 估算；過大運河要走橋或搭船，實際以 Google 地圖為準）"}, {"id": "cadoro", "cat": "free", "tier": "次要", "x": 804.6, "y": 392.4, "lx": 771.1, "ly": 248.4, "ux": 771.1, "uy": 248.4, "nx": 703.0, "ny": 412.4, "rows": [{"t": "黃金宮", "c": "t-name", "dy": 20}], "H": 29, "Hs": 29, "name": "黃金宮", "latin": "Ca' d'Oro", "gq": "Ca' d'Oro", "hl": "整修中，只看外觀", "feature": "1420 年代完成的哥德式宮殿，立面原本貼金，是大運河上最優雅的立面之一，內部是弗蘭凱蒂美術館。", "tips": ["從大運河上看立面：搭 1 號水上巴士經過最清楚。"], "hours": ["美術館整修中，預計 2027 年春天重新開放", "外觀隨時可看"], "when": "搭 1 號水上巴士遊大運河時順看。", "stay": "外觀約 5 分鐘", "price": "外觀免費。", "site": "https://www.cadoro.org/", "warn": "美術館整修閉館中（預計 2027 春天重開），2 月去只能看外觀", "fromBase": "從聖馬可廣場出發：1.0 km・步行約 12 分（直線距離 ×1.3 估算；過大運河要走橋或搭船，實際以 Google 地圖為準）"}, {"id": "grimani", "cat": "paid", "tier": "次要", "x": 1068.2, "y": 584.8, "lx": 1106.8, "ly": 572.2, "ux": 1106.8, "uy": 572.2, "nx": 1085.6, "ny": 575.0, "rows": [{"t": "格里馬尼宮", "c": "t-name", "dy": 20}, {"t": "2/7 免費", "c": "t-price t-more", "dy": 36.2}], "H": 46, "Hs": 29, "name": "格里馬尼宮", "latin": "Museo di Palazzo Grimani", "gq": "Museo di Palazzo Grimani", "hl": "五六日 10:00–19:00", "pl": "2/7 免費", "feature": "16 世紀格里馬尼家族的宅邸，現為國立博物館。主教喬凡尼・格里馬尼把收藏的古希臘羅馬雕像展示在專門設計的「講壇廳」裡，是威尼斯少見的文藝復興收藏宮殿。", "tips": ["講壇廳（Sala della Tribuna）：天窗下懸吊著劫走甘尼米德的老鷹雕像，四壁排滿古代雕塑。", "繪滿怪誕紋飾的濕壁畫房間與總督廳。"], "hours": ["週二至週日 10:00–19:00（最後入場 18:00）", "週一休館"], "when": "2/7（週日）免費日上午，接著走到沉沒書店與聖若望及保祿大殿。", "stay": "約 1 小時", "price": "平日全票 €14（第三方資料）；2/7 是當月第一個週日，「博物館星期日」免費。", "site": "https://polomusealeveneto.beniculturali.it/musei/museo-di-palazzo-grimani", "remind": ["2/7 免費是依往年「博物館星期日」慣例，2027 年名單出發前到 cultura.gov.it 再確認。", "就在聖瑪利亞福爾摩沙廣場旁，離聖馬可廣場步行約 10 分鐘。"], "fromBase": "從聖馬可廣場出發：550 m・步行約 7 分（直線距離 ×1.3 估算；過大運河要走橋或搭船，實際以 Google 地圖為準）"}, {"id": "oriente", "cat": "paid", "tier": "次要", "x": 699.1, "y": 334.4, "lx": 554.7, "ly": 316.1, "ux": 554.7, "uy": 316.1, "nx": 640.3, "ny": 351.8, "rows": [{"t": "東方藝術博物館", "c": "t-name", "dy": 20}, {"t": "2/7 免費", "c": "t-price t-more", "dy": 36.2}], "H": 46, "Hs": 29, "name": "東方藝術博物館", "latin": "Museo d'Arte Orientale (Ca' Pesaro)", "gq": "Ca' Pesaro", "hl": "五六日 10:00–17:00", "pl": "2/7 免費", "feature": "位在大運河旁卡佩薩羅宮的三樓，是歐洲數一數二的日本江戶時代藝術收藏，來自波旁王室巴爾迪伯爵 1887–89 年遠東之旅帶回的近三萬件文物。", "tips": ["江戶時代的武士盔甲、刀劍與漆器。", "同棟一、二樓是市立國際現代美術館（需另購票）。"], "hours": ["冬季週二至週日 10:00–17:00", "週一休館"], "when": "2/7 下午，可搭 1 號水上巴士到 San Stae 站。", "stay": "約 45 分鐘", "price": "平日與現代美術館聯票 €15；2/7 國立部分免費（往年名單有列）。", "warn": "免費日是否需要經過市立美術館購票口，以現場為準", "remind": ["東方藝術博物館是國立的，但樓下的現代美術館是市立的，免費日通常只免東方藝術博物館部分。", "2027 年名單出發前到 cultura.gov.it 再確認。"], "fromBase": "從聖馬可廣場出發：1.3 km・步行約 16 分（直線距離 ×1.3 估算；過大運河要走橋或搭船，實際以 Google 地圖為準）"}, {"id": "scalzi", "cat": "open", "tier": "推薦", "x": 354.3, "y": 340.5, "lx": 369.9, "ly": 349.5, "ux": 369.9, "uy": 349.5, "nx": 369.9, "ny": 349.5, "rows": [{"t": "赤足橋", "c": "t-name", "dy": 22}], "H": 31, "Hs": 31, "name": "赤足橋", "latin": "Ponte degli Scalzi", "gq": "Ponte degli Scalzi", "feature": "大運河四座橋之一，就在火車站旁邊。1934 年完成的白色伊斯特拉石單拱橋，取代原本的鐵橋，名字來自橋頭的赤足加爾默羅會教堂（Chiesa degli Scalzi）。", "tips": ["橋頂往東看大運河的第一段，兩岸宮殿一路排開。", "橋頭的赤足教堂巴洛克立面。"], "hours": ["全天開放"], "when": "一出火車站就會經過；傍晚看運河點燈。", "stay": "約 10 分鐘", "price": "免費。", "remind": ["從火車站往里亞托、聖馬可走路，第一步就是過這座橋；石階多，拖行李要扛。"], "fromBase": "從聖馬可廣場出發：1.9 km・步行約 24 分（直線距離 ×1.3 估算；過大運河要走橋或搭船，實際以 Google 地圖為準）"}, {"id": "costituzione", "cat": "open", "tier": "推薦", "x": 268.7, "y": 471.5, "lx": 284.3, "ly": 480.5, "ux": 284.3, "uy": 480.5, "nx": 284.3, "ny": 480.5, "rows": [{"t": "憲法橋", "c": "t-name", "dy": 22}], "H": 31, "Hs": 31, "name": "憲法橋", "latin": "Ponte della Costituzione", "gq": "Ponte della Costituzione", "feature": "大運河上最新的橋，西班牙建築師卡拉特拉瓦設計、2008 年啟用，玻璃台階搭配紅色鋼骨的低平拱，連接火車站與羅馬廣場巴士總站。", "tips": ["紅色鋼拱與玻璃台階的現代造型，和古城形成對比。"], "hours": ["全天開放"], "when": "搭巴士往返機場、羅馬廣場時經過。", "stay": "約 5 分鐘", "price": "免費。", "warn": "玻璃台階下雨或結霜時很滑", "remind": ["台階高低不一，拖行李要小心；雨天走旁邊的石面部分。"], "fromBase": "從聖馬可廣場出發：1.9 km・步行約 24 分（直線距離 ×1.3 估算；過大運河要走橋或搭船，實際以 Google 地圖為準）"}, {"cross": [828.1, 422.9, 788.9, 450.5], "id": "tr_sofia", "cat": "paid", "tier": "推薦", "x": 800.7, "y": 442.2, "lx": 870.7, "ly": 252.0, "ux": 870.7, "uy": 252.0, "nx": 839.3, "ny": 416.3, "rows": [{"t": "渡船・聖索菲亞", "c": "t-name", "dy": 22}, {"t": "五六日 07:30–18:30", "c": "t-wed t-more", "dy": 40.1}, {"t": "€2", "c": "t-price t-more", "dy": 59.1}], "H": 69, "Hs": 31, "name": "渡船・聖索菲亞", "latin": "Traghetto Santa Sofia – Pescaria", "gq": "Traghetto Santa Sofia", "hl": "五六日 07:30–18:30", "pl": "€2", "feature": "連接卡納雷吉歐的聖索菲亞廣場與對岸的里亞托魚市，是最熱鬧、最有在地感的一條渡船，早上很多買菜的居民。", "tips": ["站著搭的公共貢多拉（traghetto），兩位船夫划槳，橫渡大運河約 2～3 分鐘，比觀光貢多拉便宜很多。"], "hours": ["冬季（10/1–3/31）每日 07:30–18:30"], "when": "週六早上逛完里亞托市場，從魚市這側搭過去，接黃金宮外觀與新街（Strada Nova）。", "stay": "約 5 分鐘（含等船）", "price": "觀光客每人 €2（居民 €0.70），上船付現金給船夫。", "warn": "營業時間為第三方資料，冬季、天候或人手不足時可能停駛", "remind": ["只收現金，準備好 €2 銅板。", "照在地習慣站著搭，船身會晃，上下船扶好船夫的手；也可以坐在船邊。", "碼頭找黃色招牌、上面有黑色貢多拉圖案和「Traghetto」字樣。", "營業時間是第三方旅遊網站整理，現場碼頭木樁上通常貼有時刻表，以現場為準。"], "fromBase": "從聖馬可廣場出發：900 m・步行約 11 分（直線距離 ×1.3 估算；過大運河要走橋或搭船，實際以 Google 地圖為準）"}, {"cross": [852.1, 603.7, 816.1, 572.0], "id": "tr_carbon", "cat": "paid", "tier": "推薦", "x": 831.9, "y": 585.9, "lx": 593.0, "ly": 451.8, "ux": 593.0, "uy": 451.8, "nx": 698.9, "ny": 601.5, "rows": [{"t": "渡船・里亞托", "c": "t-name", "dy": 22}, {"t": "五六 08:00–14:00｜日休", "c": "t-wed t-more", "dy": 40.1}, {"t": "€2", "c": "t-price t-more", "dy": 59.1}], "H": 69, "Hs": 31, "name": "渡船・里亞托", "latin": "Traghetto Riva del Carbon – Riva del Vin", "gq": "Traghetto Riva del Carbon", "hl": "五六 08:00–14:00｜日休", "pl": "€2", "feature": "在里亞托橋南邊一點，連接聖馬可這側的碳堤岸（Riva del Carbon）與聖保羅這側的酒堤岸（Riva del Vin）。里亞托橋太擠時的替代路線，還能從水面上看里亞托橋。", "tips": ["站著搭的公共貢多拉（traghetto），兩位船夫划槳，橫渡大運河約 2～3 分鐘，比觀光貢多拉便宜很多。"], "hours": ["冬季週一至週六 08:00–14:00", "週日停駛"], "when": "只能排週六上午：週五下午才到、14:00 收，週日不開。", "stay": "約 5 分鐘（含等船）", "price": "觀光客每人 €2（居民 €0.70），上船付現金給船夫。", "warn": "營業時間為第三方資料，冬季、天候或人手不足時可能停駛", "remind": ["只收現金，準備好 €2 銅板。", "照在地習慣站著搭，船身會晃，上下船扶好船夫的手；也可以坐在船邊。", "碼頭找黃色招牌、上面有黑色貢多拉圖案和「Traghetto」字樣。", "營業時間是第三方旅遊網站整理，現場碼頭木樁上通常貼有時刻表，以現場為準。"], "fromBase": "從聖馬可廣場出發：550 m・步行約 7 分（直線距離 ×1.3 估算；過大運河要走橋或搭船，實際以 Google 地圖為準）"}, {"cross": [612.3, 725.7, 587.9, 684.4], "id": "tr_toma", "cat": "paid", "tier": "推薦", "x": 601.5, "y": 707.5, "lx": 444.7, "ly": 723.1, "ux": 444.7, "uy": 723.1, "nx": 617.1, "ny": 716.5, "rows": [{"t": "渡船・聖托馬", "c": "t-name", "dy": 22}, {"t": "五六日 07:30–18:30", "c": "t-wed t-more", "dy": 40.1}, {"t": "€2", "c": "t-price t-more", "dy": 59.1}], "H": 69, "Hs": 31, "name": "渡船・聖托馬", "latin": "Traghetto San Tomà – Santo Stefano", "gq": "Traghetto San Tomà", "hl": "五六日 07:30–18:30", "pl": "€2", "feature": "連接聖保羅區的聖托馬與聖馬可區聖斯德望一帶，從榮耀聖母聖殿、聖洛可大會堂走到聖馬可這側最省路。", "tips": ["站著搭的公共貢多拉（traghetto），兩位船夫划槳，橫渡大運河約 2～3 分鐘，比觀光貢多拉便宜很多。"], "hours": ["冬季（10/1–3/31）每日 07:30–18:30"], "when": "參觀完榮耀聖母聖殿、聖洛可大會堂後，直接搭過去接鳳凰歌劇院、蝸牛階梯。", "stay": "約 5 分鐘（含等船）", "price": "觀光客每人 €2（居民 €0.70），上船付現金給船夫。", "warn": "營業時間為第三方資料，冬季、天候或人手不足時可能停駛", "remind": ["只收現金，準備好 €2 銅板。", "照在地習慣站著搭，船身會晃，上下船扶好船夫的手；也可以坐在船邊。", "碼頭找黃色招牌、上面有黑色貢多拉圖案和「Traghetto」字樣。", "營業時間是第三方旅遊網站整理，現場碼頭木樁上通常貼有時刻表，以現場為準。"], "fromBase": "從聖馬可廣場出發：900 m・步行約 11 分（直線距離 ×1.3 估算；過大運河要走橋或搭船，實際以 Google 地圖為準）"}, {"cross": [288.0, 404.1, 325.1, 434.6], "id": "tr_ferrovia", "cat": "paid", "tier": "推薦", "x": 300.7, "y": 414.5, "lx": 47.2, "ly": 299.5, "ux": 47.2, "uy": 299.5, "nx": 309.7, "ny": 430.1, "rows": [{"t": "渡船・火車站", "c": "t-name", "dy": 22}, {"t": "五六 08:00–14:00｜日休", "c": "t-wed t-more", "dy": 40.1}, {"t": "€2", "c": "t-price t-more", "dy": 59.1}], "H": 69, "Hs": 31, "name": "渡船・火車站", "latin": "Traghetto Ferrovia – San Simeon Piccolo", "gq": "Traghetto Ferrovia San Simeon", "hl": "五六 08:00–14:00｜日休", "pl": "€2", "feature": "火車站前的大運河岸，對面是綠色圓頂的聖西蒙小堂。旁邊就有赤足橋和憲法橋，搭它主要是體驗。", "tips": ["站著搭的公共貢多拉（traghetto），兩位船夫划槳，橫渡大運河約 2～3 分鐘，比觀光貢多拉便宜很多。"], "hours": ["週一至週六 08:00–14:00", "週日停駛"], "when": "只有週六（2/6）上午能搭：週五 14:55 到站時已收班、週日停駛。不搭也沒關係，旁邊就是赤足橋。", "stay": "約 5 分鐘（含等船）", "price": "觀光客每人 €2（居民 €0.70），上船付現金給船夫。", "warn": "營業時間為第三方資料，冬季、天候或人手不足時可能停駛", "remind": ["只收現金，準備好 €2 銅板。", "照在地習慣站著搭，船身會晃，上下船扶好船夫的手；也可以坐在船邊。", "碼頭找黃色招牌、上面有黑色貢多拉圖案和「Traghetto」字樣。", "營業時間是第三方旅遊網站整理，現場碼頭木樁上通常貼有時刻表，以現場為準。"], "fromBase": "從聖馬可廣場出發：1.9 km・步行約 24 分（直線距離 ×1.3 估算；過大運河要走橋或搭船，實際以 Google 地圖為準）"}, {"cross": [958.6, 870.4, 955.2, 942.4], "id": "tr_dogana", "cat": "paid", "tier": "推薦", "x": 968.6, "y": 878.8, "lx": 818, "ly": 860, "ux": 818, "uy": 860, "nx": 1007.2, "ny": 852.9, "rows": [{"t": "渡船・海關", "c": "t-name", "dy": 22}, {"t": "五六日 09:00–14:00", "c": "t-wed t-more", "dy": 40.1}, {"t": "€2", "c": "t-price t-more", "dy": 59.1}], "H": 69, "Hs": 31, "name": "渡船・海關", "latin": "Traghetto Dogana – San Marco (Giardinetti)", "gq": "Traghetto Dogana", "hl": "五六日 09:00–14:00", "pl": "€2", "feature": "大運河口最寬的一段，連接聖馬可這側的皇家花園（Giardinetti）與對岸海關角，橫渡時正面看安康聖母大殿的大圓頂。", "tips": ["站著搭的公共貢多拉（traghetto），兩位船夫划槳，橫渡大運河約 2～3 分鐘，比觀光貢多拉便宜很多。"], "hours": ["每日 09:00–14:00"], "when": "上午從聖馬可過去看安康聖母大殿、海關角；下午兩點後就沒有了。", "stay": "約 5 分鐘（含等船）", "price": "觀光客每人 €2（居民 €0.70），上船付現金給船夫。", "warn": "營業時間為第三方資料，冬季、天候或人手不足時可能停駛", "remind": ["只收現金，準備好 €2 銅板。", "照在地習慣站著搭，船身會晃，上下船扶好船夫的手；也可以坐在船邊。", "碼頭找黃色招牌、上面有黑色貢多拉圖案和「Traghetto」字樣。", "營業時間是第三方旅遊網站整理，現場碼頭木樁上通常貼有時刻表，以現場為準。"], "fromBase": "從聖馬可廣場出發：300 m・步行約 4 分（直線距離 ×1.3 估算；過大運河要走橋或搭船，實際以 Google 地圖為準）"}, {"cross": [749.5, 881.9, 752.2, 929.9], "id": "tr_giglio", "cat": "paid", "tier": "推薦", "x": 749.9, "y": 889.8, "lx": 604, "ly": 816, "ux": 604, "uy": 816, "nx": 788.5, "ny": 863.9, "rows": [{"t": "渡船・安康聖母", "c": "t-name", "dy": 22}, {"t": "五六日 09:00–17:00", "c": "t-wed t-more", "dy": 40.1}, {"t": "€2", "c": "t-price t-more", "dy": 59.1}], "H": 69, "Hs": 31, "name": "渡船・安康聖母", "latin": "Traghetto Santa Maria del Giglio – Salute", "gq": "Traghetto Santa Maria del Giglio", "hl": "五六日 09:00–17:00", "pl": "€2", "feature": "從聖馬可區的百合聖母廣場（Gritti 飯店旁）划到對岸安康聖母大殿附近的 Calle Lanza。去佩姬古根漢美術館或安康聖母大殿，不用繞到學院橋。", "tips": ["站著搭的公共貢多拉（traghetto），兩位船夫划槳，橫渡大運河約 2～3 分鐘，比觀光貢多拉便宜很多。"], "hours": ["冬季（10/1–3/31）每日 09:00–17:00"], "when": "聖馬可這側往佩姬古根漢、安康聖母大殿時搭；回程也可以。", "stay": "約 5 分鐘（含等船）", "price": "觀光客每人 €2（居民 €0.70），上船付現金給船夫。", "warn": "營業時間為第三方資料，冬季、天候或人手不足時可能停駛", "remind": ["只收現金，準備好 €2 銅板。", "照在地習慣站著搭，船身會晃，上下船扶好船夫的手；也可以坐在船邊。", "碼頭找黃色招牌、上面有黑色貢多拉圖案和「Traghetto」字樣。", "營業時間是第三方旅遊網站整理，現場碼頭木樁上通常貼有時刻表，以現場為準。"], "fromBase": "從聖馬可廣場出發：650 m・步行約 8 分（直線距離 ×1.3 估算；過大運河要走橋或搭船，實際以 Google 地圖為準）"}, {"id": "station", "cat": "base", "tier": null, "x": 296.8, "y": 370.3, "lx": 331.4, "ly": 390.3, "ux": 331.4, "uy": 390.3, "nx": 331.4, "ny": 390.3, "rows": [{"t": "聖露西亞火車站", "c": "t-name", "dy": 22}], "H": 31, "Hs": 31, "name": "聖露西亞火車站", "latin": "Venezia Santa Lucia", "gq": "Stazione di Venezia Santa Lucia", "feature": "威尼斯本島的火車站。我們 2/5（週五）從佛羅倫斯搭 Italo 8910，12:39 開、14:55 抵達這裡（6 車 9 號位）。出站就是大運河，1、2 號水上巴士站（Ferrovia）就在門口。", "hours": ["水上巴士：單程 €9.50、24 小時 €25、48 小時 €35、72 小時 €45（2026 票價）"], "remind": ["抵達：2/5（五）14:55，Italo 8910（佛羅倫斯 S.M.N. 12:39 開）。出站就是大運河，往聖馬可可搭 1 號（慢、沿大運河）或 2 號水上巴士，或步行約 40～50 分鐘。", "週五下午抵達後還來得及：學院美術館（開到 19:15）、榮耀聖母聖殿（到 18:00）、總督宮（到 18:00，最後入場 17:00）。", "離開時 2/8 一早出發，要先確認第一班水上巴士或改用步行（從聖馬可走到火車站約 40～50 分鐘，橋多、有台階）。"], "fromBase": "從聖馬可廣場出發：2.0 km・步行約 25 分（直線距離 ×1.3 估算；過大運河要走橋或搭船，實際以 Google 地圖為準）"}, {"id": "proma", "cat": "base", "tier": null, "x": 187.5, "y": 530.6, "lx": 142.5, "ly": 481.6, "ux": 142.5, "uy": 481.6, "nx": 142.5, "ny": 481.6, "rows": [{"t": "羅馬廣場", "c": "t-name", "dy": 22}], "H": 31, "Hs": 31, "name": "羅馬廣場", "latin": "Piazzale Roma", "gq": "Piazzale Roma", "feature": "本島唯一能開車、搭巴士到達的地方，往馬可波羅機場的巴士從這裡發車。", "fromBase": "從聖馬可廣場出發：2.1 km・步行約 26 分（直線距離 ×1.3 估算；過大運河要走橋或搭船，實際以 Google 地圖為準）"}, {"id": "sh_mercerie", "name": "梅爾切里亞街", "latin": "Le Mercerie", "gq": "Merceria", "feature": "從時鐘塔拱門下一路彎到里亞托橋（聖巴托羅謬廣場）的主要商店街，由幾段 Merceria 串成，是共和國時代連接政治中心聖馬可與商業中心里亞托的大街。", "tips": ["精品、服飾、皮件、穆拉諾玻璃、面具與伴手禮一路排開。", "嘉年華期間面具店最熱鬧，可以挑手工紙漿面具。"], "when": "下午 15:00～19:00；從聖馬可走往里亞托時順逛。", "stay": "逛街約 1～1.5 小時", "remind": ["窄巷人潮擁擠，注意扒手、背包背前面。", "冬季折扣季（saldi）一般從 1 月初開始、持續到 2 月底左右，2 月初去可能還有尾盤折扣（依店家而定）。"], "cat": "shop", "hours": ["街道全天開放", "商店多半約 10:00–19:30，週日部分小店休息或較晚開"], "price": "免費（逛街）。", "x": 943.2, "y": 652.2, "fromBase": "從聖馬可廣場出發：250 m・步行約 3 分"}, {"id": "sh_xxii", "name": "三月廿二日大街", "latin": "Calle Larga XXII Marzo", "gq": "Calle Larga XXII Marzo", "feature": "聖馬可廣場西側、通往百合聖母廣場的寬街，國際精品名店集中。街名紀念 1848 年 3 月 22 日威尼斯人起義、短暫成立聖馬可共和國。", "tips": ["國際名牌精品店。", "街頭的聖摩西教堂（San Moisè）華麗的巴洛克立面。"], "when": "下午，接鳳凰歌劇院或百合聖母渡船。", "stay": "約 30 分鐘～1 小時", "remind": ["冬季折扣季（saldi）一般從 1 月初開始、持續到 2 月底左右，2 月初去可能還有尾盤折扣（依店家而定）。"], "cat": "shop", "hours": ["街道全天開放", "商店多半約 10:00–19:30，週日部分小店休息或較晚開"], "price": "免費（逛街）。", "x": 847.6, "y": 813.6, "fromBase": "從聖馬可廣場出發：300 m・步行約 4 分"}, {"id": "sh_oresi", "name": "金匠街", "latin": "Ruga dei Oresi / Ruga Rialto", "gq": "Ruga dei Oresi", "feature": "里亞托橋聖保羅這側的橋腳往市場方向的商店街，從前是金匠（oresi）聚集的地方，現在兩旁是紀念品、圍巾、皮件與面具攤，一路通往里亞托市場和威尼斯最古老的聖賈科梅托教堂。", "tips": ["聖賈科梅托教堂（San Giacomo di Rialto）的大鐘。", "往裡走就是里亞托市場與 cicchetti 小酒館。"], "when": "週六上午逛市場時順路。", "stay": "約 30 分鐘", "remind": ["攤位價格可以比較；早上市場時段人最多。", "冬季折扣季（saldi）一般從 1 月初開始、持續到 2 月底左右，2 月初去可能還有尾盤折扣（依店家而定）。"], "cat": "shop", "hours": ["街道全天開放", "商店多半約 10:00–19:30，週日部分小店休息或較晚開"], "price": "免費（逛街）。", "x": 824.9, "y": 501.9, "fromBase": "從聖馬可廣場出發：750 m・步行約 9 分"}, {"id": "sh_stradanova", "name": "新街", "latin": "Strada Nova", "gq": "Strada Nova", "feature": "19 世紀後期開闢的寬街，從卡納雷吉歐往聖使徒廣場、里亞托方向，是威尼斯人自己買東西的日常商店街：超市、藥妝、平價服飾、麵包店。", "tips": ["平價服飾與藥妝店，價格比聖馬可一帶實在。", "沿途可以彎去黃金宮外觀、聖索菲亞渡船。"], "when": "從火車站走往里亞托時順逛；傍晚在地人最多。", "stay": "約 30 分鐘～1 小時", "remind": ["冬季折扣季（saldi）一般從 1 月初開始、持續到 2 月底左右，2 月初去可能還有尾盤折扣（依店家而定）。"], "cat": "shop", "hours": ["街道全天開放", "商店多半約 10:00–19:30，週日部分小店休息或較晚開"], "price": "免費（逛街）。", "x": 839.7, "y": 359.3, "fromBase": "從聖馬可廣場出發：1.1 km・步行約 14 分"}, {"id": "sh_pio", "name": "庇護十世街", "latin": "Salizada Pio X", "gq": "Salizada Pio X", "feature": "里亞托橋聖馬可這側的橋腳，一路通到聖巴托羅謬廣場的短街，兩旁是紀念品、玻璃與面具店，是走過里亞托橋必經的一段。", "tips": ["橋腳的紀念品與穆拉諾玻璃小店。"], "when": "過里亞托橋時順看。", "stay": "約 15 分鐘", "remind": ["整條街是里亞托橋人潮最擠的一段，注意扒手。", "冬季折扣季（saldi）一般從 1 月初開始、持續到 2 月底左右，2 月初去可能還有尾盤折扣（依店家而定）。"], "cat": "shop", "hours": ["街道全天開放", "商店多半約 10:00–19:30，週日部分小店休息或較晚開"], "price": "免費（逛街）。", "x": 897.5, "y": 563.8, "fromBase": "從聖馬可廣場出發：500 m・步行約 6 分"}];
+const SPOTS = ALL.filter(s => s.cat !== "shop"), SHOPST = ALL.filter(s => s.cat === "shop");
+const SHOP_LABELS = [{"id": "sh_mercerie", "x": 929.3, "y": 641.1, "rot": 58.4, "anchor": "middle", "name": "梅爾切里亞街", "orig": "Le Mercerie"}, {"id": "sh_xxii", "x": 827.7, "y": 824.2, "rot": -12.7, "anchor": "middle", "name": "三月廿二日大街", "orig": "Calle Larga XXII Marzo"}, {"id": "sh_oresi", "x": 830.3, "y": 515.6, "rot": 44.5, "anchor": "middle", "name": "金匠街", "orig": "Ruga dei Oresi"}, {"id": "sh_stradanova", "x": 813.8, "y": 350.6, "rot": 31.3, "anchor": "middle", "name": "新街", "orig": "Strada Nova"}, {"id": "sh_pio", "x": 902.5, "y": 548.5, "rot": 50.1, "anchor": "start", "name": "庇護十世街", "orig": "Salizada Pio X"}];
+const EDGES = [{"a": [1020.6, 733.4], "b": [997.1, 766.0], "box": [959.6, 737.7, 1058.1, 761.7], "anc": [1008.85, 749.7], "text": "100 m・1 分", "ids": ["sanmarco", "campanile"]}, {"a": [997.1, 766.0], "b": [953.0, 757.2], "box": [925.8, 749.6, 1024.3, 773.6], "anc": [975.05, 761.6], "text": "100 m・1 分", "ids": ["campanile", "piazza"]}, {"a": [953.0, 757.2], "b": [902.2, 776.5], "box": [878.4, 754.9, 976.9, 778.9], "anc": [927.6, 766.85], "text": "150 m・2 分", "ids": ["piazza", "correr"]}, {"a": [1020.6, 733.4], "b": [1052.6, 779.3], "box": [987.3, 744.3, 1085.8, 768.3], "anc": [1036.6, 756.3499999999999], "text": "150 m・2 分", "ids": ["sanmarco", "ducale"]}, {"a": [1052.6, 779.3], "b": [1072.5, 758.9], "box": [1017.6, 757.1, 1107.5, 781.1], "anc": [1062.55, 769.0999999999999], "text": "70 m・1 分", "ids": ["ducale", "sospiri"]}, {"a": [902.2, 776.5], "b": [806.9, 717.4], "box": [805.3, 735.0, 903.8, 759.0], "anc": [854.55, 746.95], "text": "300 m・4 分", "ids": ["correr", "bovolo"]}, {"a": [806.9, 717.4], "b": [780.8, 777.1], "box": [744.6, 735.2, 843.1, 759.2], "anc": [793.8499999999999, 747.25], "text": "150 m・2 分", "ids": ["bovolo", "fenice"]}, {"a": [997.1, 766.0], "b": [968.6, 878.8], "box": [933.6, 810.4, 1032.1, 834.4], "anc": [982.85, 822.4], "text": "300 m・4 分", "ids": ["campanile", "tr_dogana"]}, {"a": [968.6, 878.8], "b": [898.3, 956.2], "box": [884.2, 905.5, 982.7, 929.5], "anc": [933.45, 917.5], "text": "250 m・3 分", "ids": ["tr_dogana", "dogana"]}, {"a": [898.3, 956.2], "b": [831.9, 931.9], "box": [815.8, 932.0, 914.3, 956.0], "anc": [865.0999999999999, 944.05], "text": "200 m・2 分", "ids": ["dogana", "salute"]}, {"a": [831.9, 931.9], "b": [749.9, 889.8], "box": [741.6, 898.8, 840.1, 922.8], "anc": [790.9, 910.8499999999999], "text": "250 m・3 分", "ids": ["salute", "tr_giglio"]}, {"a": [749.9, 889.8], "b": [705.8, 942.4], "box": [678.6, 904.1, 777.1, 928.1], "anc": [727.8499999999999, 916.0999999999999], "text": "200 m・2 分", "ids": ["tr_giglio", "guggenheim"]}, {"a": [705.8, 942.4], "b": [593.7, 876.0], "box": [600.5, 897.2, 699.0, 921.2], "anc": [649.75, 909.2], "text": "350 m・4 分", "ids": ["guggenheim", "pontacc"]}, {"a": [593.7, 876.0], "b": [569.5, 925.2], "box": [532.4, 888.6, 630.9, 912.6], "anc": [581.6, 900.6], "text": "150 m・2 分", "ids": ["pontacc", "accademia"]}, {"a": [569.5, 925.2], "b": [484.3, 997.6], "box": [477.6, 949.4, 576.1, 973.4], "anc": [526.9, 961.4000000000001], "text": "300 m・4 分", "ids": ["accademia", "zattere"]}, {"a": [593.7, 876.0], "b": [613.6, 763.3], "box": [554.4, 807.6, 652.9, 831.6], "anc": [603.6500000000001, 819.65], "text": "300 m・4 分", "ids": ["pontacc", "stefano"]}, {"a": [613.6, 763.3], "b": [601.5, 707.5], "box": [558.3, 723.4, 656.8, 747.4], "anc": [607.55, 735.4], "text": "150 m・2 分", "ids": ["stefano", "tr_toma"]}, {"a": [1072.5, 758.9], "b": [1203.0, 787.6], "box": [1088.5, 761.2, 1187.0, 785.2], "anc": [1137.75, 773.25], "text": "350 m・4 分", "ids": ["sospiri", "riva"]}, {"a": [806.9, 717.4], "b": [831.9, 585.9], "box": [770.1, 639.6, 868.6, 663.6], "anc": [819.4, 651.65], "text": "350 m・4 分", "ids": ["bovolo", "tr_carbon"]}, {"a": [831.9, 585.9], "b": [873.3, 542.2], "box": [803.3, 552.0, 901.8, 576.0], "anc": [852.5999999999999, 564.05], "text": "150 m・2 分", "ids": ["tr_carbon", "rialto"]}, {"a": [873.3, 542.2], "b": [786.2, 463.2], "box": [780.5, 490.7, 879.0, 514.7], "anc": [829.75, 502.70000000000005], "text": "300 m・4 分", "ids": ["rialto", "mercato"]}, {"a": [786.2, 463.2], "b": [800.7, 442.2], "box": [748.6, 440.7, 838.4, 464.7], "anc": [793.45, 452.7], "text": "70 m・1 分", "ids": ["mercato", "tr_sofia"]}, {"a": [800.7, 442.2], "b": [804.6, 392.4], "box": [753.4, 405.3, 851.9, 429.3], "anc": [802.6500000000001, 417.29999999999995], "text": "150 m・2 分", "ids": ["tr_sofia", "cadoro"]}, {"a": [804.6, 392.4], "b": [699.1, 334.4], "box": [702.6, 351.4, 801.1, 375.4], "anc": [751.85, 363.4], "text": "300 m・4 分", "ids": ["cadoro", "oriente"]}, {"a": [873.3, 542.2], "b": [1008.9, 503.0], "box": [891.8, 510.6, 990.3, 534.6], "anc": [941.0999999999999, 522.6], "text": "350 m・4 分", "ids": ["rialto", "miracoli"]}, {"a": [1008.9, 503.0], "b": [1068.2, 584.8], "box": [989.3, 531.9, 1087.8, 555.9], "anc": [1038.55, 543.9], "text": "250 m・3 分", "ids": ["miracoli", "grimani"]}, {"a": [1068.2, 584.8], "b": [1121.0, 556.0], "box": [1045.3, 558.4, 1143.8, 582.4], "anc": [1094.6, 570.4], "text": "150 m・2 分", "ids": ["grimani", "acquaalta"]}, {"a": [1121.0, 556.0], "b": [1107.7, 457.6], "box": [1065.1, 494.8, 1163.6, 518.8], "anc": [1114.35, 506.8], "text": "250 m・3 分", "ids": ["acquaalta", "zanipolo"]}, {"a": [601.5, 707.5], "b": [498.8, 605.2], "box": [500.9, 644.4, 599.4, 668.4], "anc": [550.15, 656.35], "text": "400 m・5 分", "ids": ["tr_toma", "frari"]}, {"a": [498.8, 605.2], "b": [425.7, 627.3], "box": [413.0, 604.2, 511.5, 628.2], "anc": [462.25, 616.25], "text": "200 m・2 分", "ids": ["frari", "sanrocco"]}, {"a": [425.7, 627.3], "b": [383.9, 766.6], "box": [355.5, 685.0, 454.0, 709.0], "anc": [404.79999999999995, 696.95], "text": "400 m・5 分", "ids": ["sanrocco", "margherita"]}, {"a": [699.1, 334.4], "b": [648.4, 193.4], "box": [624.5, 251.9, 723.0, 275.9], "anc": [673.75, 263.9], "text": "400 m・5 分", "ids": ["oriente", "misericordia"]}, {"a": [648.4, 193.4], "b": [499.9, 171.3], "box": [524.9, 170.4, 623.4, 194.4], "anc": [574.15, 182.35000000000002], "text": "400 m・5 分", "ids": ["misericordia", "ghetto"]}, {"a": [425.7, 627.3], "b": [268.7, 471.5], "box": [297.9, 537.4, 396.4, 561.4], "anc": [347.2, 549.4], "text": "600 m・8 分", "ids": ["sanrocco", "costituzione"]}, {"a": [268.7, 471.5], "b": [300.7, 414.5], "box": [235.4, 431.0, 333.9, 455.0], "anc": [284.7, 443.0], "text": "150 m・2 分", "ids": ["costituzione", "tr_ferrovia"]}, {"a": [300.7, 414.5], "b": [354.3, 340.5], "box": [278.2, 365.5, 376.8, 389.5], "anc": [327.5, 377.5], "text": "250 m・3 分", "ids": ["tr_ferrovia", "scalzi"]}, {"a": [968.6, 878.8], "b": [1158.1, 1030.8], "box": [1014.1, 942.8, 1112.6, 966.8], "anc": [1063.35, 954.8], "text": "650 m・8 分", "ids": ["tr_dogana", "sangiorgio"]}, {"a": [705.8, 942.4], "b": [746.0, 1182.8], "box": [676.6, 1050.6, 775.1, 1074.6], "anc": [725.9, 1062.6], "text": "650 m・8 分", "ids": ["guggenheim", "giudecca"]}, {"a": [296.8, 370.3], "b": [300.7, 414.5], "box": [249.5, 380.4, 348.0, 404.4], "anc": [298.75, 392.4], "text": "100 m・1 分", "ids": ["station", "tr_ferrovia"]}, {"a": [296.8, 370.3], "b": [354.3, 340.5], "box": [276.3, 343.4, 374.8, 367.4], "anc": [325.55, 355.4], "text": "150 m・2 分", "ids": ["station", "scalzi"]}, {"a": [187.5, 530.6], "b": [268.7, 471.5], "box": [178.8, 489.1, 277.4, 513.0], "anc": [228.1, 501.05], "text": "250 m・3 分", "ids": ["proma", "costituzione"]}, {"a": [187.5, 530.6], "b": [300.7, 414.5], "box": [194.8, 460.6, 293.4, 484.6], "anc": [244.1, 472.55], "text": "400 m・5 分", "ids": ["proma", "tr_ferrovia"]}];
+SPOTS.forEach(s => {
+  s.sup = s.tier === "次要";
+  const txt = (s.hours || []).join(" ");
+  const ts = [...txt.matchAll(/(\d{1,2}):(\d{2})/g)].map(m => +m[1] * 60 + +m[2]);
+  s.cold = s.cat === "open" || /全天|24 ?小時/.test(txt) || ts.some(t => t < 540 || t > 1140);
+});
+const NS = "http://www.w3.org/2000/svg";
+const el = (tag, attrs = {}, parent) => { const n = document.createElementNS(NS, tag); for (const k in attrs) n.setAttribute(k, attrs[k]); if (parent) parent.appendChild(n); return n; };
+const mapSvg = document.getElementById("map");
+const pressed = b => b.getAttribute("aria-pressed") === "true";
+
+
+/* ---- 立體地標: paper-cut landmarks; the bottom of each drawing stands on its pin ---- */
+const ICON_SCALE = {"piazza": 0.9, "ducale": 0.72, "fenice": 0.95, "station": 1.3, "rialto": 0.8, "pontacc": 0.8, "scalzi": 0.8, "costituzione": 0.8, "tr_sofia": 0.85, "tr_carbon": 0.85, "tr_toma": 0.85, "tr_ferrovia": 0.85, "tr_dogana": 0.85, "tr_giglio": 0.85}, ICON_DX = {"ducale": -22};
+const ICONS = {
+  piazza: g => {   // Procuratie arcades + the Campanile
+    el("ellipse", { class: "lm-shadow", cx: 2, cy: 1, rx: 40, ry: 6 }, g);
+    const out = "M-38 0 L-38 -20 L18 -20 L18 -50 L22 -64 L26 -50 L26 0 Z";
+    el("path", { class: "lm-depth", d: out, transform: "translate(3.5 3)" }, g);
+    el("rect", { class: "lm-light", x: -38, y: -20, width: 56, height: 20 }, g);
+    el("rect", { class: "lm-mid", x: -38, y: -22, width: 56, height: 3 }, g);
+    for (let x = -35; x <= 12; x += 6) { el("path", { class: "lm-hole", d: `M${x} 0 V-6 A2.2 2.2 0 0 1 ${x + 4.4} -6 V0 Z` }, g); el("rect", { class: "lm-hole", x: x + 0.8, y: -16, width: 2.8, height: 4.5, rx: 1.2 }, g); }
+    el("rect", { class: "lm-pink", x: 17, y: -46, width: 10, height: 46 }, g);                   // brick shaft
+    el("rect", { class: "lm-light", x: 16, y: -54, width: 12, height: 8 }, g);                    // belfry
+    [18.5, 23].forEach(x => el("rect", { class: "lm-hole", x, y: -52.5, width: 2.6, height: 5, rx: 1.2 }, g));
+    el("path", { class: "lm-mid", d: "M16 -54 L22 -66 L28 -54 Z" }, g);                           // spire
+    el("circle", { class: "lm-gold", cx: 22, cy: -67.5, r: 1.8 }, g);                               // golden angel
+  },
+  ducale: g => {   // Doge's Palace: two arcades below, pink diamond wall above
+    el("ellipse", { class: "lm-shadow", cx: 3, cy: 1, rx: 41, ry: 6 }, g);
+    const out = "M-38 0 L-38 -44 L38 -44 L38 0 Z";
+    el("path", { class: "lm-depth", d: out, transform: "translate(3.5 3)" }, g);
+    el("rect", { class: "lm-light", x: -38, y: -24, width: 76, height: 24 }, g);
+    for (let x = -35; x <= 30; x += 8.2) el("path", { class: "lm-hole", d: `M${x} 0 V-8 A2.6 2.6 0 0 1 ${x + 5.2} -8 V0 Z` }, g);
+    el("path", { class: "lm-band", d: "M-38 -12.5 H38" }, g);
+    for (let x = -36; x <= 34; x += 4.1) el("path", { class: "lm-hole", d: `M${x} -14 V-19 A1.4 1.4 0 0 1 ${x + 2.8} -19 V-14 Z` }, g);
+    el("rect", { class: "lm-pink", x: -38, y: -44, width: 76, height: 20 }, g);
+    for (let x = -34; x <= 34; x += 8) el("path", { class: "lm-band", d: `M${x} -24 L${x + 4} -29 L${x + 8} -24 M${x} -34 L${x + 4} -29 L${x + 8} -34` }, g);
+    [-24, 14].forEach(x => el("path", { class: "lm-hole", d: `M${x} -28 V-35 A3 3 0 0 1 ${x + 6} -35 V-28 Z` }, g));
+    el("path", { class: "lm-hole", d: "M-4 -26 V-37 A4 4 0 0 1 4 -37 V-26 Z" }, g);              // balcony window
+    for (let x = -37; x <= 35; x += 6) el("path", { class: "lm-light", d: `M${x} -44 L${x + 1.5} -48 L${x + 3} -44 Z` }, g);   // crenellation
+  },
+  fenice: g => {   // La Fenice: neoclassical portico with the golden phoenix
+    el("ellipse", { class: "lm-shadow", cx: 3, cy: 1, rx: 32, ry: 6 }, g);
+    const out = "M-28 0 L-28 -36 L28 -36 L28 0 Z";
+    el("path", { class: "lm-depth", d: out, transform: "translate(3.5 3)" }, g);
+    el("rect", { class: "lm-light", x: -28, y: -36, width: 56, height: 36 }, g);
+    el("rect", { class: "lm-hole", x: -16, y: -24, width: 32, height: 24 }, g);                  // portico shade
+    [-16, -8, 0.4, 8.8].forEach(x => el("rect", { class: "lm-light", x, y: -24, width: 3.2, height: 24 }, g));
+    el("rect", { class: "lm-light", x: 13, y: -24, width: 3.2, height: 24 }, g);
+    el("rect", { class: "lm-stone", x: -19, y: -28, width: 38, height: 4.5 }, g);                // entablature
+    [-24, 20].forEach(x => { el("rect", { class: "lm-hole", x, y: -20, width: 3.5, height: 8, rx: 1 }, g); el("rect", { class: "lm-hole", x, y: -32, width: 3.5, height: 5, rx: 1 }, g); });
+    el("path", { class: "lm-gold", d: "M0 -38 Q-9 -44 -12 -40 Q-6 -41 -3 -37 Z M0 -38 Q9 -44 12 -40 Q6 -41 3 -37 Z M-2 -36 L2 -36 L0 -41 Z" }, g);   // phoenix
+    el("rect", { class: "lm-stone", x: -20, y: -2.5, width: 40, height: 2.5 }, g);               // steps
+  },
+
+  rialto: g => {   // stone arch with the central portico and two rows of shops
+    el("ellipse", { class: "lm-shadow", cx: 2, cy: 1, rx: 36, ry: 5 }, g);
+    const out = "M-34 0 Q0 -22 34 0 Z";
+    el("path", { class: "lm-depth", d: "M-34 0 Q-18 -14 -16 -16 L16 -16 Q18 -14 34 0 Z", transform: "translate(3 2.5)" }, g);
+    el("path", { class: "lm-stone", d: "M-34 0 L-16 -16 L16 -16 L34 0 Z" }, g);                  // ramps
+    el("path", { class: "lm-hole", d: "M-22 0 Q0 -18 22 0 Z" }, g);                               // the arch opening
+    el("path", { class: "lm-light", d: "M-26 -6 L-14 -17 L14 -17 L26 -6 L22 -6 L12 -14 L-12 -14 L-22 -6 Z" }, g);   // shop roofs
+    el("rect", { class: "lm-stone", x: -8, y: -28, width: 16, height: 12 }, g);                  // central portico
+    el("path", { class: "lm-mid", d: "M-9 -28 L0 -33 L9 -28 Z" }, g);
+    el("path", { class: "lm-hole", d: "M-3.5 -16 V-22 A3.5 3.5 0 0 1 3.5 -22 V-16 Z" }, g);
+    [-13, 9].forEach(x => el("path", { class: "lm-hole", d: `M${x} -14 V-16 A2 2 0 0 1 ${x + 4} -16 V-14 Z` }, g));
+    el("path", { class: "lm-waterline", d: "M-30 1.5 h60" }, g);
+  },
+  pontacc: g => {  // wooden arch with lattice railing
+    el("ellipse", { class: "lm-shadow", cx: 2, cy: 1, rx: 36, ry: 5 }, g);
+    el("path", { class: "lm-depth", d: "M-34 0 Q0 -24 34 0 L30 0 Q0 -18 -30 0 Z", transform: "translate(3 2.5)" }, g);
+    el("path", { class: "lm-wood", d: "M-34 0 Q0 -24 34 0 L30 0 Q0 -18 -30 0 Z" }, g);         // deck
+    for (let x = -26; x <= 26; x += 5.2) { const y = -12 * (1 - (x / 34) ** 2) - 1; el("path", { class: "lm-band", d: `M${x} ${y} V${y - 7}` }, g); }
+    el("path", { class: "lm-band", d: "M-30 -6 Q0 -30 30 -6" }, g);                               // handrail
+    [-20, -8, 8, 20].forEach(x => el("path", { class: "lm-band", d: `M${x} 0 V${-12 * (1 - (x / 34) ** 2)}` }, g));   // trestles
+    el("path", { class: "lm-waterline", d: "M-30 1.5 h60" }, g);
+  },
+  scalzi: g => {   // single white stone arch
+    el("ellipse", { class: "lm-shadow", cx: 2, cy: 1, rx: 34, ry: 5 }, g);
+    const out = "M-32 0 L-32 -6 Q0 -20 32 -6 L32 0 Z";
+    el("path", { class: "lm-depth", d: out, transform: "translate(3 2.5)" }, g);
+    el("path", { class: "lm-light", d: out }, g);
+    el("path", { class: "lm-hole", d: "M-24 0 Q0 -22 24 0 Z" }, g);
+    el("path", { class: "lm-band", d: "M-32 -9 Q0 -23 32 -9" }, g);                               // parapet
+    for (let x = -24; x <= 22; x += 6) { const y = -9 - 14 * (1 - (x / 32) ** 2) * 0.95; el("rect", { class: "lm-light", x, y: y + 1, width: 2.4, height: 3.5 }, g); }
+    el("path", { class: "lm-waterline", d: "M-28 1.5 h56" }, g);
+  },
+  costituzione: g => {   // Calatrava: low glass-and-steel arch with a red spine
+    el("ellipse", { class: "lm-shadow", cx: 2, cy: 1, rx: 38, ry: 5 }, g);
+    el("path", { class: "lm-depth", d: "M-36 0 Q0 -14 36 0 L36 2 L-36 2 Z", transform: "translate(3 2)" }, g);
+    el("path", { class: "lm-glass", d: "M-36 0 Q0 -14 36 0 L32 0 Q0 -10 -32 0 Z" }, g);            // glass treads
+    for (let x = -28; x <= 28; x += 5) { const y = -7 * (1 - (x / 36) ** 2); el("path", { class: "lm-band", d: `M${x} ${y - 1} V${y + 1.6}` }, g); }
+    el("path", { class: "lm-steel", d: "M-34 1 Q0 -20 34 1" }, g);                                 // red steel arch
+    for (let x = -24; x <= 24; x += 8) { const y = -10.5 * (1 - (x / 34) ** 2); el("path", { class: "lm-steel", d: `M${x} ${y} L${x} ${y + 4}`, style: "stroke-width:1.4" }, g); }
+    el("path", { class: "lm-waterline", d: "M-32 2.5 h64" }, g);
+  },
+
+  gondola: g => {  // traghetto: plain black gondola with two standing oarsmen
+    el("ellipse", { class: "lm-shadow", cx: 2, cy: 2, rx: 30, ry: 4 }, g);
+    el("path", { class: "lm-gondola", d: "M-30 -8 Q-24 -2 -10 0 L14 0 Q26 -1 30 -9 Q24 -4 12 -4 L-12 -4 Q-24 -4 -30 -8 Z" }, g);
+    el("path", { class: "lm-gondola", d: "M27 -7 L31 -15 L33 -14 L30 -6 Z" }, g);                     // ferro at the bow
+    [[-18, -1], [18, 1]].forEach(([x, d]) => {
+      el("circle", { class: "lm-figure", cx: x, cy: -20, r: 2.4 }, g);
+      el("path", { class: "lm-figure-s", d: `M${x} -17.5 V-8 M${x} -14 L${x + 6 * d} -10` }, g);
+      el("path", { class: "lm-oar", d: `M${x + 6 * d} -10 L${x + 10 * d} 2` }, g);
+    });
+    [-6, 2].forEach(x => { el("circle", { class: "lm-pass", cx: x, cy: -14, r: 2 }, g); el("path", { class: "lm-pass-s", d: `M${x} -12 V-5` }, g); });   // passengers
+  },
+  station: g => {  // Santa Lucia: long low modernist hall with canopy
+    el("ellipse", { class: "lm-shadow", cx: 3, cy: 1, rx: 42, ry: 6 }, g);
+    const out = "M-40 0 L-40 -22 L40 -22 L40 0 Z";
+    el("path", { class: "lm-depth", d: out, transform: "translate(3.5 3)" }, g);
+    el("rect", { class: "lm-light", x: -40, y: -22, width: 80, height: 22 }, g);
+    el("rect", { class: "lm-mid", x: -40, y: -25, width: 80, height: 4 }, g);                   // roof slab
+    for (let x = -36; x <= 32; x += 4.6) el("rect", { class: "lm-hole", x, y: -19, width: 3, height: 9 }, g);   // window strip
+    el("rect", { class: "lm-stone", x: -34, y: -8, width: 68, height: 3 }, g);                   // canopy
+    el("rect", { class: "lm-hole", x: -26, y: -5, width: 52, height: 5 }, g);                    // entrances
+    el("rect", { class: "lm-stone", x: -42, y: -1.5, width: 84, height: 3 }, g);                  // steps to the canal
+  }
+};
+/* ---- spots ---- */
+const layer = document.getElementById("spots"), areaLayer = document.getElementById("areas");
+let distMode = false;
+const colorOf = s => s.id.startsWith("tr_") ? "var(--ferry)" : CAT[s.cat].color;
+SPOTS.forEach(s => {
+  const g = el("g", { class: "spot", tabindex: 0, role: "button", "data-id": s.id, "aria-label": [s.name, s.hl, s.pl].filter(Boolean).join("，"), style: `--c:${colorOf(s)}` }, layer);
+  if (s.cross) {
+    g.classList.add("ferry");
+    const [x1, y1, x2, y2] = s.cross;
+    el("path", { class: "cross", d: `M${x1} ${y1} L${x2} ${y2}` }, g);
+    [[x1, y1], [x2, y2]].forEach(([x, y]) => el("circle", { class: "cross-end", cx: x, cy: y, r: 4 }, g));
+  }
+  if (s.tier === "推薦") g.classList.add("rec");
+  if (s.sup) g.classList.add("is-sup");
+  if (s.cat === "base") g.classList.add("base");
+  if (s.areaPts) {
+    s.areaEl = el("g", { class: "area", style: `--c:${CAT[s.cat].color}` }, areaLayer);
+    el("polygon", { points: s.areaPts.map(p => p.join(",")).join(" ") }, s.areaEl);
+  }
+  s.leader = el("path", { class: "leader" }, g);
+  s.tab = el("rect", { class: "tab", rx: 4 }, g);
+  s.texts = s.rows.map(r => { const t = el("text", { class: r.c }, g); t.textContent = r.t; return t; });
+  const icon = ICONS[s.id] || (s.id.startsWith("tr_") ? ICONS.gondola : null);
+  if (icon) { el("circle", { class: "pin icon-base", cx: s.x, cy: s.y, r: 5 }, g); icon(el("g", { class: "lm", transform: `translate(${s.x + (ICON_DX[s.id] || 0)} ${s.y - 3}) scale(${ICON_SCALE[s.id] || 1})` }, g)); }
+  else if (s.cat === "base") el("rect", { class: "pin", x: s.x - 10, y: s.y - 10, width: 20, height: 20, rx: 3 }, g);
+  else el("circle", { class: "pin", cx: s.x, cy: s.y, r: s.sup ? 8 : 10 }, g);
+  s.g = g;
+  const act = () => distMode ? pickSpot(s.id) : openSpot(s.id);
+  g.addEventListener("click", e => { e.stopPropagation(); act(); });
+  g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); act(); } });
+});
+function sizeTabs() {
+  const slim = distMode || !!window.NAME_ONLY;
+  const full = pressed(document.getElementById("f-sup"));
+  SPOTS.forEach(s => {
+    const [lx, ly] = slim ? [s.nx, s.ny] : full ? [s.ux, s.uy] : [s.lx, s.ly];
+    const shown = slim ? [s.texts[0]] : s.texts;
+    let w = 0;
+    shown.forEach(t => { try { w = Math.max(w, t.getComputedTextLength()); } catch (e) {} });
+    if (!w) w = 150;
+    const W = w + 22, H = slim ? s.Hs : s.H;
+    s.tab.setAttribute("x", lx); s.tab.setAttribute("y", ly); s.tab.setAttribute("width", W); s.tab.setAttribute("height", H);
+    s.texts.forEach((t, i) => { t.setAttribute("x", lx + 11); t.setAttribute("y", ly + s.rows[i].dy); });
+    const cx = Math.max(lx, Math.min(s.x, lx + W)), cy = Math.max(ly, Math.min(s.y, ly + H));
+    s.leader.setAttribute("d", `M${s.x} ${s.y} L${cx} ${cy}`);
+  });
+}
+sizeTabs();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(sizeTabs);
+
+/* ---- shopping streets: orange band + clickable name, always shown ---- */
+SHOP_LABELS.forEach(l => {
+  const t = el("text", { class: "st-name shop-street", x: l.x, y: l.y, "text-anchor": l.anchor, transform: `rotate(${l.rot} ${l.x} ${l.y})`, role: "button", tabindex: 0, "data-id": l.id, "aria-label": l.name + "（購物街，點開介紹）" }, document.getElementById("shop-labels"));
+  t.textContent = l.name;
+  // Italian name under the Chinese one, as written on the street signs
+  const o = l.orig ? el("text", { class: "st-name st-orig shop-street", x: l.x, y: l.y + 16, "text-anchor": l.anchor, transform: `rotate(${l.rot} ${l.x} ${l.y})`, "aria-hidden": "true" }, document.getElementById("shop-labels")) : null;
+  if (o) o.textContent = l.orig;
+  const go = e => { e.stopPropagation(); if (!distMode) openSpot(l.id); };
+  if (o) o.addEventListener("click", go);
+  t.addEventListener("click", go);
+  t.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(e); } });
+});
+
+/* ---- distance mode (point to point) ---- */
+const edgeLayer = document.getElementById("edges");
+EDGES.forEach(e => {
+  const g = el("g", { class: "edge" }, edgeLayer);
+  el("line", { x1: e.a[0], y1: e.a[1], x2: e.b[0], y2: e.b[1] }, g);
+  el("rect", { x: e.box[0], y: e.box[1], width: e.box[2] - e.box[0], height: e.box[3] - e.box[1], rx: 12 }, g);
+  const t = el("text", { x: (e.box[0] + e.box[2]) / 2, y: (e.box[1] + e.box[3]) / 2 + 5, "text-anchor": "middle" }, g); t.textContent = e.text;
+  e.g = g;
+});
+let picked = null, pairEnd = null;
+const NOTE = "先點起點，會顯示它到相鄰景點的距離；再點終點，就畫出兩點之間的距離與步行時間。點空白處重新選。步行距離以直線距離 ×1.3 估算，步速每分鐘 80 公尺；威尼斯要繞橋、過大運河只有四座橋，實際路線請以 Google 地圖導航為準。";
+const p2pLine = el("g", {}); mapSvg.insertBefore(p2pLine, layer);
+const p2pLabel = el("g", { class: "p2p-lbl" }, mapSvg);
+function walkText(units) {
+  const m = units * M_PER_UNIT * 1.3;
+  const w = m < 100 ? Math.round(m / 10) * 10 : Math.round(m / 50) * 50;
+  return (w < 1000 ? w + " m" : (w / 1000).toFixed(1) + " km") + "・" + Math.max(1, Math.round(w / 80)) + " 分";
+}
+const byId = id => ALL.find(s => s.id === id);
+function renderDist() {
+  SPOTS.forEach(s => s.g.classList.toggle("picked", s.id === picked || s.id === pairEnd));
+  EDGES.forEach(e => e.g.classList.toggle("on", !!picked && !pairEnd && e.ids.includes(picked) && e.ids.every(id => !byId(id).g.classList.contains("gone"))));
+  p2pLine.replaceChildren(); p2pLabel.replaceChildren();
+  const card = document.getElementById("p2p-card");
+  card.hidden = !(picked && pairEnd);
+  const dt = document.getElementById("dist-text");
+  dt.textContent = !picked ? NOTE : !pairEnd ? "起點：" + byId(picked).name + "。再點另一個景點當終點；點空白處取消。" : "起點 " + byId(picked).name + " → 終點 " + byId(pairEnd).name + "。點空白處可重新選起點。";
+  if (!picked || !pairEnd) return;
+  const a = byId(picked), b = byId(pairEnd);
+  el("line", { class: "p2p-line", x1: a.x, y1: a.y, x2: b.x, y2: b.y }, p2pLine);
+  const cx = (a.x + b.x) / 2, cy = (a.y + b.y) / 2, wt = walkText(Math.hypot(b.x - a.x, b.y - a.y));
+  const pill = el("rect", { class: "p2p-pill" }, p2pLabel);
+  const t = el("text", { class: "p2p-text", x: cx, y: cy + 5.8, "text-anchor": "middle" }, p2pLabel);
+  t.textContent = a.name + " → " + b.name + "　" + wt;
+  document.getElementById("p2p-route").textContent = a.name + " → " + b.name;
+  document.getElementById("p2p-dist").innerHTML = wt.replace("・", " ・ ") + "<small>步行估算</small>";
+  let w = 300; try { w = t.getComputedTextLength() + 19; } catch (e) {}
+  pill.setAttribute("x", cx - w / 2); pill.setAttribute("y", cy - 14); pill.setAttribute("width", w); pill.setAttribute("height", 28); pill.setAttribute("rx", 14);
+}
+function pickSpot(id) {
+  if (id === null) picked = pairEnd = null;
+  else if (!picked || pairEnd) { picked = id; pairEnd = null; }
+  else if (id === picked) picked = null;
+  else pairEnd = id;
+  renderDist();
+}
+function setDist(on) {
+  distMode = on;
+  document.querySelectorAll(".dist-btn").forEach(b => b.setAttribute("aria-pressed", on));
+  mapSvg.classList.toggle("dist", on);
+  edgeLayer.toggleAttribute("hidden", !on);
+  document.getElementById("dist-note").hidden = !on;
+  pickSpot(null); sizeTabs();
+}
+document.querySelectorAll(".dist-btn").forEach(b => b.addEventListener("click", () => setDist(!distMode)));
+mapSvg.addEventListener("click", () => { if (distMode && picked) pickSpot(null); });
+
+/* ---- filters ---- */
+function applyFilters() {
+  const tiers = new Set([...document.querySelectorAll(".chip[data-tier]")].filter(pressed).map(c => c.dataset.tier));
+  const cats = new Set([...document.querySelectorAll(".chip[data-cat]")].filter(pressed).map(c => c.dataset.cat));
+  if (!cats.size) ["paid", "free"].forEach(c => cats.add(c));
+  if (cats.has("free")) cats.add("open");
+  const cold = pressed(document.getElementById("f-cold"));
+  SPOTS.forEach(s => {
+    const gone = !!s.tier && !tiers.has(s.tier), dim = s.cat !== "base" && (!cats.has(s.cat) || (cold && !s.cold) || !!s.dayClosed);
+    s.g.classList.toggle("gone", gone); s.g.classList.toggle("dim", dim);
+    if (s.areaEl) { s.areaEl.classList.toggle("gone", gone); s.areaEl.classList.toggle("dim", dim); }
+  });
+  sizeTabs(); renderDist();
+  if (RAD.id) renderRad();
+}
+
+/* ---- 我去的日子: pick weekdays (multi), labels show only those days' hours; spots closed on all of them fade ---- */
+const DKEY = "trip-days-venice", DAYS = [...document.querySelectorAll(".chip.day")], DN = "一二三四五六日";
+const WEEK = {"sanmarco": ["09:30–17:15", "09:30–17:15", "09:30–17:15", "09:30–17:15", "09:30–17:15", "09:30–17:15", "14:00–17:15"], "ducale": ["09:00–18:00", "09:00–18:00", "09:00–18:00", "09:00–18:00", "09:00–18:00", "09:00–18:00", "09:00–18:00"], "campanile": ["09:30–19:15", "09:30–19:15", "09:30–19:15", "09:30–19:15", "09:30–19:15", "09:30–19:15", "09:30–19:15"], "accademia": ["", "08:15–19:15", "08:15–19:15", "08:15–19:15", "08:15–19:15", "08:15–19:15", "08:15–19:15"], "salute": ["09:30–12:00、15:00–17:30", "09:30–12:00、15:00–17:30", "09:30–12:00、15:00–17:30", "09:30–12:00、15:00–17:30", "09:30–12:00、15:00–17:30", "09:30–12:00、15:00–17:30", "09:30–12:00、15:00–17:30"], "guggenheim": ["10:00–18:00", "", "10:00–18:00", "10:00–18:00", "10:00–18:00", "10:00–18:00", "10:00–18:00"], "sangiorgio": ["08:30–18:00", "08:30–18:00", "08:30–18:00", "08:30–18:00", "08:30–18:00", "08:30–18:00", "08:30–18:00"], "frari": ["09:00–18:00", "09:00–18:00", "09:00–18:00", "09:00–18:00", "09:00–18:00", "09:00–18:00", "13:00–18:00"], "sanrocco": ["09:30–17:30", "09:30–17:30", "09:30–17:30", "09:30–17:30", "09:30–17:30", "09:30–17:30", "09:30–17:30"], "bovolo": ["09:30–17:30", "09:30–17:30", "09:30–17:30", "09:30–17:30", "09:30–17:30", "09:30–17:30", "09:30–17:30"], "mercato": ["07:30–13:00（無魚市）", "07:30–12:00", "07:30–12:00", "07:30–12:00", "07:30–12:00", "07:30–12:00", ""], "acquaalta": ["09:00–19:30", "09:00–19:30", "09:00–19:30", "09:00–19:30", "09:00–19:30", "09:00–19:30", "09:00–19:30"], "zanipolo": ["09:00–17:45", "09:00–17:45", "09:00–17:45", "09:00–17:45", "09:00–17:45", "09:00–17:45", "12:00–17:45"], "miracoli": ["10:30–16:30", "10:30–16:30", "10:30–16:30", "10:30–16:30", "10:30–16:30", "10:30–16:30", ""], "correr": ["10:00–17:00", "10:00–17:00", "10:00–17:00", "10:00–17:00", "10:00–17:00", "10:00–17:00", "10:00–17:00"], "grimani": ["", "10:00–19:00", "10:00–19:00", "10:00–19:00", "10:00–19:00", "10:00–19:00", "10:00–19:00"], "oriente": ["", "10:00–17:00", "10:00–17:00", "10:00–17:00", "10:00–17:00", "10:00–17:00", "10:00–17:00"], "tr_sofia": ["07:30–18:30", "07:30–18:30", "07:30–18:30", "07:30–18:30", "07:30–18:30", "07:30–18:30", "07:30–18:30"], "tr_carbon": ["08:00–14:00", "08:00–14:00", "08:00–14:00", "08:00–14:00", "08:00–14:00", "08:00–14:00", ""], "tr_toma": ["07:30–18:30", "07:30–18:30", "07:30–18:30", "07:30–18:30", "07:30–18:30", "07:30–18:30", "07:30–18:30"], "tr_ferrovia": ["08:00–14:00", "08:00–14:00", "08:00–14:00", "08:00–14:00", "08:00–14:00", "08:00–14:00", ""], "tr_dogana": ["09:00–14:00", "09:00–14:00", "09:00–14:00", "09:00–14:00", "09:00–14:00", "09:00–14:00", "09:00–14:00"], "tr_giglio": ["09:00–17:00", "09:00–17:00", "09:00–17:00", "09:00–17:00", "09:00–17:00", "09:00–17:00", "09:00–17:00"]}, WEEK_PREFIX = {}, WEEK_NODIM = new Set([]);
+try { const sv = JSON.parse(localStorage.getItem(DKEY) || "null"); if (Array.isArray(sv) && sv.length) DAYS.forEach(b => b.setAttribute("aria-pressed", sv.includes(+b.dataset.day) ? "true" : "false")); } catch (e) {}
+function dayRuns(ds) {   // [0,1,2,4] → "週一至三、五"; [4,5] → "週五六"; [0,6] → "週一、日"
+  if (ds.length === 7) return "每日";
+  const runs = []; ds.forEach(d => { const r = runs[runs.length - 1]; if (r && d === r[1] + 1) r[1] = d; else runs.push([d, d]); });
+  return "週" + runs.map(r => r[1] - r[0] >= 2 ? DN[r[0]] + "至" + DN[r[1]] : DN.slice(r[0], r[1] + 1)).join("、");
+}
+function weekLabel(id, sel) {
+  const wk = WEEK[id], groups = [];
+  sel.forEach(d => { const v = wk[d]; const g = groups.find(x => x.v === v); if (g) g.days.push(d); else groups.push({ v, days: [d] }); });
+  const open = groups.filter(g => g.v), closed = groups.filter(g => !g.v).flatMap(g => g.days);
+  if (!open.length) return null;
+  const parts = open.map(g => ({ d: g.days[0], t: dayRuns(g.days) + " " + g.v }));
+  if (closed.length) parts.push({ d: closed[0], t: dayRuns(closed) + "休" });
+  return (WEEK_PREFIX[id] || "") + parts.sort((a, b) => a.d - b.d).map(x => x.t).join("｜");
+}
+/* every day picked: one main time + the exceptions in brackets, e.g. 「09:00–19:00（週一休）」「收費 09:00–22:00（週一、五 11:30 起）」 */
+const _tm = v => { const m = String(v).match(/^\d{2}:\d{2}–\d{2}:\d{2}(、\d{2}:\d{2}–\d{2}:\d{2})*$/); return m ? v.split("、").flatMap(x => x.split("–")) : null; };
+function exceptionText(main, v) {
+  if (!v) return "休";
+  const a = _tm(main), b = _tm(v);
+  const sp = t => (/^\d/.test(t) ? " " : "") + t;   // a space only before a time
+  if (!a || !b || a.length !== b.length) return sp(v);
+  const diff = a.map((x, i) => x !== b[i] ? i : -1).filter(i => i >= 0), last = a.length - 1;
+  if (diff.length === 1 && diff[0] === 0) return " " + b[0] + " 起";
+  if (diff.length === 1 && diff[0] === last) return "到 " + b[last];
+  if (a.length === 4 && diff.every(i => i === 1 || i === 2)) return diff.length === 2 ? "午休 " + b[1] + "–" + b[2] : diff[0] === 1 ? " " + b[1] + " 起午休" : "午休到 " + b[2];
+  return sp(v);
+}
+function compactLabel(vals, prefix) {   // vals: the 7 day values, Monday first
+  const groups = [];
+  vals.forEach((v, d) => { const g = groups.find(x => x.v === v); if (g) g.days.push(d); else groups.push({ v, days: [d] }); });
+  const open = groups.filter(g => g.v);
+  if (!open.length) return null;
+  const score = g => g.days.length * 2 + (_tm(g.v) ? 1 : 0);   // most days wins; on a tie prefer a real time
+  const main = open.reduce((m, g) => score(g) > score(m) ? g : m, open[0]);
+  const ex = groups.filter(g => g !== main).sort((x, y) => x.days[0] - y.days[0]);
+  const merged = [];   // same note on several days → one entry (週六日時間不同)
+  ex.forEach(g => { let t = exceptionText(main.v, g.v); if (t.length > 16) t = "時間不同"; const m = merged.find(x => x.t === t); if (m) m.days.push(...g.days); else merged.push({ t, days: [...g.days] }); });
+  return prefix + main.v + (merged.length ? "（" + merged.map(x => dayRuns(x.days.sort((p, q) => p - q)) + x.t).join("；") + "）" : "");
+}
+function applyDays() {
+  let sel = DAYS.filter(pressed).map(b => +b.dataset.day);
+  if (!sel.length) sel = [0, 1, 2, 3, 4, 5, 6];
+  SPOTS.forEach(s => {
+    s.dayClosed = false;
+    const t = WEEK[s.id] ? (s.texts[s.rows.findIndex(r => r.c.includes("t-wed"))] || null) : null; if (!t) return;
+    // reserve the box width the label had at first paint, so a longer line shrinks instead of widening the box
+    if (s.dayOrig == null) s.dayOrig = t.textContent;
+    if (!s.dayLim) { t.textContent = s.dayOrig; t.style.fontSize = ""; t.removeAttribute("textLength");
+      try { const w = Math.max(...[...s.g.querySelectorAll("text")].map(x => x.getComputedTextLength())); if (w > 0) s.dayLim = w; } catch (e) {} }
+    const lbl = sel.length === 7 ? compactLabel(WEEK[s.id], WEEK_PREFIX[s.id] || "") : weekLabel(s.id, sel), closed = lbl === null;
+    s.dayClosed = closed && !WEEK_NODIM.has(s.id);
+    t.textContent = closed ? "你選的日子休館" : lbl;
+    t.classList.toggle("day-off", closed);
+    t.style.fontSize = ""; t.removeAttribute("textLength"); t.removeAttribute("lengthAdjust");
+    try {
+      const w = t.getComputedTextLength(), lim = s.dayLim || w;
+      if (w > lim && w > 0) {
+        const k = Math.max(.7, lim / w); t.style.fontSize = (parseFloat(getComputedStyle(t).fontSize) * k) + "px";
+        if (w * k > lim + 1) { t.setAttribute("textLength", lim); t.setAttribute("lengthAdjust", "spacingAndGlyphs"); }
+      }
+    } catch (e) {}
+  });
+}
+DAYS.forEach(b => b.addEventListener("click", () => {
+  b.setAttribute("aria-pressed", pressed(b) ? "false" : "true");
+  try { localStorage.setItem(DKEY, JSON.stringify(DAYS.filter(pressed).map(x => +x.dataset.day))); } catch (e) {}
+  applyDays(); applyFilters(); sizeTabs();
+}));
+applyDays();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { SPOTS.forEach(s => s.dayLim = 0); applyDays(); applyFilters(); sizeTabs(); });
+/* remember the filter chips from the last visit (this device's browser) */
+const FKEY = "trip-filters-venice", FCHIPS = [...document.querySelectorAll(".chip[data-tier], .chip[data-cat], #f-cold")];
+const chipKey = ch => ch.id || ch.dataset.tier || ch.dataset.cat;
+try { const saved = JSON.parse(localStorage.getItem(FKEY) || "null"); if (saved) FCHIPS.forEach(ch => { const k = chipKey(ch); if (k in saved) ch.setAttribute("aria-pressed", saved[k] ? "true" : "false"); }); } catch (e) {}
+const saveFilters = () => { try { localStorage.setItem(FKEY, JSON.stringify(Object.fromEntries(FCHIPS.map(ch => [chipKey(ch), pressed(ch)])))); } catch (e) {} };
+FCHIPS.forEach(ch => ch.addEventListener("click", () => { ch.setAttribute("aria-pressed", pressed(ch) ? "false" : "true"); saveFilters(); applyFilters(); }));
+
+/* ---- long-press radius ---- */
+var RAD = { id: null, r: 0, closedAt: 0 };
+const radLayer = el("g", {}); mapSvg.insertBefore(radLayer, layer);
+const radCard = document.getElementById("rad-card");
+function renderRad() {
+  radLayer.replaceChildren();
+  SPOTS.forEach(s => { s.g.classList.remove("rad-out", "rad-center"); if (s.areaEl) s.areaEl.classList.remove("rad-out"); });
+  radCard.hidden = !RAD.id;
+  if (!RAD.id) return;
+  const c = byId(RAD.id);
+  for (let k = 100; k < RAD.r; k += 100) el("circle", { class: "rad-ring", cx: c.x, cy: c.y, r: k / M_PER_UNIT }, radLayer);
+  el("circle", { class: "rad-circle", cx: c.x, cy: c.y, r: RAD.r / M_PER_UNIT }, radLayer);
+  let n = 0;
+  SPOTS.forEach(s => {
+    if (s.g.classList.contains("gone")) return;
+    const m = Math.hypot(s.x - c.x, s.y - c.y) * M_PER_UNIT;
+    const inside = Math.round(m / 5) * 5 <= RAD.r;
+    s.g.classList.toggle("rad-out", !inside); if (s.areaEl) s.areaEl.classList.toggle("rad-out", !inside);
+    if (inside && s.id !== c.id && s.cat !== "base") n++;
+  });
+  c.g.classList.add("rad-center");
+  radCard.innerHTML = "";
+  const h = document.createElement("div");
+  h.innerHTML = `<b></b>　半徑 ${RAD.r} 公尺內 ${n} 個景點<button class="rad-x" type="button">關閉</button>`;
+  h.querySelector("b").textContent = c.name;
+  h.querySelector(".rad-x").addEventListener("click", closeRad);
+  const t = document.createElement("div"); t.style.color = "var(--muted)"; t.style.fontSize = "12px";
+  t.textContent = "再長按一次（電腦：在景點上點兩下）擴大 100 公尺；點一下地圖空白處關閉（直線距離）";
+  radCard.append(h, t);
+  placeRadCard(c);
+}
+/* put the 範圍 card in the map corner farthest from the circle, so it never sits on the labels being looked at */
+function placeRadCard(c) {
+  const card = document.getElementById("rad-card"), svg = document.getElementById("map"), box = card.parentElement;
+  try {
+    const m = svg.getScreenCTM(), p = svg.createSVGPoint(); p.x = c.x; p.y = c.y;
+    const q = p.matrixTransform(m), r = box.getBoundingClientRect();
+    const cx = q.x - r.left, cy = q.y - r.top, W = r.width;
+    const fs = box.classList.contains("fs");
+    // only the part of the map that is on screen counts (the map can be taller than the window)
+    const visTop = Math.max(0, -r.top), visBot = Math.min(r.height, innerHeight - r.top);
+    const top = visTop + (fs ? (document.getElementById("fs-bar")?.offsetHeight || 0) + 10 : 12);
+    const bot = r.height - visBot + 12;
+    // corners (bottom-right is kept for the zoom buttons)
+    const opts = [{ l: 12, t: top, x: 0, y: top }, { r: 12, t: top, x: W, y: top }, { l: 12, b: bot, x: 0, y: visBot }];
+    const best = opts.reduce((a, o) => Math.hypot(o.x - cx, o.y - cy) > Math.hypot(a.x - cx, a.y - cy) ? o : a, opts[0]);
+    Object.assign(card.style, { left: best.l != null ? best.l + "px" : "auto", right: best.r != null ? best.r + "px" : "auto",
+      top: best.t != null ? best.t + "px" : "auto", bottom: best.b != null ? "calc(" + best.b + "px + env(safe-area-inset-bottom, 0px))" : "auto" });
+  } catch (e) {}
+}
+
+function closeRad() { if (!RAD.id) return; RAD.id = null; RAD.r = 0; RAD.closedAt = performance.now(); renderRad(); }
+(() => {
+  let timer = null, start = null, fired = 0;
+  const cancel = () => { clearTimeout(timer); timer = null; };
+  layer.addEventListener("pointerdown", e => {
+    const g = e.target.closest(".spot"); if (!g || (e.pointerType === "mouse" && e.button !== 0)) return;
+    cancel(); start = { x: e.clientX, y: e.clientY };
+    timer = setTimeout(() => {
+      timer = null; fired = performance.now();
+      const id = g.dataset.id;
+      if (RAD.id === id) RAD.r += 100; else { RAD.id = id; RAD.r = 100; }
+      if (navigator.vibrate) try { navigator.vibrate(15); } catch (_) {}
+      renderRad();
+    }, 550);
+  });
+  window.addEventListener("pointermove", e => { if (timer && start && Math.hypot(e.clientX - start.x, e.clientY - start.y) > 10) cancel(); });
+  window.addEventListener("pointerup", cancel); window.addEventListener("pointercancel", cancel);
+  layer.addEventListener("contextmenu", e => { if (e.target.closest(".spot")) e.preventDefault(); });
+  layer.addEventListener("click", e => { if (performance.now() - fired < 700) { e.stopPropagation(); e.preventDefault(); } }, true);
+  mapSvg.addEventListener("click", e => { if (RAD.id && !e.target.closest(".spot")) closeRad(); });
+})();
+/* ---- 電腦：在景點上點兩下 = 長按（畫出 / 擴大 100 公尺範圍）；點一下照常開介紹（等 0.25 秒確定不是點兩下） ---- */
+(() => {
+  const spotsEl = document.getElementById("spots");
+  let lastType = "mouse", pend = null, bypass = false;
+  spotsEl.addEventListener("pointerdown", e => { lastType = e.pointerType || "mouse"; }, true);
+  spotsEl.addEventListener("click", e => {
+    if (bypass || lastType !== "mouse" || (typeof distMode !== "undefined" && distMode)) return;
+    const g = e.target.closest(".spot"); if (!g) return;
+    e.stopPropagation(); e.preventDefault();
+    if (pend && pend.g === g) {   // second click on the same spot
+      clearTimeout(pend.t); pend = null;
+      const id = g.dataset.id;
+      if (RAD.id === id) RAD.r += 100; else { RAD.id = id; RAD.r = 100; }
+      renderRad(); return;
+    }
+    if (pend) clearTimeout(pend.t);
+    pend = { g, t: setTimeout(() => { pend = null; bypass = true; g.dispatchEvent(new MouseEvent("click", { bubbles: true })); bypass = false; }, 260) };
+  }, true);
+})();
+
+applyFilters();
+
+/* ---- pan / pinch / wheel zoom ---- */
+const mapView = (() => {
+  const svg = mapSvg, b = svg.viewBox.baseVal;
+  const full = { x: b.x, y: b.y, w: b.width, h: b.height };
+  const mq = window.matchMedia("(max-width: 860px)");
+  const PXU = 0.75, HOME = "piazza";
+  let vb = { ...full }, raf = 0;
+  const ratio = () => { const r = svg.getBoundingClientRect(); return mq.matches && r.width ? r.height / r.width : full.h / full.w; };
+  const maxW = () => Math.max(full.w, full.h / ratio());
+  const clampW = w => Math.min(maxW(), Math.max(full.w / 10, w));
+  const axis = (p, size, lo, span) => { const m = mq.matches ? size * 0.18 : 0; return size >= span ? lo + (span - size) / 2 : Math.min(lo + span - size + m, Math.max(lo - m, p)); };
+  const clamp = () => { vb.w = clampW(vb.w); vb.h = vb.w * ratio(); vb.x = axis(vb.x, vb.w, full.x, full.w); vb.y = axis(vb.y, vb.h, full.y, full.h); };
+  const apply = () => svg.setAttribute("viewBox", `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
+  const set = (cx, cy, w) => { vb.w = clampW(w); vb.h = vb.w * ratio(); vb.x = cx - vb.w / 2; vb.y = cy - vb.h / 2; clamp(); };
+  const home = () => {
+    cancelAnimationFrame(raf);
+    if (!mq.matches) { vb = { ...full }; apply(); return; }
+    const s = byId(HOME);
+    set(s.x, s.y - 60, svg.getBoundingClientRect().width / PXU); apply();
+  };
+  const zoomAt = (f, px, py) => { const nw = clampW(vb.w / f); vb.x = px - (px - vb.x) * nw / vb.w; vb.y = py - (py - vb.y) * nw / vb.w; vb.w = nw; clamp(); apply(); };
+  const center = arr => arr.reduce((a, p) => ({ x: a.x + p.x / arr.length, y: a.y + p.y / arr.length }), { x: 0, y: 0 });
+  const dist = arr => arr.length > 1 ? Math.hypot(arr[0].x - arr[1].x, arr[0].y - arr[1].y) : 0;
+  const pts = new Map();
+  let g0 = null, moved = false, lastMove = 0;
+  const begin = () => { const arr = [...pts.values()]; g0 = { vb: { ...vb }, r: svg.getBoundingClientRect(), c: center(arr), d: dist(arr), k: ratio() }; };
+  svg.addEventListener("pointerdown", e => {
+    if (!mq.matches && (e.pointerType !== "mouse" || e.button !== 0 || vb.w >= full.w - 1)) return;
+    if (e.pointerType === "mouse") e.preventDefault();
+    cancelAnimationFrame(raf);
+    if (e.isPrimary || pts.size === 0 || performance.now() - lastMove > 800) { pts.clear(); moved = false; }
+    pts.set(e.pointerId, { x: e.clientX, y: e.clientY }); begin();
+  });
+  window.addEventListener("pointermove", e => {
+    if (!g0 || !pts.has(e.pointerId)) return;
+    pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    const arr = [...pts.values()], c = center(arr), d = dist(arr), { r, vb: v0 } = g0;
+    const w = clampW(g0.d > 0 && d > 0 ? v0.w * g0.d / d : v0.w);
+    const sx = v0.x + (g0.c.x - r.left) / r.width * v0.w, sy = v0.y + (g0.c.y - r.top) / r.height * v0.h;
+    vb.w = w; vb.h = w * g0.k; vb.x = sx - (c.x - r.left) / r.width * vb.w; vb.y = sy - (c.y - r.top) / r.height * vb.h;
+    clamp(); apply(); lastMove = performance.now();
+    if (arr.length > 1 || Math.hypot(c.x - g0.c.x, c.y - g0.c.y) > 6) moved = true;
+  });
+  const end = e => { if (!pts.delete(e.pointerId)) return; if (pts.size) begin(); else g0 = null; };
+  window.addEventListener("pointerup", end); window.addEventListener("pointercancel", end);
+  svg.addEventListener("click", e => { if (moved && performance.now() - lastMove < 600) { e.stopPropagation(); e.preventDefault(); moved = false; } }, true);
+  const atCursor = e => { const r = svg.getBoundingClientRect(); return [vb.x + (e.clientX - r.left) / r.width * vb.w, vb.y + (e.clientY - r.top) / r.height * vb.h]; };
+  svg.addEventListener("wheel", e => { if (!(e.ctrlKey || e.metaKey)) return; e.preventDefault(); cancelAnimationFrame(raf); zoomAt(Math.exp(-e.deltaY * (e.deltaMode === 1 ? 0.05 : 0.0025)), ...atCursor(e)); }, { passive: false });
+  svg.addEventListener("dblclick", e => { if (e.target.closest(".spot")) return; if (RAD.id || performance.now() - RAD.closedAt < 600) { e.preventDefault(); return; } e.preventDefault(); zoomAt(1.8, ...atCursor(e)); });
+  const mid = () => [vb.x + vb.w / 2, vb.y + vb.h / 2];
+  document.getElementById("z-in").addEventListener("click", () => zoomAt(1.6, ...mid()));
+  document.getElementById("z-out").addEventListener("click", () => zoomAt(1 / 1.6, ...mid()));
+  document.getElementById("z-reset").addEventListener("click", () => { set(full.x + full.w / 2, full.y + full.h / 2, maxW()); apply(); });
+  if (mq.addEventListener) mq.addEventListener("change", home);
+  let rw = 0;
+  window.addEventListener("resize", () => { const w = svg.getBoundingClientRect().width; if (!mq.matches || w === rw) return; rw = w; const [cx, cy] = mid(); set(cx, cy, vb.w); apply(); });
+  home(); rw = svg.getBoundingClientRect().width;
+  let homed = rw > 0; const reHome = () => { if (homed) return; const w = svg.getBoundingClientRect().width; if (w > 0) { homed = true; rw = w; home(); } };
+  window.addEventListener("load", () => { homed = false; reHome(); }); if (window.ResizeObserver) new ResizeObserver(reHome).observe(svg);
+  const refresh = () => { const [cx, cy] = mid(); set(cx, cy, vb.w); apply(); };
+  return { home, mq, refresh, homeNow: () => home() };
+})();
+
+/* ---- full screen ---- */
+(() => {
+  const box = document.querySelector(".mapbox"), bar = document.getElementById("fs-bar"), panel = document.getElementById("fs-panel");
+  const distSlot = document.getElementById("fs-dist"), menu = document.getElementById("fs-menu");
+  const filters = document.querySelector(".filters"), distNote = document.getElementById("dist-note");
+  const homeF = document.createComment("filters"), homeD = document.createComment("dist");
+  filters.before(homeF); distNote.before(homeD);
+  document.getElementById("fs-title").textContent = document.querySelector("h1").textContent;
+  const place = () => { const h = bar.offsetHeight; panel.style.top = h + "px"; distSlot.style.top = (h + (panel.hidden ? 0 : panel.offsetHeight)) + "px"; };
+  const setMenu = open => { panel.hidden = !open; menu.setAttribute("aria-expanded", open); place(); };
+  let on = false;
+  const enter = () => { if (on) return; on = true; box.classList.add("fs"); document.body.classList.add("fs-on"); panel.appendChild(filters); distSlot.appendChild(distNote); setMenu(false); requestAnimationFrame(() => mapView.homeNow()); };
+  const exit = () => { if (!on) return; on = false; box.classList.remove("fs"); document.body.classList.remove("fs-on"); homeF.after(filters); homeD.after(distNote); setMenu(false); mapView.refresh(); };
+  document.getElementById("z-full").addEventListener("click", () => on ? exit() : enter());
+  document.getElementById("fs-exit").addEventListener("click", exit);
+  document.getElementById("fs-open").addEventListener("click", enter);
+  menu.addEventListener("click", () => setMenu(panel.hidden));
+  panel.addEventListener("click", e => { if (e.target.closest("button")) setTimeout(() => setMenu(false), 120); });
+  window.addEventListener("resize", () => { if (on) place(); });
+  if (window.matchMedia("(max-width: 640px)").matches) enter();
+  const onChange = () => { if (!mapView.mq.matches) exit(); };
+  if (mapView.mq.addEventListener) mapView.mq.addEventListener("change", onChange);
+})();
+/* ---- names-only view ---- */
+document.querySelectorAll(".names-btn").forEach(b => b.addEventListener("click", () => {
+  window.NAME_ONLY = !window.NAME_ONLY;
+  mapSvg.classList.toggle("names", window.NAME_ONLY);
+  document.querySelectorAll(".names-btn").forEach(x => x.setAttribute("aria-pressed", window.NAME_ONLY));
+  sizeTabs();
+}));
+document.querySelectorAll(".icon-btn[data-tip]").forEach(b => b.addEventListener("pointerdown", e => {
+  if (e.pointerType === "mouse") return;
+  b.classList.add("tip-show"); clearTimeout(b._tip); b._tip = setTimeout(() => b.classList.remove("tip-show"), 1400);
+}));
+
+/* ---- visited ---- */
+const VKEY = "trip-visited-venice";
+let visited = new Set(); try { visited = new Set(JSON.parse(localStorage.getItem(VKEY) || "[]")); } catch (e) {}
+let showDone = false;
+const saveVisited = () => { try { localStorage.setItem(VKEY, JSON.stringify([...visited])); } catch (e) {} };
+function applyVisited() {
+  const hid = id => visited.has(id) && !showDone;
+  SPOTS.forEach(s => { s.g.classList.toggle("visited", visited.has(s.id)); s.g.classList.toggle("hide-v", hid(s.id)); if (s.areaEl) s.areaEl.classList.toggle("hide-v", hid(s.id)); });
+  EDGES.forEach(e => e.g.classList.toggle("hide-v", e.ids.some(hid)));
+  const n = visited.size, chip = document.getElementById("f-done");
+  if (n === 0) showDone = false;
+  chip.hidden = n === 0; document.getElementById("done-n").textContent = n; chip.setAttribute("aria-pressed", showDone);
+}
+document.getElementById("f-done").addEventListener("click", () => { showDone = !showDone; applyVisited(); });
+applyVisited();
+
+/* ---- links: Google Maps, share, error report ---- */
+const gmapUrl = s => "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent((s.gq || s.latin) + " Venezia");
+async function shareLink(btn) {
+  const url = btn.dataset.url, name = btn.dataset.name, note = document.getElementById("d-share-note");
+  const say = t => { note.textContent = t; clearTimeout(shareLink.t); shareLink.t = setTimeout(() => { note.textContent = ""; }, 2500); };
+  try { if (navigator.share) { await navigator.share({ title: name, text: name + "（Google 地圖）", url }); return; } } catch (err) { if (err && err.name === "AbortError") return; }
+  try { await navigator.clipboard.writeText(name + " " + url); say("已複製連結，可以貼到 LINE 或訊息裡"); return; } catch (err) {}
+  note.textContent = "複製這個連結："; const inp = document.createElement("input"); inp.readOnly = true; inp.value = url; note.appendChild(inp); inp.focus(); inp.select();
+}
+const REPORT_FORM = "https://docs.google.com/forms/d/e/1FAIpQLSfczsbVIwVeT78rpvKnk8CF1upTBqEKsf6viWWYu5iBn532Lg/viewform";
+const REPORT_MAP = "威尼斯", REPORT_BUILD = "2026-11-14";
+function reportSource(where) {
+  const d = document.getElementById("drawer"), open = !d.hidden, sp = open && d.dataset.spot ? byId(d.dataset.spot) : null;
+  const tab = open ? d.querySelector('.rt-tab[aria-selected="true"]') : null;
+  const parts = [REPORT_MAP, where];
+  if (sp) parts.push("景點：" + sp.name + "（" + sp.id + "）"); else parts.push("沒有打開側邊內容");
+  if (tab) parts.push("分頁：" + tab.textContent.replace(/[^\p{L}]/gu, ""));
+  if (window.NAME_ONLY) parts.push("簡潔模式");
+  if (distMode) parts.push("距離模式");
+  if (document.querySelector(".mapbox.fs")) parts.push("全螢幕");
+  parts.push(innerWidth <= 640 ? "手機版" : "電腦版", "地圖版本 " + REPORT_BUILD);
+  return parts.join("｜");
+}
+const reportUrl = (s, where) => REPORT_FORM + "?usp=pp_url&entry.772922063=" + encodeURIComponent(REPORT_MAP) + (s ? "&entry.2061406689=" + encodeURIComponent(s.name) : "") + "&entry.1913794735=" + encodeURIComponent(reportSource(where || "側邊內容"));
+document.addEventListener("click", e => {
+  const a = e.target.closest && e.target.closest("a.icon-act.report, #foot-report"); if (!a) return;
+  const d = document.getElementById("drawer"), id = !d.hidden && d.dataset.spot;
+  a.href = reportUrl(id ? byId(id) : null, a.id === "foot-report" ? "頁尾" : "側邊內容");
+}, true);
+
+/* ---- drawer ---- */
+const drawer = document.getElementById("drawer"), scrim = document.getElementById("scrim");
+let lastFocus = null;
+const esc = t => String(t).replace(/[&<>"]/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[m]));
+const ul = a => `<ul>${a.map(t => `<li>${esc(t)}</li>`).join("")}</ul>`;
+function showTab(tab) {
+  drawer.querySelectorAll(".rt-tab").forEach(x => x.setAttribute("aria-selected", x.dataset.tab === tab));
+  drawer.querySelectorAll(".rt-panel").forEach(p => p.hidden = p.dataset.panel !== tab);
+  drawer.scrollTop = 0;
+}
+const STRIKE_IDS = ["station", "proma"];   // train stations: link to strike lookup (user-requested 2026-11-17)
+function openSpot(id) {
+  const s = byId(id); if (!s) return;
+  drawer.dataset.spot = id;
+  lastFocus = document.activeElement;
+  SPOTS.forEach(x => x.g.classList.toggle("active", x.id === id));
+  drawer.style.setProperty("--c", colorOf(s));
+  // 介紹 = what the place is; 💡 實用資訊 = everything for planning
+  const remind = s.remind || [], hasPrac = !!(STRIKE_IDS.includes(s.id) || s.warn || remind.length || s.hours || s.when || s.stay || s.fromBase || s.price || s.pass_ || s.site);
+  const host = u => u.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
+  drawer.innerHTML = `
+    <div class="d-top"><span class="cat">${esc(s.cross ? "渡船（交通）・€2 現金" : s.tier ? s.tier + "・" + CAT[s.cat].label : CAT[s.cat].label)}</span><button class="close" id="d-close" aria-label="關閉">×</button></div>
+    <h3 id="d-name">${esc(s.name)}</h3>
+    <p class="latin">${esc(s.latin)}</p>
+    <div class="d-actions">${s.cat !== "base" && s.cat !== "shop" ? `<button class="visit-btn" id="d-visit" aria-pressed="${visited.has(s.id)}">${visited.has(s.id) ? "✓ 已去過（點一下取消）" : "標記為已去過"}</button>` : ""}<span class="d-icons"><a class="icon-act" href="${esc(gmapUrl(s))}" target="_blank" rel="noopener" aria-label="在 Google 地圖開啟" title="Google 地圖"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5a6.5 6.5 0 0 0-6.5 6.5c0 4.9 6.5 12.5 6.5 12.5s6.5-7.6 6.5-12.5A6.5 6.5 0 0 0 12 2.5zm0 9a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z" fill="currentColor"/></svg></a><button class="icon-act" type="button" id="d-share" data-url="${esc(gmapUrl(s))}" data-name="${esc(s.name)}" aria-label="分享 Google 地圖連結" title="分享"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5.5" r="2.6" fill="currentColor"/><circle cx="6" cy="12" r="2.6" fill="currentColor"/><circle cx="18" cy="18.5" r="2.6" fill="currentColor"/><path d="M8.3 10.8 15.7 6.7M8.3 13.2l7.4 4.1" stroke="currentColor" stroke-width="2" fill="none"/></svg></button><a class="icon-act report" href="${esc(reportUrl(s))}" target="_blank" rel="noopener" aria-label="匿名回報這個景點的錯誤" title="回報錯誤"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 20.5h20L12 3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 9.5v5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="17.3" r="1.3" fill="currentColor"/></svg></a></span><span class="share-note" id="d-share-note" role="status" aria-live="polite"></span></div>
+    ${hasPrac ? `<div class="rt-tabs" role="tablist"><button class="rt-tab" role="tab" data-tab="info" aria-selected="true">介紹</button><button class="rt-tab" role="tab" data-tab="tips" aria-selected="false">💡 實用資訊${s.warn ? '<span class="tab-alert" aria-label="有重要提醒">!</span>' : ""}</button></div>
+    <div class="rt-panel" data-panel="tips" hidden>
+      ${s.warn ? `<div class="warn">⚠ ${esc(s.warn)}</div>` : ""}
+      <dl>
+      ${STRIKE_IDS.includes(s.id) ? `<div><dt>罷工查詢</dt><dd>義大利常有火車、公車罷工，出發前先查：<br><a class="site" href="https://www.theitalystrike.com/" target="_blank" rel="noopener">Italy Strike 罷工查詢 ↗</a><br><small>非官方整理，資料來自義大利交通部與交通業者公告；重要行程請再到官方網站確認</small><ul style="margin-top:8px"><li>罷工特別常見在<b>星期五</b>，其次是<b>星期一</b>，因為跟週末連在一起比較好動員。但這只是傾向，不是固定規則。</li><li>罷工時間的長度有慣例：<ul><li><b>鐵路</b>常是前一天 21:00 到當天 21:00，所以「週五罷工」可能從週四晚上就開始了。</li><li><b>地方交通</b>（羅馬 ATAC、威尼斯 ACTV 等）多是當天 24 小時或 4 小時，中間有保障時段。</li><li><b>航空</b>常是當天 24 小時，或某個時段 4～8 小時。</li></ul></li></ul></dd></div>` : ""}
+      ${s.hours ? `<div><dt>${s.cat === "base" ? "交通資訊" : "營業時間"}</dt><dd>${ul(s.hours)}</dd></div>` : ""}
+      ${s.when ? `<div><dt>合適旅遊時段</dt><dd>${esc(s.when)}</dd></div>` : ""}
+      ${s.stay ? `<div><dt>建議停留時間</dt><dd>${esc(s.stay)}</dd></div>` : ""}
+      ${s.fromBase ? `<div><dt>從聖馬可廣場出發</dt><dd>${esc(s.fromBase.replace(/^從聖馬可廣場出發：/, ""))}</dd></div>` : ""}
+      ${s.price ? `<div><dt>票價</dt><dd>${esc(s.price)}</dd></div>` : ""}
+      ${s.pass_ ? `<div><dt>聯票包含</dt><dd>${ul(s.pass_)}</dd></div>` : ""}
+      ${s.site ? `<div><dt>官方網站</dt><dd><a class="site" href="${esc(s.site)}" target="_blank" rel="noopener">${esc(host(s.site))} ↗</a></dd></div>` : ""}
+      ${remind.length ? `<div><dt>小提醒</dt><dd>${ul(remind)}</dd></div>` : ""}
+      </dl>
+    </div>` : ""}
+    <div class="rt-panel" data-panel="info">
+    ${s.warn ? `<button class="warn-jump" type="button">⚠ 有開放或預約限制，點這裡看「實用資訊」</button>` : ""}
+    <dl>
+      ${s.feature ? `<div><dt>特色</dt><dd>${esc(s.feature)}</dd></div>` : ""}
+      ${s.tips && s.tips.length ? `<div><dt>看點</dt><dd>${ul(s.tips)}</dd></div>` : ""}
+      ${s.links ? `<div><dt>相關連結</dt><dd><ul>${s.links.map(([t, u]) => `<li><a class="site" href="${esc(u)}" target="_blank" rel="noopener">${esc(t)} ↗</a></li>`).join("")}</ul></dd></div>` : ""}
+    </dl></div>`;
+  drawer.hidden = false; scrim.hidden = false;
+  document.getElementById("d-close").addEventListener("click", closeSpot);
+  drawer.querySelectorAll(".rt-tab").forEach(b => b.addEventListener("click", () => showTab(b.dataset.tab)));
+  drawer.querySelector(".warn-jump")?.addEventListener("click", () => showTab("tips"));
+  document.getElementById("d-share").addEventListener("click", e => shareLink(e.currentTarget));
+  document.getElementById("d-visit")?.addEventListener("click", () => {
+    if (visited.has(s.id)) visited.delete(s.id); else visited.add(s.id);
+    saveVisited(); applyVisited();
+    if (visited.has(s.id) && !showDone) closeSpot(); else openSpot(s.id);
+  });
+  document.getElementById("d-close").focus({ preventScroll: true });
+}
+function closeSpot() {
+  drawer.hidden = true; scrim.hidden = true; drawer.dataset.spot = "";
+  SPOTS.forEach(x => x.g.classList.remove("active"));
+  if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true });
+}
+scrim.addEventListener("click", closeSpot);
+drawer.addEventListener("click", e => {
+  if (!mapView.mq.matches) return;
+  if (e.target.closest("a, button, input, select, textarea, summary, [role=button]")) return;
+  if (window.getSelection && String(window.getSelection())) return;
+  closeSpot();
+});
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !drawer.hidden) closeSpot(); });
+</script>
+</body></html>
