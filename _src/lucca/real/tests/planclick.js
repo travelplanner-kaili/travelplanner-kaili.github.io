@@ -1,0 +1,13 @@
+const { chromium } = require('playwright');
+(async () => { const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 1280, height: 900 } });
+  p.on('pageerror', e=>console.log('ERR', e.message));
+  await p.goto('file:///home/claude/lucca/real/lucca-real.html'); await p.waitForTimeout(900);
+  await p.evaluate(() => { document.querySelector('.mapbox').scrollIntoView(); planToggle('0203','frediano'); planToggle('0203','anfiteatro'); setPlanOpen(true); }); await p.waitForTimeout(500);
+  await (await p.$('.spot[data-id="anfiteatro"] .tab')).click(); await p.waitForTimeout(500);
+  console.log('in-plan click:', await p.evaluate(() => document.getElementById('d-name')?.textContent));
+  await p.evaluate(() => closeSpot()); await (await p.$('.spot[data-id="anfiteatro"] .tab')).dblclick(); await p.waitForTimeout(400);
+  console.log('dbl:', await p.evaluate(() => RAD.id));
+  await p.evaluate(() => { closeRad(); setPlanOpen(false); }); await p.waitForTimeout(300);
+  await (await p.$('.spot[data-id="anfiteatro"] .tab')).click(); await p.waitForTimeout(500);
+  console.log('after close:', await p.evaluate(() => document.getElementById('d-name')?.textContent), await p.evaluate(() => byId('anfiteatro').marker.options.pane));
+  await b.close(); })();

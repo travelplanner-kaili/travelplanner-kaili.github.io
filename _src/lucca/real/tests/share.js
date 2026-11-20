@@ -1,0 +1,18 @@
+const { chromium } = require('playwright');
+(async () => { const b = await chromium.launch();
+  const ctxA = await b.newContext({ viewport: { width: 1280, height: 900 }, permissions: ['clipboard-read','clipboard-write'] }); const a = await ctxA.newPage(); a.on('pageerror', e=>console.log('ERR A', e.message));
+  await a.goto('file:///home/claude/lucca/real/lucca-real.html'); await a.waitForTimeout(700);
+  const url = await a.evaluate(() => { planToggle('0203','duomo'); planToggle('0203','ore'); const m = addMine('Gelato A', [43.843, 10.503], '好吃', ''); plan.days['0203'].push({ id: m.id, time: '15:00', note: '' }); plan.days['0204'].push({ id: 'guinigi', time: '', note: '' }); savePlan();
+    return location.href.split('#')[0] + '#share=' + b64e(JSON.stringify(shareData())); });
+  console.log('url length', url.length);
+  const ctxB = await b.newContext({ viewport: { width: 1280, height: 900 } }); const p = await ctxB.newPage(); p.on('pageerror', e=>console.log('ERR B', e.message));
+  await p.goto('file:///home/claude/lucca/real/lucca-real.html'); await p.waitForTimeout(500);
+  await p.evaluate(() => { planToggle('0203','michele'); addMine('My own', [43.844, 10.505], '', ''); });
+  await p.goto(url); await p.waitForTimeout(700);
+  console.log('ask:', await p.textContent('.sa-card p'));
+  await p.screenshot({ path: 'ask.png' });
+  await p.click('#sa-yes'); await p.waitForTimeout(300);
+  console.log(await p.evaluate(() => [plan.days['0203'].map(x => byId(x.id).name).join('→'), plan.days['0204'].map(x => byId(x.id).name).join('→'), MINE.map(m => m.name).join(','), document.getElementById('plan-share-note').textContent, location.hash]));
+  await p.goto(url); await p.waitForTimeout(600); await p.click('#sa-yes'); await p.waitForTimeout(200);
+  console.log('again:', await p.evaluate(() => [plan.days['0203'].length, MINE.length]));
+  await b.close(); })();

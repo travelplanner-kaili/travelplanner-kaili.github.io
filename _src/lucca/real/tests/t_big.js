@@ -1,0 +1,10 @@
+const {chromium}=require('playwright');
+(async()=>{const b=await chromium.launch();const c=await b.newContext({viewport:{width:390,height:800}});const p=await c.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
+await p.addInitScript(()=>{localStorage.setItem('trip-tour-lucca','1');localStorage.setItem('trip-tour-plan-lucca','1');localStorage.setItem('trip-plan-lucca',JSON.stringify({cur:'d1',days:{d1:[{id:'duomo',time:'',note:''},{id:'campanile',time:'',note:''}]},list:[{k:'d1',date:'2/4',wd:4}]}))});
+await p.goto('file://'+process.cwd()+'/lucca-real.html');await p.waitForTimeout(700);
+const st=n=>p.evaluate(()=>{const e=document.getElementById('plan'),t=document.querySelector('.plan-tab');return [!e.hidden,e.classList.contains('big'),(r=>[r.top|0,r.bottom|0])(e.getBoundingClientRect()),(r=>[r.top|0,r.bottom|0])(t.getBoundingClientRect())]}).then(x=>console.log(n,JSON.stringify(x)));
+await p.click('.plan-tab');await p.waitForTimeout(400);await st('open');
+await p.click('.plan-tab');await p.waitForTimeout(400);await st('big');await p.screenshot({path:'/tmp/claude-0/big.png'});
+await p.click('.plan-tab');await p.waitForTimeout(400);await st('closed');
+await p.click('.plan-tab');await p.waitForTimeout(400);await st('open again');
+console.log(errs);await b.close();})();

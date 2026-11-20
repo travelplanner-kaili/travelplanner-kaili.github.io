@@ -1,0 +1,14 @@
+const { chromium } = require('playwright');
+(async () => { const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 1280, height: 900 } });
+  p.on('pageerror', e=>console.log('ERR', e.message));
+  await p.goto('file:///home/claude/lucca/real/lucca-real.html'); await p.waitForTimeout(800);
+  await p.evaluate(() => { document.querySelector('.mapbox').scrollIntoView(); ['giusto','duomo','ore'].forEach(i => planToggle('0203', i)); setPlanOpen(true); }); await p.waitForTimeout(300);
+  await p.selectOption('.pd-wd', '6'); await p.waitForTimeout(200);
+  await p.click('.pd-add'); await p.waitForTimeout(200);
+  console.log(await p.evaluate(() => [...document.querySelectorAll('#plan-days button')].map(b => b.textContent).join(' | ')));
+  await p.click('#plan-days button[data-k="0203"]'); await p.waitForTimeout(300);
+  console.log(await p.evaluate(() => [...document.querySelectorAll('.p-info')].map(x => x.textContent + (x.classList.contains('closed') ? '[紅]' : '')).join(' / ')));
+  await (await p.$('#plan')).screenshot({ path: 'wd.png' });
+  await p.evaluate(() => openSpot('michele')); await p.waitForTimeout(200);
+  console.log(await p.evaluate(() => [...document.querySelectorAll('.plan-day')].map(b => b.textContent).join(' | ')));
+  await b.close(); })();

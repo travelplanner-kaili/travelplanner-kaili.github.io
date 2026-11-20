@@ -1,0 +1,14 @@
+const { chromium } = require('playwright');
+(async () => { const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 1280, height: 900 } });
+  p.on('pageerror', e=>console.log('ERR', e.message));
+  await p.route('https://routing.openstreetmap.de/**', r => { const u = r.request().url(); const pts = u.split('/driving/')[1].split('?')[0].split(';').map(x => x.split(',').map(Number));
+    const coords = []; for (let i = 0; i + 1 < pts.length; i++) { const [a, c] = [pts[i], pts[i+1]]; coords.push(a, [a[0], c[1]]); } coords.push(pts[pts.length-1]);
+    r.fulfill({ contentType: 'application/json', headers: {'access-control-allow-origin':'*'}, body: JSON.stringify({ code: 'Ok', routes: [{ distance: 777, geometry: { coordinates: coords }, legs: pts.slice(1).map(() => ({ distance: 333 })) }] }) }); });
+  await p.goto('file:///home/claude/lucca/real/lucca-real.html'); await p.waitForTimeout(900);
+  await p.evaluate(() => { document.querySelector('.mapbox').scrollIntoView(); setDist(true); pickSpot('michele'); pickSpot('guinigi'); }); await p.waitForTimeout(500);
+  console.log(await p.evaluate(() => [document.getElementById('p2p-dist').textContent, document.getElementById('p2p-go').href.slice(0,120)]));
+  await p.screenshot({ path: 'route1.png' });
+  await p.evaluate(() => { setDist(false); planToggle('0204','duomo'); planToggle('0204','ore'); planToggle('0204','anfiteatro'); setPlanOpen(true); }); await p.waitForTimeout(600);
+  console.log(await p.evaluate(() => [document.getElementById('plan-sum').textContent, [...document.querySelectorAll('.p-leg')].map(x=>x.textContent), document.getElementById('plan-go').href.slice(0,160)]));
+  await p.screenshot({ path: 'route2.png' });
+  await b.close(); })();

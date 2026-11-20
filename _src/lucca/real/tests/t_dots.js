@@ -1,0 +1,11 @@
+const {chromium}=require('playwright');
+(async()=>{const b=await chromium.launch();const c=await b.newContext({viewport:{width:1280,height:850}});const p=await c.newPage();
+await p.addInitScript(()=>{localStorage.setItem('trip-tour-lucca','1');localStorage.setItem('trip-tour-plan-lucca','1');localStorage.setItem('trip-plan-lucca',JSON.stringify({cur:'d1',days:{d1:[{id:'duomo',time:'',note:''},{id:'campanile',time:'',note:''}]},list:[{k:'d1',date:'2/4',wd:4}]}))});
+await p.goto('file://'+process.cwd()+'/lucca-real.html');await p.waitForTimeout(700);
+await p.click('.plan-tab');await p.waitForTimeout(500);
+await p.evaluate(()=>byId('shopping')&&map.setView(byId('shopping').ll,17,{animate:false}));await p.waitForTimeout(500);
+const dots=()=>p.evaluate(()=>document.querySelectorAll('.plan-dim').length);
+console.log('day on',await dots());await p.screenshot({path:'/tmp/claude-0/dots-on.png'});
+await p.click('#plan-days button[aria-selected=true]');await p.waitForTimeout(400);
+console.log('off',await dots());await p.screenshot({path:'/tmp/claude-0/dots-off.png'});
+await b.close();})();
