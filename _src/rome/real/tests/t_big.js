@@ -1,0 +1,10 @@
+const {chromium}=require('playwright');
+(async()=>{const b=await chromium.launch();const c=await b.newContext({viewport:{width:390,height:800}});const p=await c.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
+await p.addInitScript(()=>{localStorage.setItem('trip-tour-rome','1');localStorage.setItem('trip-tour-plan-rome','1');localStorage.setItem('trip-plan-rome',JSON.stringify({cur:'d1',days:{d1:[{id:'colosseo',time:'',note:''},{id:'foro',time:'',note:''}]},list:[{k:'d1',date:'2/4',wd:4}]}))});
+await p.goto('file:///home/claude/rome/real/rome-real.html');await p.waitForTimeout(700);
+const st=n=>p.evaluate(()=>{const e=document.getElementById('plan'),t=document.querySelector('.plan-tab');return [!e.hidden,e.classList.contains('big'),(r=>[r.top|0,r.bottom|0])(e.getBoundingClientRect()),(r=>[r.top|0,r.bottom|0])(t.getBoundingClientRect())]}).then(x=>console.log(n,JSON.stringify(x)));
+await p.click('.plan-tab');await p.waitForTimeout(400);await st('open');
+await p.click('.plan-tab');await p.waitForTimeout(400);await st('big');await p.screenshot({path:'/tmp/claude-0/big.png'});
+await p.click('.plan-tab');await p.waitForTimeout(400);await st('closed');
+await p.click('.plan-tab');await p.waitForTimeout(400);await st('open again');
+console.log(errs);await b.close();})();
