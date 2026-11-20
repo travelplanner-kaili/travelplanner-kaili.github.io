@@ -1,7 +1,8 @@
-node_modules/
+node_modules
 __pycache__/
 *.png
 lucca/real/lucca-real.html
 lucca/real/version.json
 rome/real/rome-real.html
 rome/real/version.json
+lucca/spec.md
