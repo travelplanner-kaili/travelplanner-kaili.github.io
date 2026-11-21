@@ -536,7 +536,7 @@ function renderPlan() {
   // 10. one tap: every spot of this day 去過 / not 去過 (the same 「已去過」 as in a spot's own page)
   const V = visSet(), vIds = items.map(x => x.id).filter(id => byId(id).cat !== "base"), allV = !!V && vIds.length > 0 && vIds.every(id => V.has(id));
   const db = memo.querySelector(".pd-done");
-  db.hidden = !V || !vIds.length; db.textContent = allV ? "取消這天的去過" : "✓ 這天全部去過"; db.setAttribute("aria-pressed", allV);
+  db.hidden = !V || !vIds.length; db.textContent = allV ? "✓ 這天全部去過" : "這天全部去過"; db.title = allV ? "再按一次，這天全部改回沒去過" : "這天的景點全部標成去過"; db.setAttribute("aria-pressed", allV);
   db.addEventListener("click", () => { vIds.forEach(id => allV ? V.delete(id) : V.add(id)); saveVisited(); applyVisited(); renderPlan(); });
   document.getElementById("plan-empty").hidden = items.length > 0;
   planList.innerHTML = "";
@@ -544,11 +544,11 @@ function renderPlan() {
   items.forEach((x, i) => {
     const s = byId(x.id), li = document.createElement("li");
     li.dataset.id = x.id;
-    li.innerHTML = `<span class="p-drag" aria-label="拖曳調整順序">⋮⋮</span><span class="p-no">${i + 1}</span><span class="p-time-txt"></span><button type="button" class="p-name"></button><input class="p-time" type="text" inputmode="numeric" maxlength="5" placeholder="--:--" aria-label="幾點到（24 小時制，例如 09:30）"><button type="button" class="p-vis" aria-label="去過了沒" title="去過了沒（點一下切換）">✓</button><button type="button" class="p-del" aria-label="從這天的行程移除（景點還留在地圖上）" title="從這天的行程移除">×</button><div class="p-info"></div><input class="p-note" type="text" placeholder="備註" aria-label="備註">`;
+    li.innerHTML = `<span class="p-drag" aria-label="拖曳調整順序">⋮⋮</span><span class="p-no">${i + 1}</span><span class="p-time-txt"></span><button type="button" class="p-name"></button><input class="p-time" type="text" inputmode="numeric" maxlength="5" placeholder="--:--" aria-label="幾點到（24 小時制，例如 09:30）"><button type="button" class="p-vis" aria-label="去過了沒" title="去過了沒（點一下切換）">去過</button><button type="button" class="p-del" aria-label="從這天的行程移除（景點還留在地圖上）" title="從這天的行程移除">×</button><div class="p-info"></div><input class="p-note" type="text" placeholder="備註" aria-label="備註">`;
     li.querySelector(".p-name").textContent = s.name;
     const isV = !!visSet() && visSet().has(s.id), vb = li.querySelector(".p-vis");
     li.classList.toggle("p-visited", isV); vb.setAttribute("aria-pressed", isV); vb.hidden = !visSet() || s.cat === "base";
-    vb.title = isV ? "已去過（點一下取消）" : "標記為已去過";
+    vb.title = isV ? "已去過（點一下取消）" : "標記為已去過"; vb.textContent = isV ? "✓ 去過" : "去過";
     vb.addEventListener("click", () => { const V = visSet(); if (!V) return; V.has(s.id) ? V.delete(s.id) : V.add(s.id); saveVisited(); applyVisited(); renderPlan(); });
     li.querySelector(".p-name").addEventListener("click", () => { openSpot(s.id); setTimeout(() => focusOn(s), 320); });
     const tm = li.querySelector(".p-time"); tm.value = x.time || ""; li.querySelector(".p-time-txt").textContent = x.time || "";

@@ -173,9 +173,9 @@ out = out[:fi] + faq + out[fj:]
 # ---- styles ----
 css = '''<style>
 /* ===== Rome: City Walk, 購物 ===== */
-:root { --route-bernini: #1F6FB5; --route-cara: #7B3C8C; --route-michel: #0E7C72;  --shop-street: #C8457F; --walk: #44505E; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --route-bernini: #6FB0EE; --route-cara: #C891DA; --route-michel: #5CCABD; --shop-street: #F08CBA; --walk: #C3CDD8; } }
-:root[data-theme="dark"] { --route-bernini: #6FB0EE; --route-cara: #C891DA; --route-michel: #5CCABD; --shop-street: #F08CBA; --walk: #C3CDD8; }
+:root { --route-bernini: #1F6FB5; --route-cara: #7B3C8C; --route-michel: #0E7C72;  --shop-street: #C8457F; --walk: #C62828; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --route-bernini: #6FB0EE; --route-cara: #C891DA; --route-michel: #5CCABD; --shop-street: #F08CBA; --walk: #FF6B6B; } }
+:root[data-theme="dark"] { --route-bernini: #6FB0EE; --route-cara: #C891DA; --route-michel: #5CCABD; --shop-street: #F08CBA; --walk: #FF6B6B; }
 .icon-btn.route { border-color: var(--walk); color: var(--walk); }
 .icon-btn.route[aria-pressed="true"] { background: var(--walk); color: var(--paper); }
 .icon-btn.shop-btn { border-color: var(--open); color: var(--open); }
