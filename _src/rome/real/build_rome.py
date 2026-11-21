@@ -173,29 +173,29 @@ out = out[:fi] + faq + out[fj:]
 # ---- styles ----
 css = '''<style>
 /* ===== Rome: City Walk, 購物 ===== */
-:root { --route-bernini: #1F6FB5; --route-cara: #7B3C8C; --route-michel: #0E7C72; --shop-street: #C8457F; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --route-bernini: #6FB0EE; --route-cara: #C891DA; --route-michel: #5CCABD; --shop-street: #F08CBA; } }
-:root[data-theme="dark"] { --route-bernini: #6FB0EE; --route-cara: #C891DA; --route-michel: #5CCABD; --shop-street: #F08CBA; }
-.icon-btn.route { border-color: var(--route); color: var(--route); }
-.icon-btn.route[aria-pressed="true"] { background: var(--route); color: var(--paper); }
+:root { --route-bernini: #1F6FB5; --route-cara: #7B3C8C; --route-michel: #0E7C72;  --shop-street: #C8457F; --walk: #44505E; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --route-bernini: #6FB0EE; --route-cara: #C891DA; --route-michel: #5CCABD; --shop-street: #F08CBA; --walk: #C3CDD8; } }
+:root[data-theme="dark"] { --route-bernini: #6FB0EE; --route-cara: #C891DA; --route-michel: #5CCABD; --shop-street: #F08CBA; --walk: #C3CDD8; }
+.icon-btn.route { border-color: var(--walk); color: var(--walk); }
+.icon-btn.route[aria-pressed="true"] { background: var(--walk); color: var(--paper); }
 .icon-btn.shop-btn { border-color: var(--open); color: var(--open); }
 .icon-btn.shop-btn[aria-pressed="true"] { background: var(--open); color: var(--paper); }
-.ic.ic-walk { border-color: var(--route); color: var(--route); }
+.ic.ic-walk { border-color: var(--walk); color: var(--walk); }
 .ic.ic-shop { border-color: var(--open); color: var(--open); }
 .route-pick { position: absolute; left: max(10px, env(safe-area-inset-left, 0px)); top: 10px; z-index: 720; max-width: calc(100% - 80px); display: flex; flex-wrap: wrap; gap: 6px; }
-.route-pick button { --rc: var(--route); font: 700 13px var(--f-body); padding: 5px 11px; border-radius: 999px; border: 2px solid var(--rc); background: var(--paper); color: var(--rc); cursor: pointer; }
+.route-pick button { --rc: var(--walk); font: 700 13px var(--f-body); padding: 5px 11px; border-radius: 999px; border: 2px solid var(--rc); background: var(--paper); color: var(--rc); cursor: pointer; }
 .route-pick button[aria-pressed="true"] { background: var(--rc); color: var(--paper); }
 .route-pick button.all { --rc: var(--ink); }
 .mapbox.fs .route-pick { top: calc(var(--fsbar, 56px) + 6px); }
 /* computer: with 我的行程 open, the walk chips sit to the right of the panel (and its tab) instead of over it */
 @media (min-width: 641px) { .mapbox:has(.plan:not([hidden])) .route-pick { left: calc(min(372px, 100% - 80px) + 48px); max-width: calc(100% - min(372px, 100% - 80px) - 120px); } }
 @media (max-width: 640px) { .route-pick { top: 6px; left: 6px; right: 6px; max-width: none; gap: 4px; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; } .route-pick::-webkit-scrollbar { display: none; } .route-pick button { flex: none; } }
-.leaflet-pane path.route-line { stroke: var(--rc, var(--route)); stroke-width: 6; stroke-dasharray: 12 8; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+.leaflet-pane path.route-line { stroke: var(--rc, var(--walk)); stroke-width: 3.5; stroke-dasharray: 8 6; stroke-linecap: round; stroke-linejoin: round; fill: none; }
 .leaflet-pane path.route-hit { stroke: transparent; stroke-width: 26; fill: none; cursor: pointer; }
-.route-end span { position: absolute; left: -13px; top: -13px; width: 26px; height: 26px; border-radius: 50%; background: var(--rc, var(--route)); color: var(--paper); border: 2.5px solid var(--paper); font: 700 13px/21px var(--f-body); text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,.3); }
-.route-mark span { position: absolute; left: -12px; top: -12px; width: 24px; height: 24px; border-radius: 50%; background: var(--paper); color: var(--rc, var(--route)); border: 2.5px solid var(--rc, var(--route)); font: 700 12px/19px var(--f-body); text-align: center; cursor: pointer; }
-.route-mark span:hover { background: var(--rc, var(--route)); color: var(--paper); }
-.route-pill span { position: absolute; transform: translate(-50%, -50%); white-space: nowrap; background: var(--rc, var(--route)); color: var(--paper); border: 2px solid var(--paper); border-radius: 999px; padding: 4px 12px; font: 700 13px var(--f-body); cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,.25); }
+.route-end span { position: absolute; left: -13px; top: -13px; width: 26px; height: 26px; border-radius: 50%; background: var(--rc, var(--walk)); color: var(--paper); border: 2.5px solid var(--paper); font: 700 13px/21px var(--f-body); text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,.3); }
+.route-mark span { position: absolute; left: -12px; top: -12px; width: 24px; height: 24px; border-radius: 50%; background: var(--paper); color: var(--rc, var(--walk)); border: 2.5px solid var(--rc, var(--walk)); font: 700 12px/19px var(--f-body); text-align: center; cursor: pointer; }
+.route-mark span:hover { background: var(--rc, var(--walk)); color: var(--paper); }
+.route-pill span { position: absolute; transform: translate(-50%, -50%); white-space: nowrap; background: var(--rc, var(--walk)); color: var(--paper); border: 2px solid var(--paper); border-radius: 999px; padding: 4px 12px; font: 700 13px var(--f-body); cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,.25); }
 .route-pill span::after { content: "👆"; position: absolute; right: -16px; bottom: -22px; font-size: 24px; pointer-events: none; filter: drop-shadow(0 1px 1px rgba(0,0,0,.35)); }
 .spot.off-route { display: none !important; }
 #lmap .off-route-area { display: none; }
@@ -211,14 +211,14 @@ ol.stops { margin: 0; padding-left: 1.3em; }
 .food-intro { margin: 0 0 18px; line-height: 1.7; }
 .food-h { font-size: 13px; letter-spacing: .06em; color: var(--muted); margin: 0 0 10px; }
 .food-list { list-style: none; margin: 0 0 22px; padding: 0; display: flex; flex-direction: column; gap: 12px; }
-.food { border: 1px solid var(--line); border-left: 4px solid var(--route); border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
+.food { border: 1px solid var(--line); border-left: 4px solid var(--walk); border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
 .food p { margin: 0; line-height: 1.6; }
-.food-where { font-size: 12px; font-weight: 700; color: var(--route); letter-spacing: .04em; }
+.food-where { font-size: 12px; font-weight: 700; color: var(--walk); letter-spacing: .04em; }
 .food-name { font: 700 17px var(--f-body); }
 .food-kind, .food-hours { font-size: 13px; color: var(--muted); }
-.stop-link { font: 700 15px var(--f-body); color: var(--route); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
-.walk-link { margin-top: 10px; font: 700 15px var(--f-body); padding: 8px 14px; border-radius: 999px; border: 2px solid var(--route); background: none; color: var(--route); cursor: pointer; }
-.walk-link:hover { background: var(--route); color: var(--paper); }
+.stop-link { font: 700 15px var(--f-body); color: var(--walk); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.walk-link { margin-top: 10px; font: 700 15px var(--f-body); padding: 8px 14px; border-radius: 999px; border: 2px solid var(--walk); background: none; color: var(--walk); cursor: pointer; }
+.walk-link:hover { background: var(--walk); color: var(--paper); }
 .howto-intro { margin: 0 0 8px; line-height: 1.7; }
 .howto { margin: 0; padding-left: 1.3em; display: flex; flex-direction: column; gap: 8px; line-height: 1.65; }
 .stars { margin: -8px 0 16px; color: var(--paid); font-size: 17px; letter-spacing: .12em; display: flex; align-items: center; gap: 10px; }

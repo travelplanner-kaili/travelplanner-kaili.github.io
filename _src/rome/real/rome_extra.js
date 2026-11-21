@@ -15,7 +15,7 @@ SPOTS.forEach(s => { if (s.rush && s.g) { s.g.classList.add("rush"); const n = s
 /* ---- City Walk ---- */
 const routeLayer = L.layerGroup();
 let routeOn = false;
-const routeColor = r => r.color ? `var(--route-${r.color})` : "var(--route)";
+const routeColor = r => r.color ? `var(--route-${r.color})` : "var(--walk)";   // 2026-11-21: walks are not orange (that is 我的行程)
 ROUTES.forEach(r => {
   const g = r.layer = L.layerGroup();
   const css = el => { if (el) el.style.setProperty("--rc", routeColor(r)); };
@@ -38,21 +38,16 @@ ROUTES.forEach(r => {
 let routeShow = new Set(ROUTES.map(r => r.id));
 try { const v = JSON.parse(localStorage.getItem("routeShow-rome") || "null"); if (Array.isArray(v) && v.length) routeShow = new Set(v.filter(id => ROUTES.some(r => r.id === id))); } catch (e) {}
 const pick = document.getElementById("route-pick");
-const pickAll = document.createElement("button"); pickAll.type = "button"; pickAll.className = "all"; pickAll.textContent = "全部"; pick.appendChild(pickAll);
 ROUTES.forEach(r => {
   const b = document.createElement("button"); b.type = "button"; b.dataset.route = r.id;
   b.textContent = r.tag || r.name.replace("City Walk：", "");
   if (r.color) b.style.setProperty("--rc", routeColor(r));
   b.addEventListener("click", () => {
-    // first tap while everything is shown = only this walk; later taps add / remove
-    if (routeShow.size === ROUTES.length) routeShow = new Set([r.id]);
-    else if (routeShow.has(r.id)) { routeShow.delete(r.id); if (!routeShow.size) routeShow = new Set(ROUTES.map(x => x.id)); }
-    else routeShow.add(r.id);
+    if (routeShow.has(r.id)) { if (routeShow.size > 1) routeShow.delete(r.id); } else routeShow.add(r.id);
     saveShow(); applyRoute();
   });
   pick.appendChild(b);
 });
-pickAll.addEventListener("click", () => { routeShow = new Set(ROUTES.map(x => x.id)); saveShow(); applyRoute(); });
 L.DomEvent.disableClickPropagation(pick); L.DomEvent.disableScrollPropagation(pick);
 function saveShow() { try { localStorage.setItem("routeShow-rome", JSON.stringify([...routeShow])); } catch (e) {} }
 const shownRoutes = () => ROUTES.filter(r => routeShow.has(r.id));
@@ -61,9 +56,7 @@ function applyRoute() {
   if (routeOn) routeLayer.addTo(map); else routeLayer.remove();
   ROUTES.forEach(r => { if (routeOn && routeShow.has(r.id)) routeLayer.addLayer(r.layer); else routeLayer.removeLayer(r.layer); });
   pick.hidden = !routeOn;
-  const allOn = routeShow.size === ROUTES.length;
-  pickAll.setAttribute("aria-pressed", allOn);
-  pick.querySelectorAll("button[data-route]").forEach(b => b.setAttribute("aria-pressed", !allOn && routeShow.has(b.dataset.route)));
+  pick.querySelectorAll("button[data-route]").forEach(b => b.setAttribute("aria-pressed", routeShow.has(b.dataset.route)));
   document.querySelectorAll(".icon-btn.route").forEach(b => b.setAttribute("aria-pressed", routeOn));
   // a walk on the map: only the spots on the shown walks stay (their hidden 次要 spots come back too)
   const ids = new Set(routeOn ? shownRoutes().flatMap(r => [...r.stops, ...(r.areas || [])]) : []);
@@ -127,19 +120,34 @@ function openRoute(id) {
 
 /* 整條路線加入行程 (2026-11-20): the walk's stops go into that day in the walk's order (ones already there stay where they are);
    when the whole walk is already in that day, the same button takes the walk's stops out again */
+const walkIds = r => r.stops.filter(id => byId(id) && byId(id).cat !== "base");
+function walkToDay(r, k) {   // the whole walk in / out of a day (in = the walk's order, ones already there stay)
+  const ids = walkIds(r), a = plan.days[k];
+  if (ids.every(id => planHas(k, id))) plan.days[k] = a.filter(x => !ids.includes(x.id));
+  else ids.forEach(id => { if (!planHas(k, id)) a.push({ id, time: "", note: "" }); });
+  plan.cur = k; plan.on = true; savePlan(); renderPlan();
+}
+CITY.unExtra = (box, cd) => {
+  const h = document.createElement("h4"); h.textContent = "City Walk（整條路線加進 " + dayLabel(cd) + "）"; box.append(h);
+  ROUTES.forEach(r => {
+    const all = walkIds(r).every(id => planHas(cd.k, id)), row = document.createElement("div"); row.className = "un-row";
+    row.innerHTML = '<button type="button" class="un-name"></button><span class="un-off"></span><button type="button" class="un-add"></button>';
+    row.querySelector(".un-name").textContent = r.tag || r.name.replace("City Walk：", "");
+    row.querySelector(".un-off").textContent = walkIds(r).length + " 個景點";
+    const b = row.querySelector(".un-add"); b.textContent = all ? "✓ 已加入" : "＋ 加入"; b.title = all ? "再按一次，把這條路線的景點從這天移除" : "依路線順序加進這天";
+    row.querySelector(".un-name").addEventListener("click", () => openRoute(r.id));
+    b.addEventListener("click", () => walkToDay(r, cd.k));
+    box.append(row);
+  });
+};
 function bindRoutePlan(r) {
-  const ids = r.stops.filter(id => byId(id) && byId(id).cat !== "base");
+  const ids = walkIds(r);
   const paint = () => drawer.querySelectorAll(".rt-plan .plan-day").forEach(b => {
     const d = PDAYS.find(x => x.k === b.dataset.day), all = ids.every(id => planHas(d.k, id));
     b.setAttribute("aria-pressed", all); b.textContent = (all ? "✓ " : "＋ ") + d.label;
     b.title = all ? "再按一次，把這條路線的景點從這天移除" : "把沿途 " + ids.length + " 個景點依路線順序加進這天";
   });
-  drawer.querySelectorAll(".rt-plan .plan-day").forEach(b => b.addEventListener("click", () => {
-    const k = b.dataset.day, a = plan.days[k];
-    if (ids.every(id => planHas(k, id))) plan.days[k] = a.filter(x => !ids.includes(x.id));
-    else ids.forEach(id => { if (!planHas(k, id)) a.push({ id, time: "", note: "" }); });
-    plan.cur = k; plan.on = true; savePlan(); renderPlan(); paint();
-  }));
+  drawer.querySelectorAll(".rt-plan .plan-day").forEach(b => b.addEventListener("click", () => { walkToDay(r, b.dataset.day); paint(); }));
   paint();
 }
 

@@ -78,11 +78,12 @@ STREETS.forEach(st => {
 function placeStreets() {
   if (!map._loaded) return;
   const z = map.getZoom(), w = Math.max(5, Math.min(30, 11 * Math.pow(2, z - 16)));
+  let lm = "auto"; try { lm = LMODE; } catch (e) {}   // 2026-11-21: street names follow the eye like the spot labels
   STREETS.forEach(st => { st.line.setStyle({ weight: w });
     if (!st.label) return; const { ll, ang } = streetLabelAt(st.pts, st.at);
     st.label.setLatLng(ll); const sp = st.label.getElement() && st.label.getElement().querySelector("span");
     if (sp) { sp.textContent = st.name; sp.style.transform = `translate(-50%, -50%) rotate(${ang}deg)`; }
-    st.label.getElement() && st.label.getElement().classList.toggle("off", z < (st.minZoom || 14.5)); });
+    st.label.getElement() && st.label.getElement().classList.toggle("off", lm === "auto" && z < (st.minZoom || 14.5)); });
   if (typeof SPOTS !== "undefined" && SPOTS.length && SPOTS[0].g) layoutLabels();
 }
 map.on("zoomend", placeStreets); map.whenReady(placeStreets);
@@ -103,8 +104,8 @@ function makeSpot(s) {
   g.style.setProperty("--pc", ({ paid: "#E5484D", free: "#3B82F6", open: "#3DAA5A", base: "#3A3633", mine: "#A855F7" })[s.cat] || CAT[s.cat].color);   // bright dot colours for the busy street map
   const allDay = s.cat === "open" || s.cat === "base";
   g.innerHTML = `<svg class="leader"><line x1="0" y1="0"/></svg><div class="tab"><div class="t-name"></div>${allDay || !(WEEK[s.id] || s.sHours) ? "" : '<div class="t-wed t-more"></div>'}${s.sPrice ? '<div class="t-price t-more"></div>' : ""}</div><span class="pin"></span><span class="plan-no"></span>`;
-  g.querySelector(".t-name").textContent = s.name;
-  if (g.querySelector(".t-price")) g.querySelector(".t-price").textContent = s.sPrice;
+  g.querySelector(".t-name").textContent = s.id === "hotel" ? "HOTEL" : s.name;   // 2026-11-21: the full name is in the card
+  if (g.querySelector(".t-price")) { if (s.id === "hotel") g.querySelector(".t-price").remove(); else g.querySelector(".t-price").textContent = s.sPrice; }
   if (!WEEK[s.id] && s.sHours && g.querySelector(".t-wed")) g.querySelector(".t-wed").textContent = s.sHours;
   s.g = g; s.tab = g.querySelector(".tab"); s.tw = g.querySelector(".t-wed"); s.line = g.querySelector(".leader line");
   s.marker = L.marker(s.ll, { icon: L.divIcon({ className: "lm-spot", html: g, iconSize: [0, 0] }), keyboard: false, interactive: false,
@@ -190,8 +191,7 @@ function layoutLabels() {
   const rank = s => inP(s) ? -100 + (pOrder[s.id] || 0) / 100 : ORDER(s);
   [...vis].sort((a, b) => rank(a) - rank(b)).forEach(s => {
     const g0 = inP(s) ? 7 : 0;
-    const sl = forceSlim || (s.compact && LMODE !== "full") || (planOn && !inP(s) && LMODE === "auto");
-    if (planOn && !inP(s) && LMODE === "auto" && z < 15.5) { s.g.classList.add("lbl-off"); return; }   // zoomed out on a day: only that day's labels   // compact spots (crowded centre, 次要) keep a name-only label, as on the hand-drawn map
+    const sl = forceSlim || (s.compact && LMODE !== "full");   // compact spots (crowded centre, 次要) keep a name-only label, as on the hand-drawn map
     let placed = null, slim = sl;
     for (const mode of sl ? ["slim"] : forceAll ? ["full"] : ["full", "slim"]) {
       const { w, h } = s[mode];
@@ -544,9 +544,12 @@ function renderPlan() {
   items.forEach((x, i) => {
     const s = byId(x.id), li = document.createElement("li");
     li.dataset.id = x.id;
-    li.innerHTML = `<span class="p-drag" aria-label="拖曳調整順序">⋮⋮</span><span class="p-no">${i + 1}</span><span class="p-time-txt"></span><button type="button" class="p-name"></button><input class="p-time" type="text" inputmode="numeric" maxlength="5" placeholder="--:--" aria-label="幾點到（24 小時制，例如 09:30）"><button type="button" class="p-del" aria-label="從這天的行程移除（景點還留在地圖上）" title="從這天的行程移除">×</button><div class="p-info"></div><input class="p-note" type="text" placeholder="備註" aria-label="備註">`;
+    li.innerHTML = `<span class="p-drag" aria-label="拖曳調整順序">⋮⋮</span><span class="p-no">${i + 1}</span><span class="p-time-txt"></span><button type="button" class="p-name"></button><input class="p-time" type="text" inputmode="numeric" maxlength="5" placeholder="--:--" aria-label="幾點到（24 小時制，例如 09:30）"><button type="button" class="p-vis" aria-label="去過了沒" title="去過了沒（點一下切換）">✓</button><button type="button" class="p-del" aria-label="從這天的行程移除（景點還留在地圖上）" title="從這天的行程移除">×</button><div class="p-info"></div><input class="p-note" type="text" placeholder="備註" aria-label="備註">`;
     li.querySelector(".p-name").textContent = s.name;
-    if (visSet() && visSet().has(s.id)) li.classList.add("p-visited");
+    const isV = !!visSet() && visSet().has(s.id), vb = li.querySelector(".p-vis");
+    li.classList.toggle("p-visited", isV); vb.setAttribute("aria-pressed", isV); vb.hidden = !visSet() || s.cat === "base";
+    vb.title = isV ? "已去過（點一下取消）" : "標記為已去過";
+    vb.addEventListener("click", () => { const V = visSet(); if (!V) return; V.has(s.id) ? V.delete(s.id) : V.add(s.id); saveVisited(); applyVisited(); renderPlan(); });
     li.querySelector(".p-name").addEventListener("click", () => { openSpot(s.id); setTimeout(() => focusOn(s), 320); });
     const tm = li.querySelector(".p-time"); tm.value = x.time || ""; li.querySelector(".p-time-txt").textContent = x.time || "";
     // 24-hour, like the hours on the map: "930" / "9:30" / "0930" → 09:30
@@ -610,15 +613,12 @@ function renderPlan() {
     const pts = items.map(x => byId(x.id).ll);
     go.href = gDir(pts.slice(0, 10));
     const line = L.polyline(pts, { className: "plan-line", interactive: false, pane: "planRoute" }).addTo(planLayer);
-    const hit = L.polyline(pts, { className: "plan-hit", pane: "planRoute" }).addTo(planLayer);
-    hit.on("click", e => { L.DomEvent.stopPropagation(e); legsOn = !legsOn; mapEl.classList.toggle("legs-on", legsOn); placeLegPills(); });
     const pills = [];
-    for (let i = 0; i + 1 < pts.length; i++) { const pl = pill(mid(pts[i], pts[i + 1]), walkText(hav(pts[i], pts[i + 1])), "leg"); pl.options.pane = "planPills"; pl._ab = [pts[i], pts[i + 1]]; pills.push(pl.addTo(planLayer)); }
-    legPills = pills; placeLegPills();
+    // 2026-11-21: no distance pills on the map (the list says each leg); legPills stays empty
     const want = plan.cur + ":" + items.map(x => x.id).join(",");
     walkRoute(pts).then(rt => {
       if (!rt || want !== plan.cur + ":" + plan.days[plan.cur].filter(x => byId(x.id)).map(x => x.id).join(",")) return;
-      line.setLatLngs(rt.coords); hit.setLatLngs(rt.coords);
+      line.setLatLngs(rt.coords);
       rt.legs.forEach((m, i) => { const el = pills[i] && pills[i].getElement(); if (el) el.querySelector("span").textContent = realText(m); const lg = planList.children[i] && planList.children[i].querySelector(".p-leg-t"); if (lg) { lg.textContent = "↓ 步行約 " + realText(m); lg.parentNode.querySelector(".p-leg-go").textContent = "實際路線 ↗"; } });
       placeLegPills();
       const w = rt.total; document.getElementById("plan-sum").textContent = `走路共約 ${realText(w).replace("・", "・約 ")}`;
@@ -742,6 +742,7 @@ function renderUnList(list) {
       box.append(r);
     });
   });
+  if (typeof CITY.unExtra === "function") CITY.unExtra(box, cd);
 }
 L.DomEvent.disableScrollPropagation(document.getElementById("plan-unlist"));
 const setPlanOpen = on => { planOpen = on; try { localStorage.setItem(PKEY + "-open", on ? "1" : "0"); } catch (e) {} renderPlan(); if (on) fitPlan(); };
@@ -1100,7 +1101,7 @@ function setLMode(m) {
     x.setAttribute("aria-pressed", m !== "auto"); x.dataset.mode = m; x.dataset.tip = "顯示：" + LMODE_TXT[m];
     x.setAttribute("aria-label", "景點框顯示方式：" + LMODE_TXT[m] + "（按一下切換：自動、全覽、簡潔）");
   });
-  if (map._loaded) layoutLabels();   // at start-up the map places the labels itself once it has a view
+  if (map._loaded) placeStreets();   // (places the labels too) at start-up the map places the labels itself once it has a view
 }
 document.querySelectorAll(".names-btn").forEach(b => b.addEventListener("click", () => setLMode(LMODES[(LMODES.indexOf(LMODE) + 1) % 3])));
 setLMode(LMODE);
@@ -1122,7 +1123,7 @@ window.addEventListener("resize", () => map.invalidateSize());
 function saveHotel(h) {
   myHotel = h; try { h ? localStorage.setItem(HKEY, JSON.stringify(h)) : localStorage.removeItem(HKEY); } catch (e) {}
   const s = byId("hotel"); applyHotelData();
-  s.marker.setLatLng(s.ll); s.g.querySelector(".t-name").textContent = s.name; if (s.g.querySelector(".t-price")) s.g.querySelector(".t-price").textContent = s.sPrice; s.g.setAttribute("aria-label", s.name + "，我的住宿");
+  s.marker.setLatLng(s.ll); s.g.setAttribute("aria-label", s.name + "，我的住宿");
   renderPlan(); layoutLabels();
 }
 function hotelFromLine(s) {
