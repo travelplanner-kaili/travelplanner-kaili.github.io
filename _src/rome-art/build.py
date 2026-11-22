@@ -1,0 +1,12 @@
+import json, datetime, os
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+os.system("python3 -I parse2.py rome_art.md > /dev/null")
+t=open('template.html',encoding='utf-8').read()
+t=t.replace('/*QA*/[]',open('qa2.json',encoding='utf-8').read())
+t=t.replace('/*SPOTS*/{}',open('spots.json',encoding='utf-8').read())
+built=datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8))).strftime('%Y-%m-%d %H:%M')
+t=t.replace('/*CONTENT*/',open('content.js',encoding='utf-8').read()+'\nconst BUILT = "'+built+'";')
+t=t.replace('<script src="app.js"></script>','<script>\n'+open('app.js',encoding='utf-8').read()+'</script>')
+open('../../rome-art/index.html','w',encoding='utf-8').write(t)
+import shutil; shutil.copy('rome_art.md','../../rome-art/rome_art.md')
+print('built', built, len(t))
