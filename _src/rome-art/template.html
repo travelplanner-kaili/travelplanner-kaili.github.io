@@ -130,6 +130,11 @@ section.view{display:none} section.view.on{display:block}
 .subli{margin:4px 0 2px;padding-left:12px;border-left:2px solid var(--line);font-size:16px;line-height:1.8}
 .subli b{color:var(--c,var(--ink))!important}
 .qb ol>li{margin-bottom:14px}
+.deep{margin:18px 0 6px;border-top:1px dashed var(--line);padding-top:10px}
+.deep>summary{cursor:pointer;font-weight:700;font-size:15.5px;color:var(--c,var(--ink));list-style:none;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:99px;padding:3px 12px;background:var(--soft)}
+.deep>summary::-webkit-details-marker{display:none}
+.deep>summary:after{content:"▾"}.deep[open]>summary:after{content:"▴"}
+.deep[open]>summary{margin-bottom:6px}
 .tbl{margin:10px 0 14px;overflow-x:auto}
 .tbl table{border-collapse:collapse;width:100%;font-size:15.5px;line-height:1.7}
 .tbl th{background:var(--soft);text-align:left;padding:8px 10px;font-size:14px;color:var(--mute);white-space:nowrap}

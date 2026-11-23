@@ -10,6 +10,7 @@ function parseMD(src) {
     else if (!cur) continue;
     else if (!q) (cur.intro = cur.intro || []).push(t);
     else if (s.startsWith("> ")) q.s = (q.s ? q.s + "\n" : "") + s.slice(2).trim();
+    else if (t === "=== 深究") q.b.push(["deep", ""]);
     else if (s.startsWith("|")) { const cells = t.replace(/^\||\|$/g, "").split("|").map(c => c.trim()); if (cells.every(c => /^[-: ]*$/.test(c))) continue; const l = q.b[q.b.length - 1]; if (l && l[0] === "tbl") l[1].push(cells); else q.b.push(["tbl", [cells]]); }
     else if (t === "---") continue;
     else if (s.startsWith("#### ")) q.b.push(["h", s.slice(5).trim()]);
@@ -51,9 +52,10 @@ QA.forEach(q => { const all = q.q + q.s + q.b.map(x => [].concat(x[1]).join(""))
 const linkify = s => s.replace(alRe, m => { const id = alMap[m]; return id[0] === "@" ? `<button class="sp g" data-g="${esc(id.slice(1))}">${m}</button>` : `<button class="sp" data-s="${id}">${m}</button>`; });
 const rich = s => linkify(esc(s)).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
 function body(b) {
-  let h = "", list = null;
+  let h = "", list = null, deep = false;
   const close = () => { if (list) { h += `</${list}>`; list = null; } };
   b.forEach(([t, x]) => {
+    if (t === "deep") { if (list) { h += `</${list}>`; list = null; } h += `<details class="deep"><summary>深究</summary>`; deep = true; return; }
     if (t === "sub") { if (list) { h = h.replace(/<\/li>$/, "") + `<div class="subli">${rich(x)}</div></li>`; } else h += `<div class="subli">${rich(x)}</div>`; return; }
     if (t === "li" || t === "ol") { const tag = t === "li" ? "ul" : "ol"; if (list !== tag) { close(); h += `<${tag}>`; list = tag; } h += `<li>${rich(x)}</li>`; return; }
     close();
@@ -62,7 +64,7 @@ function body(b) {
     if (t === "tbl") { const [hd, ...rows] = x; h += `<div class="tbl"><table><thead><tr>${hd.map(c => `<th>${rich(c)}</th>`).join("")}</tr></thead><tbody>${rows.map(r => `<tr>${r.map((c, i) => `<td data-h="${esc(hd[i] || "")}">${rich(c)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`; return; }
     h += t === "h" ? (x.startsWith("↳") ? `<h4 class="fq"><span>接著問</span>${rich(x.slice(1).trim())}</h4>` : `<h4>${rich(x)}</h4>`) : `<p>${rich(x)}</p>`;
   });
-  close(); return h;
+  close(); if (deep) h += "</details>"; return h;
 }
 const qChip = (id, withTitle) => Q[id] ? `<button class="qc" data-q="${id}" style="color:${cvar(Q[id].era)}">${id}${withTitle ? `<small>${esc(Q[id].q)}</small>` : ""}</button>` : "";
 const spotEras = id => (SPOTINFO[id] || [""])[0].split(" ").filter(Boolean);
@@ -130,7 +132,7 @@ function search(v) {
 
 /* ---------- 脈絡圖 ---------- */
 function buildFlow() {
-  if (PRE) $("#preqa").innerHTML = PRE.qs.map(q => card(q.id).replace('<div class="qb">', '<button class="fold" aria-expanded="false">展開完整回答 ▾</button><div class="qb">')).join("");
+  if (PRE) $("#preqa").innerHTML = PRE.qs.map(q => card(q.id).replace('<div class="qb">', '<button class="fold" aria-expanded="false">看詳答 ▾</button><div class="qb">')).join("");
   const head = e => `<div class="eh" style="background:${cvar(e.id)}"><b>${e.n}. ${e.name}</b>${e.sub ? `<small>（${e.sub}）</small>` : ""}<small>${e.yr}</small></div>`;
   const sp = ([id, lab]) => id[0] === "@" ? `<button class="chip" data-g="${esc(id.slice(1))}" style="--c:${cvar("aft")}"><span class="d"></span>${esc(lab || id.slice(1))}</button>`
     : SPOTS[id] ? `<button class="chip" data-s="${id}" style="--c:${cvar(spotEras(id)[0])}"><span class="d"></span>${esc(lab || SPOTS[id].n)}</button>` : "";
@@ -241,7 +243,7 @@ function gotoQ(id) {
 }
 document.addEventListener("click", ev => {
   const f = ev.target.closest(".fold, #preqa .qt");
-  if (f) { const qi = f.closest(".qi"), on = qi.classList.toggle("open"); const b = qi.querySelector(".fold"); b.setAttribute("aria-expanded", on); b.textContent = on ? "收起 ▴" : "展開完整回答 ▾"; return; }
+  if (f) { const qi = f.closest(".qi"), on = qi.classList.toggle("open"); const b = qi.querySelector(".fold"); b.setAttribute("aria-expanded", on); b.textContent = on ? "收起 ▴" : "看詳答 ▾"; return; }
   const t = ev.target.closest("[data-q],[data-s],[data-g],[data-goto],[data-sec],[data-oq],.x,#tocbtn");
   if (!t) return;
   if (t.classList.contains("x")) return closeDrawer();

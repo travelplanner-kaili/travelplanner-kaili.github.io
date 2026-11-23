@@ -15,6 +15,7 @@ for line in src.splitlines():
     elif q is None:
         cur.setdefault('intro', []).append(s.strip()); continue
     elif s.startswith('> '): q['s'] = (q['s'] + '\n' if q['s'] else '') + s[2:].strip()
+    elif s.strip() == '=== 深究': q['b'].append(['deep', ''])
     elif s.startswith('|'):
         cells = [c.strip() for c in s.strip().strip('|').split('|')]
         if all(set(c) <= set('-: ') for c in cells): continue
