@@ -765,8 +765,27 @@ NEW += [
 EXTRA_REMIND["smtrastevere"] = ["彌撒進行時請不要走動參觀；保持安靜，遮住肩膀和膝蓋。", "Google 地圖評論提到部分區域在整修。"]
 
 # ===== 購物 tag (user list 2026-11-13) =====
+# Porta Portese Sunday flea market as an area (2026-11-24, she asked for it on the map; it was a shopping-only point before)
+# range: Rome tourism office (turismoroma.it) — between Piazza Ippolito Nievo, Via Ettore Rolli and Via Portuense, starting at the gate;
+# gate 41.8839,12.4740 (Wikipedia / OSM); river centre Ponte Sublicio 41.8833,12.4752 → Ponte Testaccio 41.8755,12.4704,
+# Via Portuense kept ~1 block (≈0.0015° lon) west of that line; the outline is drawn roughly along those streets
+NEW += [
+ dict(id="portaportese", cat="free", sup=True, lat=41.8793517, lon=12.468878,
+  name="Porta Portese 跳蚤市場", latin="Mercato di Porta Portese",
+  area=[(41.8840,12.4741),(41.8820,12.4730),(41.8800,12.4717),(41.8780,12.4705),(41.8765,12.4695),(41.8772,12.4683),(41.8786,12.4680),(41.8797,12.4686),(41.8812,12.4705),(41.8828,12.4725),(41.8838,12.4736)],
+  feature="羅馬最大的跳蚤市場，只在週日早上，綿延好幾條街：二手衣、皮外套、古董雜貨、老件，價格很便宜，可以殺價。",
+  tips=["範圍：從 Porta Portese 城門往南，沿著 Via Portuense 走到 Via Ettore Rolli，再到 Piazza Ippolito Nievo 一帶（羅馬觀光局的說法）。地圖上是大致畫的範圍，所以形狀有點怪。",
+        "Via Portuense 這段多是衣服、鞋子和日用雜貨；Piazza Ippolito Nievo、Via Ippolito Nievo 一帶比較多古董、家具和老件。",
+        "越早去越好，中午後很多攤位就收了。",
+        "人非常多，扒手也多，包包背前面、只帶少量現金。"],
+  when="只有週日早上，搭配特拉斯提弗列一起逛。", stay="約 1～2 小時",
+  hours=["只在週日 06:00 起，約 14:00 後陸續收攤", "（Google 地圖資料寫到 17:00）"], price="免費逛（只收現金）"),
+]
+REMIND.setdefault("portaportese", [])
+EXTRA_REMIND["portaportese"] = ["只有週日開！你們在羅馬的週日是 1/31。", "扒手非常多，貴重物品留在旅館。"]
+
 # existing spots that also belong to the shopping view
-SHOP_IDS = {"rinascente", "giubbonari", "coronari", "campo", "monti", "trastevere", "ghetto", "testaccio", "hotel", "termini"}
+SHOP_IDS = {"rinascente", "giubbonari", "coronari", "campo", "monti", "trastevere", "ghetto", "testaccio", "portaportese", "hotel", "termini"}
 def _shop(id, lat, lon, name, latin, hours, feature, tips, when, sHours=None, price="免費逛", stay="約 30 分鐘～1 小時", remind=None):
     d = dict(id=id, cat="open", lat=lat, lon=lon, name=name, latin=latin, sHours=sHours or hours[0], sTime="逛街", sPrice=price,
              feature=feature, tips=tips, when=when, stay=stay, hours=hours, price=price)
@@ -828,11 +847,6 @@ SHOP_NEW = [
    "在地人的室內菜市場，蔬果、起司、肉舖之外，還有很多熟食攤：炸物、三明治、海鮮，中午來吃一頓很道地。",
    [dict(t="Mordi e Vai 的羅馬式牛肉三明治很有名。", links=[["Mordi e Vai", "Mordi e Vai Mercato Testaccio Roma"]])],
    "上午或中午來，順便逛泰斯塔西奧區。", sHours="07:00–15:30（週日休）", stay="約 1 小時", remind=["下午 15:30 就收攤，週日休市。"]),
- _shop("s_portese", 41.8793517, 12.468878, "Porta Portese 跳蚤市場", "Mercato di Porta Portese", ["只在週日 06:00 起，約 14:00 後陸續收攤", "（Google 地圖資料寫到 17:00）"],
-   "羅馬最大的跳蚤市場，綿延好幾條街：二手衣、皮外套、古董雜貨、老件，價格很便宜，可以殺價。",
-   ["越早去越好，中午後很多攤位就收了。", "人非常多，扒手也多，包包背前面、只帶少量現金。"],
-   "只有週日早上，搭配特拉斯提弗列一起逛。", sHours="只開週日 06:00–約 14:00", price="免費逛（只收現金）", stay="約 1～2 小時",
-   remind=["只有週日開！你們在羅馬的週日是 1/31。", "扒手非常多，貴重物品留在旅館。"]),
  _shop("s_boschetto", 41.8970585, 12.4904891, "Via del Boschetto・Via Urbana", "Via del Boschetto", _H,
    "蒙蒂區的兩條小街，獨立設計師小店、二手古著、手作飾品和小酒館集中，羅馬最有文青感的逛街區。",
    [dict(t="Via Urbana 和 Via del Boschetto 平行，可以兩條一起逛。", links=[["Via Urbana", "Via Urbana Roma"]])],
@@ -939,7 +953,7 @@ WEEK = {
  "s_castroni": _D(*["08:00–20:00"] * 6, "09:30–20:00"),
  "s_mercato": _D(*["07:30–23:30"] * 4, "07:30–24:00", "07:30–24:00", "07:30–23:30"),
  "s_boccione": _D(*["07:30–19:00"] * 4, "07:30–14:30", "", "07:30–17:30"),
- "s_testaccio_mkt": _D(*["07:00–15:30"] * 6, ""), "s_portese": _D("", "", "", "", "", "", "06:00–約 14:00"),
+ "s_testaccio_mkt": _D(*["07:00–15:30"] * 6, ""), "portaportese": _D("", "", "", "", "", "", "06:00–約 14:00"),
 }
 WEEK_PREFIX = {"trevi": "收費 ", "esculapio": "公園 ", "ghetto": "博物館 "}
 WEEK_NODIM = {"ghetto"}
