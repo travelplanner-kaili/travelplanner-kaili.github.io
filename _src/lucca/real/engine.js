@@ -501,7 +501,7 @@ function renderPlan() {
   const days = document.getElementById("plan-days");
   days.innerHTML = PDAYS.map(d => `<button type="button" role="tab" data-k="${d.k}" aria-selected="${dayOn && d.k === plan.cur}">${d.label.replace(/[&<>"]/g, c => "&#" + c.charCodeAt(0) + ";")}<span class="n">${plan.days[d.k].length || ""}</span></button>`).join("") + '<button type="button" class="pd-add" aria-label="新增一天">＋</button>';
   // drag a day tab to change the order of the days (the date goes with it; the user edits dates by hand)
-  if (!days._sortable) days._sortable = Sortable.create(days, { draggable: "button[data-k]", animation: 150, delay: 180, delayOnTouchOnly: true, onEnd: () => {
+  if (!days._sortable) days._sortable = Sortable.create(days, { draggable: "button[data-k]", animation: 150, delay: 300, delayOnTouchOnly: true, touchStartThreshold: 6, onEnd: () => {   // phone: long press drags, a swipe scrolls the row
     const order = [...days.querySelectorAll("button[data-k]")].map(b => b.dataset.k);
     const moved = order.map(k => PDAYS.find(d => d.k === k)); PDAYS.splice(0, PDAYS.length, ...moved); savePlan(); renderPlan();
   } });

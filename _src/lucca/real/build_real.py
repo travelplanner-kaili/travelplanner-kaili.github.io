@@ -337,7 +337,7 @@ extra_css = '''
 #lmap.planning .spot.un-hi { opacity: 1; }
 .plan-un-btn[aria-pressed="true"] { background: var(--route); color: var(--paper); border-color: var(--route); }
 .plan-days .pd-paste { font-size: 12px; }
-.plan-days button[data-k] { cursor: grab; touch-action: pan-y; }
+.plan-days button[data-k] { cursor: grab; touch-action: pan-x; }   /* 2026-11-27: the date row must swipe sideways on phones (pan-y blocked it) */
 .plan-days .sortable-ghost { opacity: .4; }
 .plan-paste { margin: 0 12px 8px; padding: 8px 10px; border: 1.5px dashed var(--route); border-radius: 8px; font-size: 12.5px; }
 .plan-paste label { display: block; font-weight: 700; }
