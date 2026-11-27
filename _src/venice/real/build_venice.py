@@ -159,6 +159,13 @@ EAT = [
        when='逛里亞托市場一帶時，當點心或簡單一餐。', week=['09:00–20:30', '', '09:00–20:30', '09:00–20:30', '09:00–20:30', '09:00–19:00', '09:00–19:00'],
        hours=['週一、三至五 09:00–20:30', '週六、日 09:00–19:00', '週二休', _GH], price='一人約 €10–20（Google 地圖）', sPrice='€10–20'),
 ]
+EAT.append(  # 2026-11-27 she asked to add it (Google 4.2; her own pick, so outside the 4.5 rule)
+  dict(id='s_nono', ll=[45.4397051, 12.3313417], name='Al Nono Risorto', latin='Osteria Trattoria Al Nono Risorto', slogan='1870 老店・披薩',
+       feature='里亞托市場西邊小巷裡（Sotoportego de Siora Bettina）的老餐館，菜單上寫「1870 年起的老店」。披薩、手工麵和威尼斯菜都有，Google 評分 4.2。',
+       tips=['入座費（coperto）每人 €2.50；披薩加料每樣 €1.50，加冷切肉 €3。', '菜單上標 * 的海鮮可能是冷凍的（店家自己註明）。',
+             'Google 地圖上還有兩組套餐：€29（海鮮義大利麵＋威尼斯式墨魚配玉米糕）、€26（千層麵＋烤牛排配馬鈴薯）。'],
+       when='逛里亞托市場一帶時，吃午餐或晚餐。', week=['12:00–15:00、18:00–23:00'] * 5 + ['12:00–22:30', '12:00–22:30'],
+       hours=['週一至五 12:00–15:00、18:00–23:00', '週六、日 12:00–22:30', _GH], price='一人約 €20–30（Google 地圖）', sPrice='€20–30'))
 for e in EAT:
     t = dict(id=e['id'], cat='open', tier='購物', shop=True, compact=True, name=e['name'], latin=e['latin'], slogan=e['slogan'], feature=e['feature'],
              tips=e['tips'], when=e['when'], stay='約 30 分鐘～1 小時', hours=e['hours'], price=e['price'], sPrice=e['sPrice'], sTime='用餐')
