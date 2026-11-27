@@ -676,8 +676,8 @@ out, _n = re.subn(r'(<button class="icon-btn dist" id="(f-dist|fs-dist-btn)"[^>]
                   lambda m: m.group(1) + _shop_btn('f-shop' if m.group(2) == 'f-dist' else 'fs-shop-btn'), out, flags=re.S)
 assert _n == 2, _n
 out = out.replace('</head>', '''<style id="lucca-only">
-.icon-btn.shop-btn { border-color: var(--open); color: var(--open); }
-.icon-btn.shop-btn[aria-pressed="true"] { background: var(--open); color: var(--paper); }
+.icon-btn.shop-btn { border-color: var(--shop-street); color: var(--shop-street); }
+.icon-btn.shop-btn[aria-pressed="true"] { background: var(--shop-street); color: var(--paper); }
 .spot.shopbox .tab { background: var(--c); }
 .spot.shopbox .tab .t-name, .spot.shopbox .tab .t-more { color: var(--paper); }
 /* Via Fillungo = shopping street, pink like Rome's (2026-11-27) */

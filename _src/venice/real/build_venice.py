@@ -144,7 +144,7 @@ CITY = {
 }
 city_js = 'const CITY = ' + json.dumps(CITY, ensure_ascii=False) + ';\n'
 city_js += '''CITY.tourExtra = [
-  { sel: ".icon-btn.shop-btn", t: "購物", x: "地圖上粉紅色的路是購物街，點路名看介紹；按這顆會再加上店家（綠色實心框）。" }
+  { sel: ".icon-btn.shop-btn", t: "購物", x: "地圖上粉紅色的路是購物街，點路名看介紹；按這顆會再加上店家（粉紅色實心框）。" }
 ];
 '''
 
@@ -248,9 +248,9 @@ css = '''<style>
 :root { --shop-street: #C8457F; --ferry: #0E7C86; --vap: #E2B007; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --shop-street: #F08CBA; --ferry: #3FB6C0; --vap: #F2C230; } }
 :root[data-theme="dark"] { --shop-street: #F08CBA; --ferry: #3FB6C0; --vap: #F2C230; }
-.icon-btn.shop-btn { border-color: var(--open); color: var(--open); }
-.icon-btn.shop-btn[aria-pressed="true"] { background: var(--open); color: var(--paper); }
-.ic.ic-shop { border-color: var(--open); color: var(--open); }
+.icon-btn.shop-btn { border-color: var(--shop-street); color: var(--shop-street); }
+.icon-btn.shop-btn[aria-pressed="true"] { background: var(--shop-street); color: var(--paper); }
+.ic.ic-shop { border-color: var(--shop-street); color: var(--shop-street); }
 .spot.shopbox .tab { background: var(--c); }
 .spot.shopbox .tab .t-name, .spot.shopbox .tab .t-more { color: var(--paper); }
 .leaflet-pane path.street-band.shop-street { stroke: var(--shop-street); stroke-opacity: .5; cursor: pointer; }

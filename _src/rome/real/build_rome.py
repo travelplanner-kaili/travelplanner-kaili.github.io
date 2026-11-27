@@ -79,7 +79,7 @@ city_js = 'const CITY = ' + json.dumps(CITY, ensure_ascii=False) + ';\n'
 city_js += '''CITY.unWalk = true;   // 待選景點 lists the City Walks (rome_extra.js); the 我的行程 tour says so
 CITY.tourExtra = [
   { sel: ".icon-btn.route", t: "City Walk", x: "推薦的散步路線，沿著真的街道畫出來；點路線或距離膠囊看路線介紹、沿途吃什麼。" },
-  { sel: ".icon-btn.shop-btn", t: "購物", x: "地圖上粉紅色的路是購物街，點路名看介紹；按這顆會再加上店家（綠色實心框）。" }
+  { sel: ".icon-btn.shop-btn", t: "購物", x: "地圖上粉紅色的路是購物街，點路名看介紹；按這顆會再加上店家（粉紅色實心框）。" }
 ];
 '''
 
@@ -157,6 +157,7 @@ def faq_item(title):
 walk_q = faq_item('有推薦的散步路線嗎？'); shop_q = faq_item('想逛街買東西要去哪裡？')
 # 2026-11-20: shopping streets are pink on the real map (orange was mixed up with 我的行程 and City Walk)
 assert '地圖上橘色的路' in shop_q; shop_q = shop_q.replace('地圖上橘色的路', '地圖上粉紅色的路')
+assert '綠色實心框' in shop_q; shop_q = shop_q.replace('綠色實心框', '粉紅色實心框')   # 2026-11-27: shops are pink now
 fi = out.index('<section class="faq"'); fj = out.index('</ol></section>\n</div>', fi) + len('</ol></section>')
 faq = out[fi:fj]
 # 待選景點 also lists the City Walks in Rome (2026-11-27, same as the 我的行程 tour)
@@ -187,10 +188,10 @@ css = '''<style>
 :root[data-theme="dark"] { --route-bernini: #6FB0EE; --route-cara: #C891DA; --route-michel: #5CCABD; --shop-street: #F08CBA; --walk: #FF6B6B; }
 .icon-btn.route { border-color: var(--walk); color: var(--walk); }
 .icon-btn.route[aria-pressed="true"] { background: var(--walk); color: var(--paper); }
-.icon-btn.shop-btn { border-color: var(--open); color: var(--open); }
-.icon-btn.shop-btn[aria-pressed="true"] { background: var(--open); color: var(--paper); }
+.icon-btn.shop-btn { border-color: var(--shop-street); color: var(--shop-street); }
+.icon-btn.shop-btn[aria-pressed="true"] { background: var(--shop-street); color: var(--paper); }
 .ic.ic-walk { border-color: var(--walk); color: var(--walk); }
-.ic.ic-shop { border-color: var(--open); color: var(--open); }
+.ic.ic-shop { border-color: var(--shop-street); color: var(--shop-street); }
 .route-pick { position: absolute; left: max(10px, env(safe-area-inset-left, 0px)); top: 10px; z-index: 720; max-width: calc(100% - 80px); display: flex; flex-wrap: wrap; gap: 6px; }
 .route-pick button { --rc: var(--walk); font: 700 13px var(--f-body); padding: 5px 11px; border-radius: 999px; border: 2px solid var(--rc); background: var(--paper); color: var(--rc); cursor: pointer; }
 .route-pick button[aria-pressed="true"] { background: var(--rc); color: var(--paper); }

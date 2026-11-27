@@ -102,6 +102,7 @@ function makeSpot(s) {
   g.tabIndex = 0; g.setAttribute("role", "button"); g.setAttribute("aria-label", [s.name, s.sTime, s.sPrice].filter(Boolean).join("，"));
   g.style.setProperty("--c", CAT[s.cat].color);
   g.style.setProperty("--pc", ({ paid: "#E5484D", free: "#3B82F6", open: "#3DAA5A", base: "#3A3633", mine: "#A855F7" })[s.cat] || CAT[s.cat].color);   // bright dot colours for the busy street map
+  if (s.tier === "購物") { g.style.setProperty("--c", "var(--shop-street, #C8457F)"); g.style.setProperty("--pc", "var(--shop-street, #C8457F)"); }   // 2026-11-27: shops are pink like the shopping streets (green was mixed up with 全天開放)
   const allDay = s.cat === "open" || s.cat === "base";
   g.innerHTML = `<svg class="leader"><line x1="0" y1="0"/></svg><div class="tab"><div class="t-name"></div>${allDay || !(WEEK[s.id] || s.sHours) ? "" : '<div class="t-wed t-more"></div>'}${s.sPrice ? '<div class="t-price t-more"></div>' : ""}</div><span class="pin"></span><span class="plan-no"></span>`;
   g.querySelector(".t-name").textContent = s.id === "hotel" ? "HOTEL" : s.name;   // 2026-11-21: the full name is in the card
