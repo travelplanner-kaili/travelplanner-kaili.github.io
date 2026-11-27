@@ -143,6 +143,39 @@ spots.append(dict(id='s_test', cat='open', tier='購物', shop=True, compact=Tru
                   hours=['測試資料'], price='免費逛', tips=['這是暫放的測試店家。'], when='逛街時順路', stay='約 15 分鐘'))
 LL['s_test'] = [45.43745, 12.33660]   # Salizada Pio X, near Rialto
 
+# water-bus lines 1 and 2 (2026-11-27, she asked for the stops joined into lines): OSM route relations ACTV Linea 1 / Linea 2,
+# chained in order; on the Grand Canal the two lines run side by side (offset 7 m each way) so both stay visible.
+def _chain(pieces, start=None):
+    pieces = [list(map(list, p)) for _, p in pieces]; line = pieces.pop(0) if start is None else pieces.pop(start)
+    close = lambda p, q: abs(p[0] - q[0]) < 2e-5 and abs(p[1] - q[1]) < 2e-5
+    while pieces:
+        for k, pc in enumerate(pieces):
+            if close(pc[0], line[-1]): line += pc[1:]; break
+            if close(pc[-1], line[-1]): line += pc[::-1][1:]; break
+            if close(pc[-1], line[0]): line = pc[:-1] + line; break
+            if close(pc[0], line[0]): line = pc[::-1][:-1] + line; break
+        else: break
+        pieces.pop(k)
+    return line
+def _offset(line, m):
+    out = []
+    for i, p in enumerate(line):
+        a, b = line[max(0, i - 1)], line[min(len(line) - 1, i + 1)]
+        dx, dy = (b[1] - a[1]) * KM[1], (b[0] - a[0]) * KM[0]; L_ = math.hypot(dx, dy) or 1
+        out.append([round(p[0] + (dx / L_) * m / KM[0], 6), round(p[1] - (dy / L_) * m / KM[1], 6)])
+    return out
+_R = json.load(open(OUT + 'vap_routes_osm.json'))
+_l1 = [x for x in _R['1'] if x[0] not in ('Piazzale Roma', 'Piazzale Roma - San Marco via Canale della Giudecca', 'Piazzale Roma - Ferrovia')
+       and not x[0].startswith(('Arsenale', 'Giardini', "Sant'Elena"))]
+L1 = _chain(_l1, start=[x[0] for x in _l1].index('Ferrovia - Piazzale Roma'))
+if L1[0][1] > L1[-1][1]: L1 = L1[::-1]   # P.le Roma first
+L2 = _chain(_R['2'])
+def _near(line, ll): return min(range(len(line)), key=lambda i: (line[i][0] - ll[0]) ** 2 + (line[i][1] - ll[1]) ** 2)
+VAP_ROUTES = []
+for ref, line, off, marks in (('1', L1, 7, [[45.4415, 12.3315], [45.4312, 12.3308]]), ('2', L2, -7, [[45.4423, 12.3270], [45.4311, 12.3335], [45.4297, 12.3225], [45.4310, 12.3425]])):
+    o = _offset(line, off)
+    VAP_ROUTES.append(dict(ref=ref, pts=o, badges=[o[_near(line, m)] for m in marks]))
+
 # water-bus stops (yellow V) and traghetto crossings
 VAP = [dict(id=a['id'], ll=LL[a['id']], name=VAPL[a['id']]['name'], lines=VAPL[a['id']]['lines']) for a in ALL if a['cat'] == 'vap']
 FERRY = []
@@ -181,7 +214,7 @@ CAT = '''const CAT = {
   vap: { label: "水上巴士站", color: "var(--vap)" }
 };'''
 data = ('<script>\n' + CAT + '\nconst SPOTS = ' + json.dumps(spots, ensure_ascii=False) + ';\nconst LL = ' + json.dumps(LL)
-        + ';\nconst VAP = ' + json.dumps(VAP, ensure_ascii=False) + ', FERRY_CROSS = ' + json.dumps(FERRY) + ';\n')
+        + ';\nconst VAP = ' + json.dumps(VAP, ensure_ascii=False) + ', FERRY_CROSS = ' + json.dumps(FERRY) + ', VAP_ROUTES = ' + json.dumps(VAP_ROUTES) + ';\n')
 
 out = T
 # Lucca-only pieces of the template
@@ -205,7 +238,7 @@ out = re.sub(r'(<button class="chip day" type="button" data-day="(\d)" aria-pres
              lambda m: m.group(1) + ('true' if m.group(2) in '456' else 'false'), out)
 # 水上巴士站 chip after 冷門時段
 out, n = re.subn(r'(<button class="chip cold" id="f-cold"[^>]*>.*?</button>)',
-                 lambda m: m.group(1) + '<button class="chip vap-chip" type="button" aria-pressed="true" style="--c:var(--vap)" data-tip="地圖上黃色的數字：水上巴士站（數字是停靠的路線）"><span class="dot"></span>水上巴士站</button>', out, count=1, flags=re.S)
+                 lambda m: m.group(1) + '<button class="chip vap-chip" type="button" aria-pressed="true" style="--c:var(--vap)" data-tip="地圖上黃色的點線：水上巴士（圓點是 1 號線、虛線是 2 號線）"><span class="dot"></span>水上巴士站</button>', out, count=1, flags=re.S)
 assert n == 1
 
 # ---- drawer: Rome's, with the same real-map patches ----
@@ -254,11 +287,12 @@ assert out.count('<small class="loc-help">') == 3, out.count('<small class="loc-
 # ---- FAQ: Venice's 購物 and 水上巴士 questions join the basics (like Rome) ----
 def faq_item(title):
     return re.search(r'<li class="faq-item"><p class="faq-q"><span class="n">Q\d+</span><span>' + re.escape(title) + r'</span>.*?</li>', H, flags=re.S).group(0)
-shop_q = faq_item('想逛街買東西要去哪裡？'); vap_q = faq_item('地圖上黃色的 V 是什麼？').replace('地圖上黃色的 V 是什麼？', '地圖上黃色的數字是什麼？')
+shop_q = faq_item('想逛街買東西要去哪裡？'); vap_q = faq_item('地圖上黃色的 V 是什麼？').replace('地圖上黃色的 V 是什麼？', '地圖上黃色的點線是什麼？')
 assert '地圖上橘色的路' in shop_q; shop_q = shop_q.replace('地圖上橘色的路', '地圖上粉紅色的路')
-# 2026-11-27: stops are yellow number tags (1 / 2 / 1・2); no ferry sentence (she: 不用 Q&A 再解釋)
+# 2026-11-27: lines 1/2 drawn as dotted lines; no ferry sentence (she: 不用 Q&A 再解釋)
 assert '旁邊的數字是停靠的路線' in vap_q and '藍綠色小船則是 €2 的過河渡船（traghetto），兩種不一樣。' in vap_q
-vap_q = vap_q.replace('旁邊的數字是停靠的路線', '黃色框裡的數字是停靠的路線').replace('藍綠色小船則是 €2 的過河渡船（traghetto），兩種不一樣。', '')
+vap_q = re.sub(r'是水上巴士（vaporetto）站，旁邊的數字是停靠的路線，例如「1・2」就是 1 號、2 號線都停。點一下', '是水上巴士（vaporetto）的路線：圓點線是 1 號線、虛線是 2 號線，線上的小圓點是停靠站。點站', vap_q); assert '圓點線是 1 號線' in vap_q
+vap_q = vap_q.replace('藍綠色小船則是 €2 的過河渡船（traghetto），兩種不一樣。', '')
 fi = out.index('<section class="faq"'); fj = out.index('</ol></section>\n</div>', fi) + len('</ol></section>')
 faq = out[fi:fj]
 num2title = dict(re.findall(r'<span class="n">(Q\d+)</span><span>([^<]*)</span>', faq))
@@ -279,9 +313,9 @@ out = out[:fi] + faq + out[fj:]
 # ---- styles: Venice colours, canal, water bus, ferries, shops (Rome's 購物 look) ----
 css = '''<style>
 /* ===== Venice ===== */
-:root { --shop-street: #C8457F; --ferry: #0E7C86; --vap: #E2B007; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --shop-street: #F08CBA; --ferry: #3FB6C0; --vap: #F2C230; } }
-:root[data-theme="dark"] { --shop-street: #F08CBA; --ferry: #3FB6C0; --vap: #F2C230; }
+:root { --shop-street: #C8457F; --ferry: #0E7C86; --vap: #E2B007; --vap2: #A86F00; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --shop-street: #F08CBA; --ferry: #3FB6C0; --vap: #F2C230; --vap2: #D9962B; } }
+:root[data-theme="dark"] { --shop-street: #F08CBA; --ferry: #3FB6C0; --vap: #F2C230; --vap2: #D9962B; }
 .icon-btn.shop-btn { border-color: var(--shop-street); color: var(--shop-street); }
 .icon-btn.shop-btn[aria-pressed="true"] { background: var(--shop-street); color: var(--paper); }
 .ic.ic-shop { border-color: var(--shop-street); color: var(--shop-street); }
@@ -294,20 +328,27 @@ css = '''<style>
 /* the Grand Canal stays clear (she finds her way by the canals): same strength as the Tiber rule */
 .leaflet-pane path.ferry-line { stroke: var(--ferry); stroke-width: 3; stroke-dasharray: 5 4; stroke-linecap: round; fill: none; }
 .vap-mark .v { position: absolute; left: -12px; top: -12px; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; font-size: 0; }   /* tap area */
-/* 2026-11-27 (later): the stop is a small yellow tag with the line numbers (1 / 2 / 1・2), she couldn't tell line 1 from line 2 on plain dots;
-   stops without line 1 or 2 (F.te Nove) get a white tag */
-.vap-mark .vn { position: absolute; left: 0; top: 0; transform: translate(-50%, -50%); white-space: nowrap; background: var(--vap); color: #2A2000; font: 800 10px/1 var(--f-body); padding: 2px 4px; border-radius: 7px; border: 1.5px solid var(--paper); box-shadow: 0 1px 2px rgba(0,0,0,.35); cursor: pointer; }
-.vap-mark .vn.other { background: var(--paper); color: #8A6A00; border-color: var(--vap); }
-.vap-mark .vl { position: absolute; left: calc(100% + 3px); top: 50%; transform: translateY(-50%); white-space: nowrap; font: 700 11px var(--f-body); color: var(--ink); text-shadow: 0 0 3px var(--paper), 0 0 3px var(--paper), 0 0 2px var(--paper); cursor: pointer; }
+/* 2026-11-27 (later): lines 1 and 2 are dotted lines on the water (1 = round dots, 2 = dashes) with numbered badges; the stops are small dots on them */
+.leaflet-pane path.vap-route { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.leaflet-pane path.vap-r1 { stroke: var(--vap); stroke-width: 4.5; stroke-dasharray: 0 8; }
+.leaflet-pane path.vap-r2 { stroke: var(--vap2); stroke-width: 3; stroke-dasharray: 9 6; stroke-linecap: butt; }
+.vap-badge span { position: absolute; left: -8px; top: -8px; width: 16px; height: 16px; border-radius: 50%; display: grid; place-items: center; font: 800 10.5px/1 var(--f-body); border: 1.5px solid var(--paper); box-shadow: 0 1px 2px rgba(0,0,0,.35); }
+.vap-b1 span { background: var(--vap); color: #2A2000; }
+.vap-b2 span { background: var(--vap2); color: #fff; }
+.vap-mark .vn { position: absolute; left: -4.5px; top: -4.5px; width: 9px; height: 9px; box-sizing: border-box; border-radius: 50%; background: var(--paper); border: 2.5px solid #8A6A00; cursor: pointer; }
+.vap-mark .vl { position: absolute; left: calc(100% + 4px); top: 50%; transform: translateY(-50%); white-space: nowrap; font: 700 11px var(--f-body); color: var(--ink); text-shadow: 0 0 3px var(--paper), 0 0 3px var(--paper), 0 0 2px var(--paper); cursor: pointer; }
 .vap-mark .vl b { color: #8A6A00; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .vap-mark .vl b { color: var(--vap); } }
 :root[data-theme="dark"] .vap-mark .vl b { color: var(--vap); }
 #lmap.vap-small .vap-mark .vl { display: none; }
 #lmap.dist .vap-mark, #lmap.planning .vap-mark { opacity: .45; }
-.chip.vap-chip .dot { background: var(--vap); border-radius: 3px; }
+.chip.vap-chip .dot { background: var(--vap); }
 /* traghetto boxes: dashed, lightly teal, so they read as a different set from the places (2026-11-27) */
 .spot.is-ferry .tab { border-style: dashed; background: color-mix(in srgb, var(--ferry) 10%, var(--paper)); }
 /* the four Grand Canal bridges are drawn as a bridge across the canal instead of a round pin (2026-11-27) */
+.bridge-name span { position: absolute; left: 0; top: 0; white-space: nowrap; transform: translate(-50%, -50%) rotate(var(--ta)) translateY(calc(var(--bh, 9px) / 2 + 9px)); font: 700 10px var(--f-body); font-size: clamp(9px, calc(10.5px * var(--ls, 1)), 12px); color: var(--ink); -webkit-text-stroke: 2.5px var(--paper); paint-order: stroke fill; text-shadow: 0 1px 3px rgba(0,0,0,.25); cursor: pointer; }
+.spot.nolab .tab, .spot.nolab .leader { display: none; }
+#lmap.dist .bridge-name, #lmap.planning .bridge-name { opacity: .55; }
 #lmap .spot.is-bridge .pin { width: 0; height: 0; left: 0; top: 0; border: 0; background: none; box-shadow: none; }
 #lmap .spot.is-bridge .pin::before { content: ""; position: absolute; width: var(--bw, 30px); height: var(--bh, 9px); left: calc(var(--bw, 30px) / -2); top: calc(var(--bh, 9px) / -2);
   box-sizing: border-box; background: var(--paper); border-top: 2.5px solid var(--pc, var(--c)); border-bottom: 2.5px solid var(--pc, var(--c)); border-radius: 1px;

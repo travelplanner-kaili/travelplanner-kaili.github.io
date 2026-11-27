@@ -150,7 +150,7 @@ function layoutLabels() {
   const z = map.getZoom(), forceSlim = distMode || LMODE === "names", forceAll = LMODE !== "auto" && !distMode, none = z < 13.5 && !geo && LMODE === "auto";
   mapEl.classList.toggle("lbl-none", none);
   if (none) return;
-  const vis = SPOTS.filter(s => !s.g.classList.contains("gone") && !s.g.classList.contains("hide-v") && !s.g.classList.contains("off-route"));
+  const vis = SPOTS.filter(s => !s.g.classList.contains("gone") && !s.g.classList.contains("hide-v") && !s.g.classList.contains("off-route") && !s.g.classList.contains("nolab"));   // nolab: the city draws the name itself (Venice bridges)
   // sizes of the full and the name-only label
   vis.forEach(s => {
     s.g.classList.remove("lbl-off", "slim1");
@@ -185,6 +185,7 @@ function layoutLabels() {
   const mr = mapEl.getBoundingClientRect();
   STREETS.forEach(st => { const el = st.label && st.label.getElement(); if (!el || el.classList.contains("off")) return; const r = el.querySelector("span").getBoundingClientRect(); if (r.width) boxes.push({ x: r.left - mr.left, y: r.top - mr.top, w: r.width, h: r.height }); });
   coverBoxes(mr).forEach(b => boxes.push(b));
+  mapEl.querySelectorAll(".lbl-obst").forEach(el => { const r = el.getBoundingClientRect(); if (r.width && el.offsetParent) boxes.push({ x: r.left - mr.left, y: r.top - mr.top, w: r.width, h: r.height }); });   // names a city draws itself (Venice bridges)
   // a day open: labels stay inside the map's visible edges (they are placed again after every pan then)
   const mw = mapEl.clientWidth, mh = mapEl.clientHeight, outside = r => planOn && (r.x < 2 || r.y < 2 || r.x + r.w > mw - 2 || r.y + r.h > mh - 2);
   const hit = r => outside(r) || boxes.some(o => r.x < o.x + o.w + 3 && r.x + r.w + 3 > o.x && r.y < o.y + o.h + 3 && r.y + r.h + 3 > o.y);
