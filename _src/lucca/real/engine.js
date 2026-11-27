@@ -763,7 +763,8 @@ function placeTab() {
   t.style.left = t.style.top = t.style.bottom = "";
   if (!planOpen) return;
   if (innerWidth <= 640) t.style.bottom = (planEl.offsetParent ? planEl.offsetParent.clientHeight - planEl.offsetTop : planEl.offsetHeight) + "px";
-  // computer: placed by CSS (sticks to the panel's right edge, also in full screen)
+  // computer: stick to the panel's real right edge (2026-11-27: 最簡 makes the panel narrower, the CSS 372px left a gap)
+  else if (planEl.offsetWidth) t.style.left = (planEl.offsetLeft + planEl.offsetWidth) + "px";
 }
 if (window.ResizeObserver) { let rz = 0; new ResizeObserver(() => { placeTab(); clearTimeout(rz); rz = setTimeout(() => { if (!planEl.hidden) layoutLabels(); }, 120); }).observe(planEl); }
 addEventListener("resize", placeTab);
