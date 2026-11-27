@@ -38,15 +38,16 @@ VAP_ROUTES.forEach(r => {
   r.badges.forEach(b => L.marker(b, { pane: "vap", icon: L.divIcon({ className: "vap-badge vap-b" + r.ref, html: `<span>${r.ref}</span>`, iconSize: [0, 0] }), interactive: false, keyboard: false }).addTo(vapLayer));
 });
 VAP.forEach(v => {
-  const m = L.marker(v.ll, { icon: L.divIcon({ className: "vap-mark", html: `<span class="v" title="${esc(v.name)}（水上巴士站）">V</span><span class="vn"><span class="vl">${esc(v.name)}</span></span>`, iconSize: [0, 0] }), keyboard: false, zIndexOffset: 400 });   // above the place pins, or a tap on V opens the pin under it
+  const m = L.marker(v.ll, { icon: L.divIcon({ className: "vap-mark", html: `<span class="v" title="${esc(v.name)}（水上巴士站）">V</span><span class="vn"><span class="vl lbl-obst">${esc((SPOTS.find(x => x.id === v.id) || {}).name || v.name)} <i>${esc(v.name)}</i></span></span>`, iconSize: [0, 0] }), keyboard: false, zIndexOffset: 400 });   // above the place pins, or a tap on V opens the pin under it
   m.on("click", e => { L.DomEvent.stopPropagation(e); if (picking || distMode) return; openSpot(v.id); });
   m.addTo(vapLayer);
 });
 let vapOn = true; try { vapOn = localStorage.getItem("trip-vap-venice") !== "0"; } catch (e) {}
 function applyVap() {   // 【水路交通】: the water-bus lines and stops, and the traghetti (pins, boxes, crossing lines)
   if (vapOn) { vapLayer.addTo(map); ferryLayer.addTo(map); } else { vapLayer.remove(); ferryLayer.remove(); }
+  layoutLabels();
   document.querySelectorAll(".vap-chip").forEach(b => b.setAttribute("aria-pressed", vapOn));
-  mapEl.classList.toggle("vap-small", map.getZoom() < 16.5);   // names only when zoomed in: place labels would cover them
+  const sm = map.getZoom() < 16; if (mapEl.classList.contains("vap-small") !== sm) { mapEl.classList.toggle("vap-small", sm); layoutLabels(); }   // names only when zoomed in: place labels would cover them
 }
 document.querySelectorAll(".vap-chip").forEach(b => b.addEventListener("click", () => { vapOn = !vapOn; try { localStorage.setItem("trip-vap-venice", vapOn ? "1" : "0"); } catch (e) {} applyVap(); applySup(); }));
 map.on("zoomend", applyVap);

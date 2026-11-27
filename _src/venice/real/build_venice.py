@@ -328,7 +328,7 @@ css = '''<style>
 .street-name.shop-street span:hover { text-decoration: underline; }
 /* the Grand Canal stays clear (she finds her way by the canals): same strength as the Tiber rule */
 .leaflet-pane path.ferry-line { stroke: var(--ferry); stroke-width: 3; stroke-dasharray: 5 4; stroke-linecap: round; fill: none; }
-.vap-mark .v { position: absolute; left: -12px; top: -12px; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; font-size: 0; }   /* tap area */
+.vap-mark .v { position: absolute; left: -18px; top: -18px; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 0; }   /* tap area */
 /* 2026-11-27 (later): lines 1 and 2 are dotted lines on the water (1 = round dots, 2 = dashes) with numbered badges; the stops are small dots on them */
 .leaflet-pane path.vap-route { fill: none; stroke-linecap: round; stroke-linejoin: round; }
 .leaflet-pane path.vap-r1 { stroke: var(--vap); stroke-width: 4.5; stroke-dasharray: 0 8; }
@@ -336,8 +336,9 @@ css = '''<style>
 .vap-badge span { position: absolute; left: -8px; top: -8px; width: 16px; height: 16px; border-radius: 50%; display: grid; place-items: center; font: 800 10.5px/1 var(--f-body); border: 1.5px solid var(--paper); box-shadow: 0 1px 2px rgba(0,0,0,.35); }
 .vap-b1 span { background: var(--vap); color: #2A2000; }
 .vap-b2 span { background: var(--vap2); color: #fff; }
-.vap-mark .vn { position: absolute; left: -4.5px; top: -4.5px; width: 9px; height: 9px; box-sizing: border-box; border-radius: 50%; background: var(--paper); border: 2.5px solid #8A6A00; cursor: pointer; }
-.vap-mark .vl { position: absolute; left: calc(100% + 4px); top: 50%; transform: translateY(-50%); white-space: nowrap; font: 700 11px var(--f-body); color: var(--ink); text-shadow: 0 0 3px var(--paper), 0 0 3px var(--paper), 0 0 2px var(--paper); cursor: pointer; }
+.vap-mark .vn { position: absolute; left: -7px; top: -7px; width: 14px; height: 14px; box-sizing: border-box; border-radius: 50%; background: var(--paper); border: 3.5px solid #8A6A00; box-shadow: 0 1px 3px rgba(0,0,0,.4); cursor: pointer; }   /* 2026-11-27: bigger, she could not see or tap the 9px dot */
+.vap-mark .vl { position: absolute; left: calc(100% + 5px); top: 50%; transform: translateY(-50%); white-space: nowrap; font: 700 12.5px/1.2 var(--f-body); color: var(--ink); background: var(--paper); border: 1.5px solid #8A6A00; border-radius: 999px; padding: 2px 7px; box-shadow: 0 1px 3px rgba(0,0,0,.25); cursor: pointer; }
+.vap-mark .vl i { font-style: normal; font-weight: 600; font-size: 11px; color: var(--muted); }
 .vap-mark .vl b { color: #8A6A00; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .vap-mark .vl b { color: var(--vap); } }
 :root[data-theme="dark"] .vap-mark .vl b { color: var(--vap); }
