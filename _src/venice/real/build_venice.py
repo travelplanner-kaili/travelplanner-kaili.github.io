@@ -161,7 +161,7 @@ EAT = [
 ]
 from menu_nono import MENU as _NONO_MENU, MENU_NOTE as _NONO_NOTE   # her menu photo, Italian / English / 中文 (2026-11-27)
 EAT.append(  # 2026-11-27 she asked to add it (Google 4.2; her own pick, so outside the 4.5 rule)
-  dict(id='s_nono', ll=[45.4397051, 12.3313417], name='Al Nono Risorto', latin='Osteria Trattoria Al Nono Risorto', slogan='1870 老店・披薩',
+  dict(id='s_nono', ll=[45.4397051, 12.3313417], name='Al Nono Risorto', latin='Osteria Trattoria Al Nono Risorto', slogan='CP值高好餐廳',
        feature='里亞托市場西邊小巷裡（Sotoportego de Siora Bettina）的老餐館，菜單上寫「1870 年起的老店」。披薩、手工麵和威尼斯菜都有，Google 評分 4.2。',
        tips=['入座費（coperto）每人 €2.50；披薩加料每樣 €1.50，加冷切肉 €3。', '菜單上標 * 的海鮮可能是冷凍的（店家自己註明）。',
              'Google 地圖上還有兩組套餐：€29（海鮮義大利麵＋威尼斯式墨魚配玉米糕）、€26（千層麵＋烤牛排配馬鈴薯）。'],
