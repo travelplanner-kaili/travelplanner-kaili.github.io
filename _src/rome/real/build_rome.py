@@ -111,6 +111,8 @@ exec(src[a:b], ns)
 dj = ns['drawer_js']
 for k in ('planToggle', 'h-change', 'hotelFromLine', 'bindMineEdit', 'bindHotel'): assert k in dj, k
 dj = dj.replace('例如：Hotel Ilaria', '例如：Hotel Nazionale Roma')
+# 2026-11-27: she asked to drop 必去指數 from the spot drawer (the stars on the map labels stay)
+dj, _n = re.subn(r'\n\s*\$\{s\.stars \? `<p class="stars".*?</p>` : ""\}', '', dj, count=1); assert _n == 1 and '必去指數' not in dj
 i = T.index('/* ---- Drawer ---- */'); i = out.index('/* ---- Drawer ---- */'); j = out.index('</script>', i)
 extra_js = open(OUT + 'rome_extra.js').read()
 out = out[:i] + dj + '\n' + extra_js + out[j:]

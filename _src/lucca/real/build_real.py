@@ -393,6 +393,13 @@ a.plan-copy { text-decoration: none; }
 .d-plan { display: flex; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; align-items: center; gap: 6px; margin: -6px 0 16px; padding-bottom: 2px; font-size: 13px; color: var(--muted); }   /* 2026-11-27: one row that swipes sideways, like 我的行程 */
 .d-plan::-webkit-scrollbar { display: none; }
 .d-plan > * { flex: none; white-space: nowrap; }
+@media (hover: hover) and (pointer: fine) {   /* 2026-11-27: on computers show a thin scrollbar so you can see there are more dates */
+  .d-plan, .plan-days { scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+  .d-plan::-webkit-scrollbar, .plan-days::-webkit-scrollbar { display: block; height: 6px; }
+  .d-plan::-webkit-scrollbar-thumb, .plan-days::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
+  .d-plan { padding-bottom: 6px; }
+}
+.d-plan.h-dragging, .d-plan.h-dragging button { cursor: grabbing; user-select: none; }
 .d-plan button { font: 700 13px var(--f-body); padding: 4px 10px; border-radius: 999px; border: 1.5px dashed var(--route); background: var(--paper); color: var(--route); cursor: pointer; }
 .d-plan button[aria-pressed="true"] { background: var(--route); color: var(--paper); border-style: solid; }
 

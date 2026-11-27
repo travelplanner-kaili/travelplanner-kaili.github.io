@@ -1245,3 +1245,29 @@ document.querySelectorAll(".help-btn").forEach(b => b.addEventListener("click", 
   if (document.body.classList.contains("fs-on")) { const x = document.getElementById("fs-exit"); if (x) x.click(); }
   setTimeout(() => document.getElementById("faq").scrollIntoView({ block: "start", behavior: "smooth" }), 250);
 }));
+
+/* 2026-11-27: sideways date rows (加入行程 in the spot / City Walk drawer, 我的行程 days on narrow screens) must also move with a mouse:
+   the wheel scrolls them sideways, and in the drawer you can click-and-drag the row (a drag doesn't count as a click). */
+const HROWS = ".d-plan, .plan-days";
+document.addEventListener("wheel", e => {
+  const r = e.target.closest && e.target.closest(HROWS); if (!r || r.scrollWidth <= r.clientWidth + 1) return;
+  const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY; if (!d) return;
+  const max = r.scrollWidth - r.clientWidth;
+  if ((d < 0 && r.scrollLeft <= 0) || (d > 0 && r.scrollLeft >= max - 1)) return;   // at the end: let the page/drawer scroll as usual
+  r.scrollLeft += d * (e.deltaMode === 1 ? 16 : 1); e.preventDefault();
+}, { passive: false });
+let hDrag = null;
+document.addEventListener("pointerdown", e => {
+  if (e.pointerType !== "mouse" || e.button !== 0) return;
+  const r = e.target.closest && e.target.closest(".d-plan"); if (!r || r.scrollWidth <= r.clientWidth + 1) return;
+  hDrag = { r, x: e.clientX, sl: r.scrollLeft, moved: false };
+});
+document.addEventListener("pointermove", e => {
+  if (!hDrag) return; const dx = e.clientX - hDrag.x;
+  if (!hDrag.moved && Math.abs(dx) < 5) return;
+  hDrag.moved = true; hDrag.r.classList.add("h-dragging"); hDrag.r.scrollLeft = hDrag.sl - dx;
+});
+document.addEventListener("pointerup", () => {
+  if (!hDrag) return; const g = hDrag; hDrag = null; g.r.classList.remove("h-dragging");
+  if (g.moved) { const stop = ev => { ev.stopPropagation(); ev.preventDefault(); }; g.r.addEventListener("click", stop, { capture: true, once: true }); setTimeout(() => g.r.removeEventListener("click", stop, { capture: true }), 0); }
+});
