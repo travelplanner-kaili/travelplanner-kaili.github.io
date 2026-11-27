@@ -76,7 +76,8 @@ CITY = {
   'demo': [dict(id='colosseo', time='08:30', note='先上官網買票'), dict(id='foro', time='11:00', note=''), dict(id='palatino', time='13:00', note='')],
 }
 city_js = 'const CITY = ' + json.dumps(CITY, ensure_ascii=False) + ';\n'
-city_js += '''CITY.tourExtra = [
+city_js += '''CITY.unWalk = true;   // 待選景點 lists the City Walks (rome_extra.js); the 我的行程 tour says so
+CITY.tourExtra = [
   { sel: ".icon-btn.route", t: "City Walk", x: "推薦的散步路線，沿著真的街道畫出來；點路線或距離膠囊看路線介紹、沿途吃什麼。" },
   { sel: ".icon-btn.shop-btn", t: "購物", x: "地圖上粉紅色的路是購物街，點路名看介紹；按這顆會再加上店家（綠色實心框）。" }
 ];
@@ -153,6 +154,9 @@ walk_q = faq_item('有推薦的散步路線嗎？'); shop_q = faq_item('想逛�
 assert '地圖上橘色的路' in shop_q; shop_q = shop_q.replace('地圖上橘色的路', '地圖上粉紅色的路')
 fi = out.index('<section class="faq"'); fj = out.index('</ol></section>\n</div>', fi) + len('</ol></section>')
 faq = out[fi:fj]
+# 待選景點 also lists the City Walks in Rome (2026-11-27, same as the 我的行程 tour)
+_a = '按「＋ 加入」就排進目前選的那一天。'
+assert faq.count(_a) == 1; faq = faq.replace(_a, _a + '最下面還有 City Walk，可以整條路線一次加進來。')
 # answers point to other questions by number: turn those into the question's title first, renumber, then put numbers back
 num2title = dict(re.findall(r'<span class="n">(Q\d+)</span><span>([^<]*)</span>', faq))
 def to_ref(m):
