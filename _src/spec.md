@@ -401,3 +401,4 @@
   - Gelato di Natura「在地人推薦冰淇淋」：有好幾家分店，放聖使徒廣場那家（十二使徒橋旁，4.5），其他分店寫在看點。推薦提拉米蘇和水果口味。
   - Amorino（Ruga Vecchia San Giovanni 480）「玫瑰花冰淇淋」：週一至五 12:00–23:00、週六日 11:00–23:00，依份量計價、口味隨便混。
   - GROM「天然食材冰淇淋」：放聖露西亞火車站裡那家（4.6），另一家在聖巴拿巴廣場（Strada Nova 那家已永久歇業）。
+- 相關連結（2026-11-27 她要求）：五家冰淇淋都連到 monicaineurope.com/italy-venice-gelato/；Al Nono Risorto 連到 monicaineurope.com/venice-al-nono-risorto/。在介紹頁「介紹」分頁的「相關連結」。
