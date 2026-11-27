@@ -936,7 +936,7 @@ function togglePaste(show, mode) {
   if (on) { impMode = mode || "all"; impPop.querySelector(".add-pop-head b").textContent = impMode === "day" ? "匯入本日行程" : "匯入地圖";
     document.getElementById("pp-lbl").textContent = impMode === "day" ? "貼上「匯出本日行程」複製的連結" : "貼上「匯出整份地圖」或「匯出本日行程」複製的連結"; }
   impPop.hidden = !on; b.hidden = !on;
-  document.getElementById("pp-ver").textContent = "你的地圖更新時間：" + MAP_UPDATED;
+  { const v = document.getElementById("pp-ver"); v.textContent = ""; v.classList.remove("warn"); }   // 2026-11-27: no 「你的地圖更新時間」 line (she decided not to keep it); the line only shows errors
   if (on) document.getElementById("pp-text").focus();
 }
 impPop.querySelector(".add-pop-x").addEventListener("click", () => togglePaste(false));

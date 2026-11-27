@@ -17,6 +17,18 @@ T = open(LR + 'lucca-real.html').read()
 H = open(VR + 'venice.html').read()
 C = json.load(open(OUT + 'coords_raw.json'))
 CANAL = json.load(open(OUT + 'canal.json'))
+# 2026-11-27 (her feedback: some water-bus stops sat far from the shore): real positions from OpenStreetMap (Overpass, looked up
+# through her desktop browser): the ACTV stops where lines 1/2 call, and the traghetto crossings (OSM route=ferry ways).
+# tr_ferrovia is not in OSM: it keeps the hand-drawn crossing.
+STOP_LL = {'v_proma': [45.43888, 12.31895], 'v_ferrovia': [45.44030, 12.32130], 'v_sanstae': [45.44176, 12.33081], 'v_rmercato': [45.43944, 12.33531],
+           'v_rialto': [45.43730, 12.33510], 'v_santoma': [45.43517, 12.32792], 'v_accademia': [45.43174, 12.32853], 'v_salute': [45.43118, 12.33437],
+           'v_vallaresso': [45.43209, 12.33730], 'v_zaccaria': [45.43335, 12.34300], 'v_sangiorgio': [45.42947, 12.34222], 'v_zattere': [45.42913, 12.32679],
+           'v_fnove': [45.44300, 12.34094]}
+TRAG_LINE = {'tr_giglio': [[45.43155, 12.33290], [45.43107, 12.33311]], 'tr_sofia': [[45.43998, 12.33431], [45.44039, 12.33450]],
+             'tr_toma': [[45.43532, 12.32941], [45.43547, 12.32841]], 'tr_dogana': [[45.43230, 12.33722], [45.43112, 12.33628]],
+             'tr_carbon': [[45.43711, 12.33396], [45.43675, 12.33425]]}
+C.update(STOP_LL)
+C.update({k: [round((v[0][0] + v[1][0]) / 2, 6), round((v[0][1] + v[1][1]) / 2, 6)] for k, v in TRAG_LINE.items()})   # pin in the middle of the crossing
 
 i = H.index('const ALL = ') + len('const ALL = '); ALL = json.loads(H[i:H.index(';\n', i)])
 WEEK = json.loads(H[H.index('const WEEK = ') + 13:H.index(', WEEK_PREFIX', H.index('const WEEK = '))])
@@ -86,6 +98,17 @@ _p0, _p1 = aff(0, 0), aff(1000, 0); UNIT_M = dist(_p0, _p1) / 1000
 LL = {}
 for a in ALL:
     LL[a['id']] = C[a['id']] if a['id'] in C else aff(a['x'], a['y'])
+def _on_canal(p):
+    best = None
+    for q, r in zip(CANAL, CANAL[1:]):
+        ax, ay = (q[1] - p[1]) * KM[1], (q[0] - p[0]) * KM[0]; bx, by = (r[1] - p[1]) * KM[1], (r[0] - p[0]) * KM[0]
+        dx, dy = bx - ax, by - ay; t = max(0, min(1, -(ax * dx + ay * dy) / (dx * dx + dy * dy or 1)))
+        x, y = ax + t * dx, ay + t * dy; dd = math.hypot(x, y)
+        if best is None or dd < best[0]: best = (dd, [round(p[0] + y / KM[0], 6), round(p[1] + x / KM[1], 6)])
+    return best
+BRIDGES = ['rialto', 'pontacc', 'scalzi', 'costituzione']
+for _b in BRIDGES:
+    _d, _p = _on_canal(LL[_b]); assert _d < 60, (_b, _d); LL[_b] = _p
 
 def lab_of(a):
     # the drawn label corner; when the real spot is far from where it was drawn (> 60 m), move the label with it
@@ -125,6 +148,7 @@ VAP = [dict(id=a['id'], ll=LL[a['id']], name=VAPL[a['id']]['name'], lines=VAPL[a
 FERRY = []
 for a in ALL:
     if a.get('cross'):
+        if a['id'] in TRAG_LINE: FERRY.append(TRAG_LINE[a['id']]); continue
         x1, y1, x2, y2 = a['cross']; d = [LL[a['id']][0] - aff(a['x'], a['y'])[0], LL[a['id']][1] - aff(a['x'], a['y'])[1]]
         FERRY.append([[p[0] + d[0], p[1] + d[1]] for p in (aff(x1, y1), aff(x2, y2))])
 
@@ -181,7 +205,7 @@ out = re.sub(r'(<button class="chip day" type="button" data-day="(\d)" aria-pres
              lambda m: m.group(1) + ('true' if m.group(2) in '456' else 'false'), out)
 # 水上巴士站 chip after 冷門時段
 out, n = re.subn(r'(<button class="chip cold" id="f-cold"[^>]*>.*?</button>)',
-                 lambda m: m.group(1) + '<button class="chip vap-chip" type="button" aria-pressed="true" style="--c:var(--vap)" data-tip="地圖上的小黃點：水上巴士站"><span class="dot"></span>水上巴士站</button>', out, count=1, flags=re.S)
+                 lambda m: m.group(1) + '<button class="chip vap-chip" type="button" aria-pressed="true" style="--c:var(--vap)" data-tip="地圖上黃色的數字：水上巴士站（數字是停靠的路線）"><span class="dot"></span>水上巴士站</button>', out, count=1, flags=re.S)
 assert n == 1
 
 # ---- drawer: Rome's, with the same real-map patches ----
@@ -230,9 +254,11 @@ assert out.count('<small class="loc-help">') == 3, out.count('<small class="loc-
 # ---- FAQ: Venice's 購物 and 水上巴士 questions join the basics (like Rome) ----
 def faq_item(title):
     return re.search(r'<li class="faq-item"><p class="faq-q"><span class="n">Q\d+</span><span>' + re.escape(title) + r'</span>.*?</li>', H, flags=re.S).group(0)
-shop_q = faq_item('想逛街買東西要去哪裡？'); vap_q = faq_item('地圖上黃色的 V 是什麼？').replace('地圖上黃色的 V 是什麼？', '地圖上的小黃點是什麼？')
+shop_q = faq_item('想逛街買東西要去哪裡？'); vap_q = faq_item('地圖上黃色的 V 是什麼？').replace('地圖上黃色的 V 是什麼？', '地圖上黃色的數字是什麼？')
 assert '地圖上橘色的路' in shop_q; shop_q = shop_q.replace('地圖上橘色的路', '地圖上粉紅色的路')
-assert '藍綠色小船則是' in vap_q; vap_q = vap_q.replace('藍綠色小船則是', '藍綠色的點和大運河上的短線則是')
+# 2026-11-27: stops are yellow number tags (1 / 2 / 1・2); no ferry sentence (she: 不用 Q&A 再解釋)
+assert '旁邊的數字是停靠的路線' in vap_q and '藍綠色小船則是 €2 的過河渡船（traghetto），兩種不一樣。' in vap_q
+vap_q = vap_q.replace('旁邊的數字是停靠的路線', '黃色框裡的數字是停靠的路線').replace('藍綠色小船則是 €2 的過河渡船（traghetto），兩種不一樣。', '')
 fi = out.index('<section class="faq"'); fj = out.index('</ol></section>\n</div>', fi) + len('</ol></section>')
 faq = out[fi:fj]
 num2title = dict(re.findall(r'<span class="n">(Q\d+)</span><span>([^<]*)</span>', faq))
@@ -268,14 +294,24 @@ css = '''<style>
 /* the Grand Canal stays clear (she finds her way by the canals): same strength as the Tiber rule */
 .leaflet-pane path.ferry-line { stroke: var(--ferry); stroke-width: 3; stroke-dasharray: 5 4; stroke-linecap: round; fill: none; }
 .vap-mark .v { position: absolute; left: -12px; top: -12px; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; font-size: 0; }   /* tap area */
-.vap-mark .v::after { content: ""; position: absolute; left: 7px; top: 7px; width: 10px; height: 10px; border-radius: 50%; background: var(--vap); }   /* 2026-11-27: a small solid yellow dot (the V circles were too loud) */
-.vap-mark .vl { position: absolute; left: 9px; top: -8px; white-space: nowrap; font: 700 11px var(--f-body); color: var(--ink); text-shadow: 0 0 3px var(--paper), 0 0 3px var(--paper), 0 0 2px var(--paper); cursor: pointer; }
+/* 2026-11-27 (later): the stop is a small yellow tag with the line numbers (1 / 2 / 1・2), she couldn't tell line 1 from line 2 on plain dots;
+   stops without line 1 or 2 (F.te Nove) get a white tag */
+.vap-mark .vn { position: absolute; left: 0; top: 0; transform: translate(-50%, -50%); white-space: nowrap; background: var(--vap); color: #2A2000; font: 800 10px/1 var(--f-body); padding: 2px 4px; border-radius: 7px; border: 1.5px solid var(--paper); box-shadow: 0 1px 2px rgba(0,0,0,.35); cursor: pointer; }
+.vap-mark .vn.other { background: var(--paper); color: #8A6A00; border-color: var(--vap); }
+.vap-mark .vl { position: absolute; left: calc(100% + 3px); top: 50%; transform: translateY(-50%); white-space: nowrap; font: 700 11px var(--f-body); color: var(--ink); text-shadow: 0 0 3px var(--paper), 0 0 3px var(--paper), 0 0 2px var(--paper); cursor: pointer; }
 .vap-mark .vl b { color: #8A6A00; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .vap-mark .vl b { color: var(--vap); } }
 :root[data-theme="dark"] .vap-mark .vl b { color: var(--vap); }
 #lmap.vap-small .vap-mark .vl { display: none; }
 #lmap.dist .vap-mark, #lmap.planning .vap-mark { opacity: .45; }
-.chip.vap-chip .dot { background: var(--vap); }
+.chip.vap-chip .dot { background: var(--vap); border-radius: 3px; }
+/* traghetto boxes: dashed, lightly teal, so they read as a different set from the places (2026-11-27) */
+.spot.is-ferry .tab { border-style: dashed; background: color-mix(in srgb, var(--ferry) 10%, var(--paper)); }
+/* the four Grand Canal bridges are drawn as a bridge across the canal instead of a round pin (2026-11-27) */
+#lmap .spot.is-bridge .pin { width: 0; height: 0; left: 0; top: 0; border: 0; background: none; box-shadow: none; }
+#lmap .spot.is-bridge .pin::before { content: ""; position: absolute; width: var(--bw, 30px); height: var(--bh, 9px); left: calc(var(--bw, 30px) / -2); top: calc(var(--bh, 9px) / -2);
+  box-sizing: border-box; background: var(--paper); border-top: 2.5px solid var(--pc, var(--c)); border-bottom: 2.5px solid var(--pc, var(--c)); border-radius: 1px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.35); transform: rotate(var(--ba, 0deg)); }
 .tip-map { white-space: nowrap; }
 dd.tr h4 { margin: 8px 0 4px; font-size: 13px; }
 </style>
