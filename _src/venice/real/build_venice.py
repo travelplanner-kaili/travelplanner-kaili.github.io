@@ -141,6 +141,7 @@ LL['hotel'] = [45.43430, 12.33810]; GQ['hotel'] = 'Piazza San Marco, Venezia'
 # DESPAR, Fried Land, Pastificio Rizzo had no rating), and the sights spread over the tiers. Positions: Google Maps / OSM (her browser).
 # Each shop has a slogan for its box (her rule: a name alone says nothing). Replaces the 「test」 placeholder shop.
 _GH = '（Google 地圖資料）'
+_GEL = ['威尼斯冰淇淋推薦（Monica in Europe）', 'https://monicaineurope.com/italy-venice-gelato/']
 EAT = [
   dict(id='s_vagone', ll=[45.4418996, 12.3220173], name='Trattoria Il Vagone', latin='Trattoria Il Vagone', slogan='車站旁人氣小館',
        feature='聖露西亞火車站附近的義大利家常小館，Google 評分 4.6。', tips=['離火車站走路幾分鐘，剛到威尼斯或要離開前順路吃一頓。'],
@@ -148,9 +149,11 @@ EAT = [
   dict(id='s_oppa', ll=[45.4421384, 12.3217142], name='Oppa 韓式中式料理', latin='Oppa Ristorante coreano e cinese', slogan='韓式・中式料理',
        feature='火車站附近的韓國、中式餐廳，Google 評分 4.5。吃膩義大利菜時的選擇。', tips=['想吃米飯、熱湯時可以來。'],
        when='吃膩義大利菜的時候。', week=None, hours=['營業時間請看 Google 地圖'], price='一人約 €10–20（Google 地圖）', sPrice='€10–20'),
-  dict(id='s_suso', ll=[45.4377263, 12.3374098], name='Suso 冰淇淋', latin='Suso Gelatoteca', slogan='人氣義式冰淇淋',
-       feature='里亞托橋附近的人氣義式冰淇淋店（Sotoportego de la Bissa），Google 評分 4.6。', tips=['店門口常排隊，人多時隊伍會排進小巷。'],
-       when='逛里亞托橋一帶時。', week=None, hours=['營業時間請看 Google 地圖'], price='依店家公告', sPrice=None),
+  dict(id='s_suso', ll=[45.4377263, 12.3374098], name='Suso 冰淇淋', latin='Gelatoteca Suso', slogan='雙焦糖冰淇淋',
+       feature='里亞托橋旁小巷裡（Sotoportego de la Bissa）的人氣冰淇淋店，只有威尼斯有。口味二十多種、可以免費試吃，也賣自家做的蛋糕、餅乾和巧克力。Google 評分 4.6。',
+       tips=['推薦招牌「雙焦糖」（甜但不膩）；芒果口味偏酸。', '店裡沒有內用座位，附近的 Sant\'Antonio 橋可以拍運河。'],
+       when='逛里亞托橋一帶時。', week=['10:00–23:00'] * 7, hours=['每日 10:00–23:00（推薦文資料）'],
+       price='一球 €2.5、兩球 €4、三球 €5.9、四球 €6.9；加鮮奶油或換巧克力甜筒 +€0.5，部分口味另加價（推薦文資料）', sPrice='一球 €2.5', links=[_GEL]),
   dict(id='s_saraceno', ll=[45.4379258, 12.3352382], name='Ristorante Caffè Saraceno', latin='Ristorante Caffè Saraceno', slogan='里亞托運河邊餐廳',
        feature='里亞托橋旁大運河邊的餐廳，Google 評分 4.6。', tips=['想坐運河邊的位子，早一點去或先訂位。'],
        when='逛完里亞托橋，坐下來吃一頓。', week=['08:00–24:00'] * 7, hours=['每日 08:00–24:00', _GH], price='一人約 €20–70（Google 地圖）', sPrice='€20–70'),
@@ -160,6 +163,27 @@ EAT = [
        hours=['週一、三至五 09:00–20:30', '週六、日 09:00–19:00', '週二休', _GH], price='一人約 €10–20（Google 地圖）', sPrice='€10–20'),
 ]
 from menu_nono import MENU as _NONO_MENU, MENU_NOTE as _NONO_NOTE   # her menu photo, Italian / English / 中文 (2026-11-27)
+# 2026-11-27: the five gelato shops from the article she sent (monicaineurope.com/italy-venice-gelato); Suso is above
+EAT += [
+  dict(id='s_gallonetto', ll=[45.4372522, 12.3393132], name='Gallonetto 冰淇淋', latin='Gelateria Gallonetto', slogan='便宜又好吃冰淇淋',
+       feature='聖馬可廣場北邊 Salizada San Lio 上的冰淇淋店，常被稱為威尼斯最好吃的冰淇淋之一，Google 評分 4.9。', 
+       tips=['推薦草莓（天然、偏酸，像台灣的雪酪）和焦糖（濃郁滑順）。', '不會講義大利文也沒關係，店員很有耐心，用手指就可以點。', '也有冰沙（granita）和奶昔（frappé）。'],
+       when='聖馬可廣場和里亞托之間散步時。', week=['11:00–23:00'] * 7, hours=['每日 11:00–23:00（推薦文資料）'],
+       price='一球 €1.6、兩球 €2.5、三球 €3.5；加鮮奶油或巧克力醬另計，可以刷卡（推薦文資料）', sPrice='一球 €1.6', links=[_GEL]),
+  dict(id='s_natura', ll=[45.4401139, 12.3366705], name='Gelato di Natura（聖使徒廣場店）', latin='Gelato di Natura – Campo Santi Apostoli', slogan='在地人推薦冰淇淋',
+       feature='在地人推薦的冰淇淋連鎖店，店內裝潢漂亮、價格便宜。威尼斯有好幾家分店，這家在聖使徒廣場（十二使徒橋旁），Google 評分 4.5。',
+       tips=['朋友推薦提拉米蘇和水果口味。', '其他分店：聖雅各伯廣場（Campo San Giacomo dell\'Orio）、聖瑪利亞福爾摩沙廣場、聖馬可廣場旁。'],
+       when='從火車站走往里亞托時順路。', week=None, hours=['營業時間請看 Google 地圖'], price='價格便宜（推薦文資料）', sPrice=None, links=[_GEL]),
+  dict(id='s_amorino', ll=[45.4387078, 12.3343289], name='Amorino 冰淇淋', latin='Amorino', slogan='玫瑰花冰淇淋',
+       feature='義大利連鎖冰淇淋「小天使」，店員會把冰淇淋堆成玫瑰花瓣的樣子，很好拍。在里亞托橋西邊的 Ruga Vecchia San Giovanni 上。',
+       tips=['依份量大小算錢，口味可以隨便混，選幾種都可以。'],
+       when='逛里亞托市場一帶時。', week=['12:00–23:00'] * 5 + ['11:00–23:00', '11:00–23:00'], hours=['週一至五 12:00–23:00', '週六、日 11:00–23:00（推薦文資料）'],
+       price='依份量計價（推薦文資料）', sPrice=None, links=[_GEL]),
+  dict(id='s_grom', ll=[45.4413385, 12.321211], name='GROM 冰淇淋（火車站店）', latin='GROM – Stazione Santa Lucia', slogan='天然食材冰淇淋',
+       feature='義大利連鎖冰淇淋，強調天然食材、不加人工香料和色素，品質穩定不踩雷。這家在聖露西亞火車站裡，Google 評分 4.6。',
+       tips=['剛到或要離開威尼斯時順便吃。', '另一家分店在聖巴拿巴廣場（Campo San Barnaba）。'],
+       when='進出火車站時。', week=None, hours=['營業時間請看 Google 地圖'], price='依店家公告', sPrice=None, links=[_GEL]),
+]
 EAT.append(  # 2026-11-27 she asked to add it (Google 4.2; her own pick, so outside the 4.5 rule)
   dict(id='s_nono', ll=[45.4397051, 12.3313417], name='Al Nono Risorto', latin='Osteria Trattoria Al Nono Risorto', slogan='CP值高好餐廳',
        feature='里亞托市場西邊小巷裡（Sotoportego de Siora Bettina）的老餐館，菜單上寫「1870 年起的老店」。披薩、手工麵和威尼斯菜都有，Google 評分 4.2。',
@@ -173,6 +197,7 @@ for e in EAT:
     if not t['sPrice']: del t['sPrice']
     if e['week']: WEEK[e['id']] = e['week']
     if e['id'] == 's_nono': t['menu'] = _NONO_MENU; t['menuNote'] = _NONO_NOTE
+    if e.get('links'): t['links'] = e['links']
     spots.append(t); LL[e['id']] = e['ll']; GQ[e['id']] = e['latin'] + ', Venezia'
 SIGHTS = [
   dict(id='guglie', tier='推薦', cat='open', ll=[45.44363, 12.32546], name='尖塔橋', latin='Ponte delle Guglie',
