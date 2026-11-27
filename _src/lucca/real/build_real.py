@@ -659,6 +659,12 @@ def _faq_fold(out):
              '</section></div><h3 class="faq-sub">其他問題</h3>%s') % (''.join(cov), ''.join(planq), CUST_NOTE, ''.join(custq), ''.join(parts))
     return out[:i] + block + out[j + 5:]
 out = _add_help(_faq_refs(_faq_fold(out)))
+# 2026-11-27 (she asked): say up front that Google's shared short links can't be read, and how to get coordinates instead
+_LOC_HELP = ('<small class="loc-help">Google 地圖分享的短網址（maps.app.goo.gl 開頭）讀不到位置，請改貼座標：'
+             '電腦在 Google 地圖對著地點按右鍵，點選單第一行的數字就複製好了；手機在 Google 地圖 App 長按地點，點上方出現的數字複製。</small>')
+out, _n = re.subn(r'(placeholder="Google 地圖網址，或 [\d.]+, [\d.]+"></label>)', lambda m: m.group(1) + _LOC_HELP, out)
+assert _n == 3, _n
+out = out.replace('</head>', '<style>.loc-help { display: block; margin: -2px 0 4px; font-size: 12px; line-height: 1.5; color: var(--muted); }</style>\n</head>', 1)
 # ---- 購物 (2026-11-27, she asked for it on Lucca too): the shop button + shops as solid green boxes, like Rome.
 # Lucca-only pieces: buttons (class lucca-only) and <style id="lucca-only"> are dropped by build_rome.py (Rome has its own);
 # the test spot sits in the data block and the JS after the drawer, both of which build_rome.py replaces anyway.

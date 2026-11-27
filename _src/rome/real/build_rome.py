@@ -140,6 +140,10 @@ rep = [
 ]
 for a, b in rep: out = out.replace(a, b)
 out = re.sub(r'<div class="eyebrow">[^<]*</div>', '<div class="eyebrow">Roma · Lazio</div>', out, count=1)
+# the location note (build_real.py) also under the drawer's forms (住宿, 自己加的點), which come from this city's own drawer
+_lh = re.search(r'<small class="loc-help">.*?</small>', out).group(0)
+out, _n = re.subn(r'(placeholder="Google 地圖網址，或 [\d.]+, [\d.]+"></label>)(?!<small class="loc-help">)', lambda m: m.group(1) + _lh, out)
+assert out.count('<small class="loc-help">') == 3, out.count('<small class="loc-help">')
 
 # ---- City Walk + 購物 buttons (after 距離模式, before ?) and the route picker ----
 ic = lambda cls: re.search(r'<button class="icon-btn %s"[^>]*>.*?</button>' % cls, H, flags=re.S).group(0)
