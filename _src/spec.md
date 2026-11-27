@@ -381,3 +381,4 @@
 - 羅馬新增次要景點「特雷維噴泉地下城」Vicus Caprarius – La Città dell'Acqua（2026-11-27 她提供介紹，放次要）：Vicolo del Puttarello 25（座標用羅馬觀光局 41.900413, 12.484133）。需購票。
   營業時間照官網／Google：週二至日 11:00–17:00（最後入場 16:30），週一休；週末一定要預約（電話或 WhatsApp）。票價官網只寫「導覽 €8（要預約）」；不適用每月第一個週日免費日。小提醒：地底涼、通道窄，帶薄外套穿好走的鞋，不開閃光燈。
   做法：notes.py 的 NEW、WEEK、EXTRA_REMIND，data.json 直接加這一筆（框位置在點的右下），跑 build.py、build_rome.py，不重跑 gen.py。
+- 羅馬購物新增餐廳 Miscele e Fuoco（2026-11-27 她給 Google 地圖連結和心得）：Via Cavour 319，競技場和 Monti 之間（41.8937131, 12.4890175）。一句話「隱藏版蝦燉飯」（Claude 擬）。看點照她的話：披薩、海鮮麵好吃；隱藏版蝦子燉飯（新菜單沒有，現場說要點 risotto alla crema di scampi，「是導遊 Nick 的朋友」照她原文）。營業時間照 Google：每日 08:00–23:30（週五、六到 24:00），訂位電話 06 2539 2338，€10–20。
