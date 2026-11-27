@@ -159,6 +159,7 @@ EAT = [
        when='逛里亞托市場一帶時，當點心或簡單一餐。', week=['09:00–20:30', '', '09:00–20:30', '09:00–20:30', '09:00–20:30', '09:00–19:00', '09:00–19:00'],
        hours=['週一、三至五 09:00–20:30', '週六、日 09:00–19:00', '週二休', _GH], price='一人約 €10–20（Google 地圖）', sPrice='€10–20'),
 ]
+from menu_nono import MENU as _NONO_MENU, MENU_NOTE as _NONO_NOTE   # her menu photo, Italian / English / 中文 (2026-11-27)
 EAT.append(  # 2026-11-27 she asked to add it (Google 4.2; her own pick, so outside the 4.5 rule)
   dict(id='s_nono', ll=[45.4397051, 12.3313417], name='Al Nono Risorto', latin='Osteria Trattoria Al Nono Risorto', slogan='1870 老店・披薩',
        feature='里亞托市場西邊小巷裡（Sotoportego de Siora Bettina）的老餐館，菜單上寫「1870 年起的老店」。披薩、手工麵和威尼斯菜都有，Google 評分 4.2。',
@@ -171,6 +172,7 @@ for e in EAT:
              tips=e['tips'], when=e['when'], stay='約 30 分鐘～1 小時', hours=e['hours'], price=e['price'], sPrice=e['sPrice'], sTime='用餐')
     if not t['sPrice']: del t['sPrice']
     if e['week']: WEEK[e['id']] = e['week']
+    if e['id'] == 's_nono': t['menu'] = _NONO_MENU; t['menuNote'] = _NONO_NOTE
     spots.append(t); LL[e['id']] = e['ll']; GQ[e['id']] = e['latin'] + ', Venezia'
 SIGHTS = [
   dict(id='guglie', tier='推薦', cat='open', ll=[45.44363, 12.32546], name='尖塔橋', latin='Ponte delle Guglie',
@@ -488,6 +490,14 @@ dd.tr h4 { margin: 8px 0 4px; font-size: 13px; }
 '''
 out = out.replace('</head>', css + '</head>', 1)
 MAP_UPDATED = re.search(r'const MAP_UPDATED = "([^"]+)"', out).group(1)
+# the fold-out menu in a restaurant's card (2026-11-27, Al Nono Risorto)
+_m = "${s.remind ? `<div><dt>小提醒</dt><dd>${list(s.remind)}</dd></div>` : \"\"}"
+assert out.count(_m) == 1, out.count(_m)
+out = out.replace(_m, _m + "\n      ${s.menu ? `<div class=\"menu-blk\"><dt>菜單（中英對照）</dt><dd><details><summary>展開菜單（照店家菜單照片翻譯）</summary>${s.menu.map(([h, rows]) => `<h4>${esc(h)}</h4><ul class=\"menu-list\">${rows.map(([it, en, zh, p]) => `<li><span class=\"mi-p\">€${esc(p)}</span><b>${esc(it)}</b><br><span class=\"mi-en\">${esc(en)}</span><br>${esc(zh)}</li>`).join(\"\")}</ul>`).join(\"\")}${s.menuNote ? list(s.menuNote) : \"\"}</details></dd></div>` : \"\"}", 1)
+_c = 'closest("a, button, input, select, textarea, summary, [role=button]")'
+assert out.count(_c) == 1
+out = out.replace(_c, 'closest("a, button, input, select, textarea, summary, [role=button], .menu-blk")', 1)   # reading the long menu: a tap there does not close the card
+out = out.replace('</head>', '<style>.menu-blk details summary { cursor: pointer; font-weight: 700; color: var(--route, #B5541C); } .menu-blk h4 { margin: 12px 0 4px; } .menu-list { list-style: none; padding: 0; margin: 0; } .menu-list li { padding: 5px 0; border-bottom: 1px dashed var(--line); line-height: 1.45; } .menu-list .mi-p { float: right; font-weight: 700; margin-left: 8px; } .menu-list .mi-en { font-size: .88em; color: var(--muted); font-style: italic; }</style>\n</head>', 1)
 open(OUT + 'venice-real.html', 'w').write(out)
 open(OUT + 'version.json', 'w').write(json.dumps({'updated': MAP_UPDATED}))
 print('ok', len(out), 'spots', len(spots), 'vap', len(VAP), 'ferries', len(FERRY), 'unitM', round(UNIT_M, 3))
