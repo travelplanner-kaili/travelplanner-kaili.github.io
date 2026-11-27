@@ -163,6 +163,7 @@ EAT = [
        hours=['週一、三至五 09:00–20:30', '週六、日 09:00–19:00', '週二休', _GH], price='一人約 €10–20（Google 地圖）', sPrice='€10–20'),
 ]
 from menu_nono import MENU as _NONO_MENU, MENU_NOTE as _NONO_NOTE
+from menu_squero import MENU as _SQ_MENU, MENU_NOTE as _SQ_NOTE
 from menu_friedland import MENU as _FL_MENU, MENU_NOTE as _FLM_NOTE
 from menu_dalmoro import MENU as _DM_MENU, MENU_NOTE as _DM_NOTE
 from flavors import GALLONETTO as _FL_GAL, SUSO as _FL_SUSO, FLAV_NOTE as _FL_NOTE   # gelato flavors from the article (2026-11-27)   # her menu photo, Italian / English / 中文 (2026-11-27)
@@ -224,11 +225,24 @@ EAT += [  # 2026-11-27 her list (text and hours as she gave them)
        links=[['威尼斯美食總整理（Monica in Europe）', 'https://monicaineurope.com/venice-food-guides/'],
               ['Fried Land 評論（Tripadvisor）', 'https://www.tripadvisor.com.tw/Restaurant_Review-g187870-d7224041-Reviews-Fried_Land-Venice_Veneto.html']]),
 ]
+EAT.append(  # 2026-11-27 her pick; slogan hers, details from her pasted summary + Google Maps
+  dict(id='s_squero', ll=[45.4301018, 12.3261331], name='Osteria Al Squero', latin='Osteria Al Squero', slogan='2歐海鮮小吃',
+       feature='多爾索杜羅區聖特羅瓦索運河邊的小酒館，以便宜好吃的威尼斯小點 cicchetti 出名，對面就是修貢多拉的造船廠（Squero di San Trovaso）。Google 評分 4.7。',
+       tips=['玻璃櫃裡每天有幾十種 cicchetti（麵包片配南瓜泥、莫札瑞拉配帕瑪火腿、青醬起司番茄、海鮮、鹹魚醬等），一塊約 €1.5–2.5，部分可以請店家加熱。',
+             '配一杯 Spritz 或在地葡萄酒（單杯 €3–6.5），一人約 €10–20。',
+             '店小座位少，大家多半拿著吃的喝的站在運河邊，看對面修貢多拉船。',
+             '下午到傍晚人最多（週三至五、週六下午）；不接受訂位，現場排隊點。',
+             '在運河邊吃要小心海鷗搶食。'],
+       when='逛學院美術館一帶時，下午點心或傍晚小酌。',
+       week=['10:00–20:30'] * 5 + ['10:00–15:00', ''], hours=['週一至五 10:00–20:30', '週六 10:00–15:00', '週日休', _GH],
+       price='cicchetti 一塊約 €1.5–2.5；一人約 €10–20（Google 地圖）', sPrice='€10–20',
+       links=[['Osteria Al Squero 評論（Tripadvisor）', 'https://www.tripadvisor.com.tw/Restaurant_Review-g187870-d3226055-Reviews-Osteria_Al_Squero-Venice_Veneto.html']]))
 for e in EAT:
     t = dict(id=e['id'], cat='open', tier='購物', shop=True, compact=True, name=e['name'], latin=e['latin'], slogan=e['slogan'], feature=e['feature'],
              tips=e['tips'], when=e['when'], stay='約 30 分鐘～1 小時', hours=e['hours'], price=e['price'], sPrice=e['sPrice'], sTime='用餐')
     if not t['sPrice']: del t['sPrice']
     if e['week']: WEEK[e['id']] = e['week']
+    if e['id'] == 's_squero': t['menu'] = _SQ_MENU; t['menuNote'] = _SQ_NOTE; t['menuTitle'] = ['酒單（中英對照）', '展開酒單（照 Google 地圖菜單翻譯）']
     if e['id'] == 's_friedland': t['menu'] = _FL_MENU; t['menuNote'] = _FLM_NOTE; t['menuTitle'] = ['菜單（義中對照）', '展開菜單（照店家菜單照片翻譯）']
     if e['id'] == 's_dalmoro': t['menu'] = _DM_MENU; t['menuNote'] = _DM_NOTE; t['menuTitle'] = ['菜單（義中對照）', '展開菜單（照推薦文翻譯）']
     if e['id'] == 's_nono': t['menu'] = _NONO_MENU; t['menuNote'] = _NONO_NOTE
