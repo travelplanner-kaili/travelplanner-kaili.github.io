@@ -43,12 +43,12 @@ VAP.forEach(v => {
   m.addTo(vapLayer);
 });
 let vapOn = true; try { vapOn = localStorage.getItem("trip-vap-venice") !== "0"; } catch (e) {}
-function applyVap() {
-  if (vapOn) vapLayer.addTo(map); else vapLayer.remove();
+function applyVap() {   // 【水路交通】: the water-bus lines and stops, and the traghetti (pins, boxes, crossing lines)
+  if (vapOn) { vapLayer.addTo(map); ferryLayer.addTo(map); } else { vapLayer.remove(); ferryLayer.remove(); }
   document.querySelectorAll(".vap-chip").forEach(b => b.setAttribute("aria-pressed", vapOn));
   mapEl.classList.toggle("vap-small", map.getZoom() < 16.5);   // names only when zoomed in: place labels would cover them
 }
-document.querySelectorAll(".vap-chip").forEach(b => b.addEventListener("click", () => { vapOn = !vapOn; try { localStorage.setItem("trip-vap-venice", vapOn ? "1" : "0"); } catch (e) {} applyVap(); }));
+document.querySelectorAll(".vap-chip").forEach(b => b.addEventListener("click", () => { vapOn = !vapOn; try { localStorage.setItem("trip-vap-venice", vapOn ? "1" : "0"); } catch (e) {} applyVap(); applySup(); }));
 map.on("zoomend", applyVap);
 
 /* ---- 購物: pink shopping streets are always on the map; the button adds the shops (solid boxes), like Rome ---- */
@@ -59,6 +59,7 @@ let shopOn = false;
     _applySup();
     SPOTS.forEach(s => {
       if (s.shopStreet || s.cat === "vap") { s.g.classList.add("gone"); return; }   // streets are the pink lines, stops are the yellow V
+      if (s.id.startsWith("tr_")) { s.g.classList.toggle("gone", !vapOn); s.g.classList.remove("dim"); return; }   // ferries follow 水路交通 only, not 推薦／需購票
       if (s.tier === "購物") { s.g.classList.toggle("gone", !shopOn); s.g.classList.toggle("shopbox", shopOn); s.g.classList.remove("dim"); }
       else if (shopOn && s.cat !== "base") { if (s.sup) s.g.classList.add("gone"); s.g.classList.remove("dim"); }
     });

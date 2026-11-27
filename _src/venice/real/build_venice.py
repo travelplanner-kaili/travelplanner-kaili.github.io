@@ -236,9 +236,9 @@ out = out.replace('const REPORT_MAP = "盧卡";', 'const REPORT_MAP = "威尼斯
 # 星期幾去: Venice days are Fri–Sun (spec 2026-11-15)
 out = re.sub(r'(<button class="chip day" type="button" data-day="(\d)" aria-pressed=")(true|false)',
              lambda m: m.group(1) + ('true' if m.group(2) in '456' else 'false'), out)
-# 水上巴士站 chip after 冷門時段
-out, n = re.subn(r'(<button class="chip cold" id="f-cold"[^>]*>.*?</button>)',
-                 lambda m: m.group(1) + '<button class="chip vap-chip" type="button" aria-pressed="true" style="--c:var(--vap)" data-tip="地圖上黃色的點線：水上巴士（圓點是 1 號線、虛線是 2 號線）"><span class="dot"></span>水上巴士站</button>', out, count=1, flags=re.S)
+# 【水路交通】 chip (2026-11-27, her idea): water bus + traghetti in one switch, in the 主要／推薦／次要 row (those show/hide, like this one)
+out, n = re.subn(r'(<button class="chip tier sup" id="f-sup"[^>]*>.*?</button>)',
+                 lambda m: m.group(1) + '<button class="chip vap-chip" type="button" aria-pressed="true" style="--c:var(--vap)" data-tip="水上巴士（黃色點線：圓點是 1 號線、虛線是 2 號線）和 €2 過河渡船"><span class="dot"></span>水路交通</button>', out, count=1, flags=re.S)
 assert n == 1
 
 # ---- drawer: Rome's, with the same real-map patches ----
@@ -293,6 +293,7 @@ assert '地圖上橘色的路' in shop_q; shop_q = shop_q.replace('地圖上橘�
 assert '旁邊的數字是停靠的路線' in vap_q and '藍綠色小船則是 €2 的過河渡船（traghetto），兩種不一樣。' in vap_q
 vap_q = re.sub(r'是水上巴士（vaporetto）站，旁邊的數字是停靠的路線，例如「1・2」就是 1 號、2 號線都停。點一下', '是水上巴士（vaporetto）的路線：圓點線是 1 號線、虛線是 2 號線，線上的小圓點是停靠站。點站', vap_q); assert '圓點線是 1 號線' in vap_q
 vap_q = vap_q.replace('藍綠色小船則是 €2 的過河渡船（traghetto），兩種不一樣。', '')
+assert '不想看可以在篩選列關掉「水上巴士站」。' in vap_q; vap_q = vap_q.replace('不想看可以在篩選列關掉「水上巴士站」。', '不想看可以在篩選列關掉「水路交通」（水上巴士和渡船一起關）。')
 fi = out.index('<section class="faq"'); fj = out.index('</ol></section>\n</div>', fi) + len('</ol></section>')
 faq = out[fi:fj]
 num2title = dict(re.findall(r'<span class="n">(Q\d+)</span><span>([^<]*)</span>', faq))
@@ -342,7 +343,7 @@ css = '''<style>
 :root[data-theme="dark"] .vap-mark .vl b { color: var(--vap); }
 #lmap.vap-small .vap-mark .vl { display: none; }
 #lmap.dist .vap-mark, #lmap.planning .vap-mark { opacity: .45; }
-.chip.vap-chip .dot { background: var(--vap); }
+.chip.vap-chip .dot { background: linear-gradient(90deg, var(--vap) 50%, var(--ferry) 50%); }
 /* traghetto boxes: dashed, lightly teal, so they read as a different set from the places (2026-11-27) */
 .spot.is-ferry .tab { border-style: dashed; background: color-mix(in srgb, var(--ferry) 10%, var(--paper)); }
 /* the four Grand Canal bridges are drawn as a bridge across the canal instead of a round pin (2026-11-27) */
