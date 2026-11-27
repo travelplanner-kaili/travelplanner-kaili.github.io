@@ -168,16 +168,34 @@ function layoutLabels() {
        so zooming out shrinks everything together and the whole city stays readable as one picture */
     const routeOn_ = !!window.ROUTE_ON, shopOn_ = !!window.SHOP_ON;   // set by the city's extra code (Rome)
     const full = !shopOn_ && ((document.getElementById("f-sup") || {}).getAttribute?.("aria-pressed") === "true" || routeOn_);
+    const setTab = (s, dx, dy) => { const W = s.tab.offsetWidth, H = s.tab.offsetHeight; s.tab.style.left = dx + "px"; s.tab.style.top = dy + "px";
+      s.line.setAttribute("x2", Math.max(dx, Math.min(0, dx + W))); s.line.setAttribute("y2", Math.max(dy, Math.min(0, dy + H))); };
+    const gb = vis.map(s => ({ x: s.p.x - 9, y: s.p.y - 9, w: 18, h: 18 })), free = [];   // pins are obstacles for the free ones
     vis.forEach(s => {
       const L0 = s.lab || {}, sl = LMODE === "names" || s.compact || (shopOn_ && L0.sh && s.cat !== "base");
       s.g.classList.toggle("slim1", sl);
       const ll = shopOn_ && L0.sh ? L0.sh : LMODE === "names" ? (L0.n || L0.sl || L0.l) : (full && L0.u ? L0.u : L0.l);
-      const W = s.tab.offsetWidth, H = s.tab.offsetHeight;
-      let dx = 12, dy = -H / 2;
-      if (ll) { const q = map.latLngToContainerPoint(ll); dx = q.x - s.p.x; dy = q.y - s.p.y; }
-      s.tab.style.left = dx + "px"; s.tab.style.top = dy + "px";
-      const cx = Math.max(dx, Math.min(0, dx + W)), cy = Math.max(dy, Math.min(0, dy + H));
-      s.line.setAttribute("x2", cx); s.line.setAttribute("y2", cy);
+      if (!ll) { free.push(s); return; }   // no hand-drawn spot (places added on the real map): placed below where there is room
+      const q = map.latLngToContainerPoint(ll), dx = q.x - s.p.x, dy = q.y - s.p.y; setTab(s, dx, dy);
+      gb.push({ x: s.p.x + dx, y: s.p.y + dy, w: s.tab.offsetWidth, h: s.tab.offsetHeight });
+    });
+    /* 2026-11-27 (her screenshot: Venice's new shops piled up in 簡潔): places without a hand-drawn spot look for a free spot around
+       their pin, clear of the drawn boxes, pins, street names and the water-bus lines; no room = just the dot (hover shows a shop's box) */
+    const mr0 = mapEl.getBoundingClientRect();
+    STREETS.forEach(st => { const el = st.label && st.label.getElement(); if (!el || el.classList.contains("off")) return; const r = el.querySelector("span").getBoundingClientRect(); if (r.width) gb.push({ x: r.left - mr0.left, y: r.top - mr0.top, w: r.width, h: r.height }); });
+    if (window.extraObstacles) window.extraObstacles().forEach(b => gb.push(b));
+    mapEl.querySelectorAll(".lbl-obst").forEach(el => { const r = el.getBoundingClientRect(); if (r.width && el.offsetParent) gb.push({ x: r.left - mr0.left, y: r.top - mr0.top, w: r.width, h: r.height }); });
+    const hit = (r) => gb.some(b => r.x < b.x + b.w && r.x + r.w > b.x && r.y < b.y + b.h && r.y + r.h > b.y);
+    free.sort((a, b) => ORDER(a) - ORDER(b)).forEach(s => {
+      const W = s.tab.offsetWidth, H = s.tab.offsetHeight; let got = null;
+      for (const d of [12, 30, 52, 80]) {
+        for (const [dx, dy] of [[d, -H / 2], [-d - W, -H / 2], [-W / 2, -d - H], [-W / 2, d], [d, -d - H], [d, d], [-d - W, -d - H], [-d - W, d]]) {
+          const r = { x: s.p.x + dx, y: s.p.y + dy, w: W, h: H }; if (!hit(r)) { got = [dx, dy, r]; break; }
+        }
+        if (got) break;
+      }
+      if (!got) { s.g.classList.add("lbl-off"); return; }
+      setTab(s, got[0], got[1]); gb.push(got[2]);
     });
     placeLegPills(); return;
   }

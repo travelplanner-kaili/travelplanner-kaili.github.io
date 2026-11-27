@@ -136,6 +136,7 @@ extra_css = '''
   .spot.has-slogan:hover .t-shopname { display: inline !important; }
   .spot.has-slogan:hover .t-more { display: block !important; }
   .leaflet-marker-icon:has(.spot.has-slogan:hover) { z-index: 100001 !important; }
+  .spot.has-slogan.lbl-off:hover .tab { display: block; }   /* a shop shown only as a dot: hovering the dot shows its box */
 }
 .spot .t-wed { font: 500 11.5px var(--f-body); font-variant-numeric: tabular-nums; }
 .spot .t-price { font: 700 11.5px var(--f-body); color: var(--c); font-variant-numeric: tabular-nums; }
