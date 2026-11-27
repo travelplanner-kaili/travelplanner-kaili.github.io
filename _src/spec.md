@@ -376,3 +376,4 @@
 - 店家框寫「一句話」（2026-11-27 她要求：只寫店名看不懂；店名不重要，放不下可以縮小或省略）：地圖上的店家框先寫粗體的一句話，後面接小一號的店名（引擎：景點的 slogan 欄位）；介紹頁標題照樣是店名。以後新增店家一律要有一句話。羅馬（build_rome.py 的 SLOGAN）：
   Galleria Alberto Sordi＝玻璃頂拱廊商場、Sermoneta Gloves＝手工皮手套、Castroni（Cola di Rienzo 店）＝高級食材伴手禮、Castroni（Ottaviano 店）＝便宜 Venchi、Mercato Centrale＝車站美食市集、Boccione＝瑞可塔櫻桃派、泰斯塔西奧市場＝在地市場・熟食、萬神殿周邊小店＝手工紙品・封蠟。（字是 Claude 擬的，她可以改。）
 - 羅馬原本的 Castroni 改名「Castroni（Cola di Rienzo 店）」，跟 Ottaviano 店分開（她同意）。
+- 羅馬購物新增 Ceramica Raku Roma（2026-11-27 她給連結，一句話「絕美時鐘」）：Via dei Pastini 20，萬神殿東邊（Google 地圖座標 41.8997144, 12.4786485）。家族陶藝店，樂燒（Raku）手工藝術時鐘。營業時間照 Google 地圖（週六至四 10:00–22:00、週五 10:00–20:00）。做法同 Ottaviano 店（notes.py＋data.json＋SLOGAN，不重跑 gen.py）。
