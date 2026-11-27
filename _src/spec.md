@@ -377,3 +377,4 @@
   Galleria Alberto Sordi＝玻璃頂拱廊商場、Sermoneta Gloves＝手工皮手套、Castroni（Cola di Rienzo 店）＝高級食材伴手禮、Castroni（Ottaviano 店）＝便宜 Venchi、Mercato Centrale＝車站美食市集、Boccione＝瑞可塔櫻桃派、泰斯塔西奧市場＝在地市場・熟食、萬神殿周邊小店＝手工紙品・封蠟。（字是 Claude 擬的，她可以改。）
 - 羅馬原本的 Castroni 改名「Castroni（Cola di Rienzo 店）」，跟 Ottaviano 店分開（她同意）。
 - 羅馬購物新增 Ceramica Raku Roma（2026-11-27 她給連結，一句話「絕美時鐘」）：Via dei Pastini 20，萬神殿東邊（Google 地圖座標 41.8997144, 12.4786485）。家族陶藝店，樂燒（Raku）手工藝術時鐘。營業時間照 Google 地圖（週六至四 10:00–22:00、週五 10:00–20:00）。做法同 Ottaviano 店（notes.py＋data.json＋SLOGAN，不重跑 gen.py）。
+- 羅馬購物新增 Il Sorpasso（2026-11-27 她給店名、地址、官網）：Via Properzio 31/33，梵蒂岡博物館附近（Google 地圖座標 41.9055098, 12.4613183）。在地小餐酒館，一句話「在地餐酒館・冷盤」（Claude 擬）。營業時間照官網：週一至六 08:30–01:00、週日休；訂位只收電話（10:00–12:00、16:00–18:00）。價位 €€。

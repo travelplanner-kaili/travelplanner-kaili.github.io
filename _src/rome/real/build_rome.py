@@ -29,7 +29,7 @@ WEEK, WPRE, NODIM, KEEP = {}, {}, [], []
 DROP = {'x', 'y', 'lx', 'ly', 'slx', 'sly', 'ux', 'uy', 'nx', 'ny', 'W', 'mapLines', 'fromHotel', 'week'}
 # 2026-11-27: shop boxes on the map say what the shop is for (her idea: 「便宜 Venchi」), the name comes small after it
 SLOGAN = {'s_sordi': '玻璃頂拱廊商場', 's_sermoneta': '手工皮手套', 's_castroni': '高級食材伴手禮', 's_castroni_ott': '便宜 Venchi',
-          's_mercato': '車站美食市集', 's_boccione': '瑞可塔櫻桃派', 's_testaccio_mkt': '在地市場・熟食', 's_pantheonshops': '手工紙品・封蠟', 's_raku': '絕美時鐘'}
+          's_mercato': '車站美食市集', 's_boccione': '瑞可塔櫻桃派', 's_testaccio_mkt': '在地市場・熟食', 's_pantheonshops': '手工紙品・封蠟', 's_raku': '絕美時鐘', 's_sorpasso': '在地餐酒館・冷盤'}
 spots = []
 for s in SPOTS:
     w = s.get('week')
