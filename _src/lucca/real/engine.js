@@ -316,7 +316,11 @@ function setDist(on) {
   document.getElementById("dist-note").hidden = !on;
   pickSpot(null); layoutLabels();
 }
-document.querySelectorAll(".icon-btn.dist").forEach(b => b.addEventListener("click", () => setDist(!distMode)));
+document.querySelectorAll(".icon-btn.dist").forEach(b => b.addEventListener("click", () => { setDist(!distMode); if (distMode) tripMode("dist"); }));
+/* 2026-11-27: 點對點, 我的行程 and City Walk each draw lines; turning one on (by the user) turns the others' lines off:
+   點對點 or 我的行程 → City Walk off; 我的行程 or City Walk → 點對點 off. The city's own parts listen for "trip-mode". */
+function tripMode(m) { if (m !== "dist" && distMode) setDist(false); document.dispatchEvent(new CustomEvent("trip-mode", { detail: m })); }
+document.addEventListener("trip-mode", e => { if (e.detail === "walk" && distMode) setDist(false); });
 document.getElementById("dist-text").textContent = NOTE;
 
 /* ---- filters ---- */
@@ -508,7 +512,7 @@ function renderPlan() {
   // tap a day to open it; tap the open day again to close it (no day chosen = 我的行程 off, the map looks as usual)
   days.querySelectorAll("button[data-k]").forEach(b => b.addEventListener("click", () => {
     if (dayOn && plan.cur === b.dataset.k) { plan.on = false; unMode = false; savePlan(); renderPlan(); return; }
-    plan.cur = b.dataset.k; plan.on = true; savePlan(); renderPlan(); fitPlan(); }));
+    plan.cur = b.dataset.k; plan.on = true; savePlan(); renderPlan(); fitPlan(); tripMode("plan"); }));
   days.querySelector(".pd-add").addEventListener("click", () => {
     const last = PDAYS[PDAYS.length - 1], k = "d" + Date.now().toString(36);
     let date = "";
@@ -749,7 +753,7 @@ const setPlanOpen = on => { planOpen = on; try { localStorage.setItem(PKEY + "-o
 /* phone: the tab goes 開啟 → 全螢幕 → 關閉; computer: 開啟 ↔ 關閉 */
 document.querySelectorAll(".plan-btn").forEach(b => b.addEventListener("click", () => {
   if (innerWidth <= 640 && planOpen && !planEl.classList.contains("big")) { planEl.classList.add("big"); renderPlan(); return; }
-  planEl.classList.remove("big"); setPlanOpen(!planOpen);
+  planEl.classList.remove("big"); setPlanOpen(!planOpen); if (planOpen) tripMode("plan");
 }));
 document.getElementById("plan-x").addEventListener("click", () => setPlanOpen(false));
 /* the 我的行程 tab sticks to the panel's edge: computer = its right side, phone = its top; closed = the map's edge */

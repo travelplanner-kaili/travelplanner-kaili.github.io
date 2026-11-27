@@ -67,7 +67,9 @@ function applyRoute() {
   });
   applySup();
 }
-document.querySelectorAll(".icon-btn.route").forEach(b => b.addEventListener("click", () => { routeOn = !routeOn; applyRoute(); }));
+document.querySelectorAll(".icon-btn.route").forEach(b => b.addEventListener("click", () => { routeOn = !routeOn; applyRoute(); if (routeOn) tripMode("walk"); }));
+// 點對點 or 我的行程 turned on → the walks go off (2026-11-27); the walk's own card, if open, closes with them
+document.addEventListener("trip-mode", e => { if (e.detail !== "walk" && routeOn) { routeOn = false; if (drawer.dataset.route && !drawer.hidden) closeSpot(); applyRoute(); } });
 const routesOfAll = id => ROUTES.filter(r => r.stops.includes(id) || (r.areas || []).includes(id));
 function openRoute(id) {
   drawer.dataset.spot = ""; drawer.dataset.route = id;
@@ -105,7 +107,7 @@ function openRoute(id) {
       <div><dt>怎麼到起點</dt><dd>${esc(r.start)}</dd></div>
       <div><dt>走完之後</dt><dd>${esc(r.end)}</dd></div>
     </dl>`;
-  if (!routeOn || !routeShow.has(r.id)) { routeOn = true; routeShow.add(r.id); saveShow(); applyRoute(); }
+  if (!routeOn || !routeShow.has(r.id)) { const was = routeOn; routeOn = true; routeShow.add(r.id); saveShow(); applyRoute(); if (!was) tripMode("walk"); }
   drawer.hidden = false; scrim.hidden = false;
   // zoom to the walk, in the part of the map the drawer does not cover
   const b = L.latLngBounds(r.ll); r.stops.forEach(id => { const s = byId(id); if (s) b.extend(s.ll); });
