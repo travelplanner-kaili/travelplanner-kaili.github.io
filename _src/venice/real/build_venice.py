@@ -237,6 +237,16 @@ EAT.append(  # 2026-11-27 her pick; slogan hers, details from her pasted summary
        week=['10:00–20:30'] * 5 + ['10:00–15:00', ''], hours=['週一至五 10:00–20:30', '週六 10:00–15:00', '週日休', _GH],
        price='cicchetti 一塊約 €1.5–2.5；一人約 €10–20（Google 地圖）', sPrice='€10–20',
        links=[['Osteria Al Squero 評論（Tripadvisor）', 'https://www.tripadvisor.com.tw/Restaurant_Review-g187870-d3226055-Reviews-Osteria_Al_Squero-Venice_Veneto.html']]))
+EAT.append(  # 2026-11-27 her pick (「早午餐店推薦」), details from her text; hours from Google Maps (her rule)
+  dict(id='s_farini', ll=[45.4375254, 12.33825], name='Farini', latin='Farini', slogan='早午餐店',
+       feature='平價、快速、從早開到晚的烘焙坊，賣切片披薩（pizza al taglio）、佛卡夏、可頌和咖啡，是早餐、早午餐或快速簡餐的好選擇。這家（Calle Seconda de la Fava）最熱門，附近還有兩家分店。Google 評分 4.4。',
+       tips=['店內有廁所，沒有管制，臨時找不到廁所可以來借。',
+             '切片披薩是羅馬式厚片、發酵久、口感蓬鬆，一片約 €4.90–5.40 起；也有夾餡佛卡夏。',
+             '可頌約 €1.80 起，配卡布奇諾或濃縮咖啡；也有開心果可頌、提拉米蘇（約 €5.10）。',
+             '櫃檯點餐、不接受訂位；座位多是高腳椅或站著吃，尖峰時段很擠，適合趕行程、省預算。'],
+       when='早餐、早午餐，或逛里亞托一帶時快速吃一頓。', week=['07:30–22:00'] * 7, hours=['每日 07:30–22:00', _GH],
+       price='一人約 €1–10（Google 地圖）', sPrice='€1–10',
+       links=[['Farini 威尼斯官方菜單（San Lio 店）', 'https://farini.com/en/menu/venice/san-lio/']]))
 for e in EAT:
     t = dict(id=e['id'], cat='open', tier='購物', shop=True, compact=True, name=e['name'], latin=e['latin'], slogan=e['slogan'], feature=e['feature'],
              tips=e['tips'], when=e['when'], stay='約 30 分鐘～1 小時', hours=e['hours'], price=e['price'], sPrice=e['sPrice'], sTime='用餐')
