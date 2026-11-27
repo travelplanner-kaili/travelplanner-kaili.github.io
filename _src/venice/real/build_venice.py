@@ -208,6 +208,18 @@ EAT.append(  # 2026-11-27 she: Suso has two shops (her Google Maps link)
        tips=['本店排隊太長時來這裡，人比較少（Google 評論）。', '推薦招牌「雙焦糖」；開心果、榛果也常被推薦。'],
        when='逛里亞托橋一帶時。', week=['09:30–22:30'] * 7, hours=['每日 09:30–22:30', _GH],
        price='同本店（一球約 €2.5，推薦文資料）', sPrice='一球 €2.5', links=[_GEL]))
+EAT += [  # 2026-11-27 her list (text and hours as she gave them)
+  dict(id='s_bistrot', ll=[45.4355689, 12.3364874], name='Bistrot de Venise', latin='Bistrot de Venise', slogan='貴貴米其林',
+       feature='聖馬可廣場和里亞托之間 Calle dei Fabbri 上的米其林推薦餐廳，價位高。', tips=['價位高，想好好吃一頓、慶祝時再來；建議先訂位。'],
+       when='想吃一頓好的晚餐時。', week=['12:00–15:00、19:00–23:30'] * 7, hours=['每日 12:00–15:00、19:00–23:30'], price='價位高', sPrice=None),
+  dict(id='s_friedland', ll=[45.4423503, 12.3324272], name='Fried Land', latin='Fried Land', slogan='便宜炸海鮮外帶',
+       feature='炸海鮮和義大利麵外帶店，有好幾種炸海鮮。', tips=['價格便宜、份量足夠，CP 值很高，適合買來當宵夜。'],
+       when='想吃宵夜或簡單外帶時。', week=['11:00–22:00'] * 7, hours=['每日 11:00–22:00'], price='便宜', sPrice=None),
+  dict(id='s_crepes', ll=[45.4448788, 12.3220771], name='Crepes House by PePe', latin='Crepes House by PePe', slogan='可麗餅小店',
+       feature='卡納雷吉歐運河邊（Fondamenta San Giobbe）的可麗餅店，離火車站不遠。', tips=['週三公休，其他天的營業時間看店家臉書。'],
+       when='火車站附近散步時。', week=None, hours=['週三公休，其他天看店家臉書'], price='依店家公告', sPrice=None,
+       links=[['Crepes House by PePe 臉書（營業時間）', 'https://www.facebook.com/people/Crepes-House-By-Pepe/100075989383392/']]),
+]
 for e in EAT:
     t = dict(id=e['id'], cat='open', tier='購物', shop=True, compact=True, name=e['name'], latin=e['latin'], slogan=e['slogan'], feature=e['feature'],
              tips=e['tips'], when=e['when'], stay='約 30 分鐘～1 小時', hours=e['hours'], price=e['price'], sPrice=e['sPrice'], sTime='用餐')
