@@ -412,4 +412,4 @@
 - 介紹頁「菜單／口味」欄標題後面也加 📖（跟地圖框一致，好辨認）。Gallonetto、Suso 的一句話前面加「★」（她要求）。
 - Dal Moro's（2026-11-27 她定）：菜單只放威尼斯店的（推薦文 1～9 號），拿掉官網的馬拉加菜單和官網連結；營業時間、價位照 Google 地圖（每日 12:00–18:00、€10–20、評分 4.6）。
 - Suso 兩家（2026-11-27 她給 Google 地圖連結）：原本那家改名「Suso 冰淇淋（本店）」，新增「Suso 冰淇淋（分店）」Salizada San Giovanni Grisostomo 5801（45.4389856, 12.3371667，Google 4.6，每日 09:30–22:30），一句話、口味表同本店；本店小提醒加「排隊長可以走 3 分鐘到分店」。
-- 威尼斯購物再加三家（2026-11-27 她給的文字和營業時間）：Bistrot de Venise「貴貴米其林」（她定，Calle dei Fabbri 4685，每日 12:00–15:00、19:00–23:30）；Fried Land「便宜炸海鮮外帶」（Claude 擬，Campiello dei Fiori 2287，每日 11:00–22:00）；Crepes House by PePe「可麗餅小店」（Claude 擬，Fondamenta San Giobbe 548/B，週三公休，時間看臉書，相關連結放臉書）。座標用 Google 地圖。
+- 威尼斯購物再加三家（2026-11-27 她給的文字和營業時間）：Bistrot de Venise「貴貴米其林」（她定，Calle dei Fabbri 4685，每日 12:00–15:00、19:00–23:30）；Fried Land「便宜炸海鮮外帶」（Claude 擬，Campiello dei Fiori 2287，每日 11:00–22:00）。Crepes House by PePe 她說已經關門，不放。座標用 Google 地圖。
