@@ -126,6 +126,7 @@ extra_css = '''
 .leaflet-marker-icon:has(.spot.active) { z-index: 100000 !important; }
 .scrim { background: rgba(10,12,14,.12) !important; }   /* lighter, so the glowing place still shows above the phone card */
 .spot .t-name { font: 700 14px var(--f-body); }
+.spot .t-name .t-shopname { margin-left: .4em; font-size: .78em; font-weight: 600; opacity: .8; }   /* shops: slogan first, the name small */
 .spot .t-wed { font: 500 11.5px var(--f-body); font-variant-numeric: tabular-nums; }
 .spot .t-price { font: 700 11.5px var(--f-body); color: var(--c); font-variant-numeric: tabular-nums; }
 .spot .day-off { color: var(--paid); font-weight: 700; }

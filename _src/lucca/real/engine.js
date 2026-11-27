@@ -106,6 +106,10 @@ function makeSpot(s) {
   const allDay = s.cat === "open" || s.cat === "base";
   g.innerHTML = `<svg class="leader"><line x1="0" y1="0"/></svg><div class="tab"><div class="t-name"></div>${allDay || !(WEEK[s.id] || s.sHours) ? "" : '<div class="t-wed t-more"></div>'}${s.sPrice ? '<div class="t-price t-more"></div>' : ""}</div><span class="pin"></span><span class="plan-no"></span>`;
   g.querySelector(".t-name").textContent = s.id === "hotel" ? "HOTEL" : s.name;   // 2026-11-21: the full name is in the card
+  if (s.slogan) {   // 2026-11-27: shops lead with what you go there for (e.g. 便宜 Venchi), the shop's name small after it
+    const tn = g.querySelector(".t-name"); tn.textContent = ""; const a = document.createElement("b"), n = document.createElement("span");
+    a.className = "t-slogan"; a.textContent = s.slogan; n.className = "t-shopname"; n.textContent = s.name; tn.append(a, n);
+  }
   if (g.querySelector(".t-price")) { if (s.id === "hotel") g.querySelector(".t-price").remove(); else g.querySelector(".t-price").textContent = s.sPrice; }
   if (!WEEK[s.id] && s.sHours && g.querySelector(".t-wed")) g.querySelector(".t-wed").textContent = s.sHours;
   s.g = g; s.tab = g.querySelector(".tab"); s.tw = g.querySelector(".t-wed"); s.line = g.querySelector(".leader line");

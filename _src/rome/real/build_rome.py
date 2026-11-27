@@ -27,6 +27,9 @@ DD = {s['id']: s for s in D['spots']}
 LL = {s['id']: [DD[s['id']]['lat'], DD[s['id']]['lon']] for s in SPOTS}
 WEEK, WPRE, NODIM, KEEP = {}, {}, [], []
 DROP = {'x', 'y', 'lx', 'ly', 'slx', 'sly', 'ux', 'uy', 'nx', 'ny', 'W', 'mapLines', 'fromHotel', 'week'}
+# 2026-11-27: shop boxes on the map say what the shop is for (her idea: 「便宜 Venchi」), the name comes small after it
+SLOGAN = {'s_sordi': '玻璃頂拱廊商場', 's_sermoneta': '手工皮手套', 's_castroni': '高級食材伴手禮', 's_castroni_ott': '便宜 Venchi',
+          's_mercato': '車站美食市集', 's_boccione': '瑞可塔櫻桃派', 's_testaccio_mkt': '在地市場・熟食', 's_pantheonshops': '手工紙品・封蠟'}
 spots = []
 for s in SPOTS:
     w = s.get('week')
@@ -36,6 +39,7 @@ for s in SPOTS:
         if w.get('nodim'): NODIM.append(s['id'])
         if w.get('keep'): KEEP.append(s['id'])
     t = {k: v for k, v in s.items() if k not in DROP}
+    if s['id'] in SLOGAN: t['slogan'] = SLOGAN[s['id']]
     # the hand-drawn map's label spots (top-left corners) for 全覽／簡潔: l = default, u = with 次要 / City Walk, n = 簡潔, sl = name-only, sh = 購物
     lab = {}
     for key, (a, b) in {'l': ('lx', 'ly'), 'u': ('ux', 'uy'), 'n': ('nx', 'ny'), 'sl': ('slx', 'sly'), 'sh': ('shx', 'shy')}.items():

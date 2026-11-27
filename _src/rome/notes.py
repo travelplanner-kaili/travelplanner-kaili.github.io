@@ -829,7 +829,7 @@ SHOP_NEW = [
    "梵蒂岡旁 Prati 區的寬敞購物大街，在地人逛的地方，有 COIN 百貨、Falconeri、Max Mara Weekend 等，比市中心觀光區輕鬆、價格實在。",
    [dict(t="COIN 百貨在這條街上，冬季折扣很划算。", links=[["COIN Cola di Rienzo", "COIN Via Cola di Rienzo Roma"]])],
    "參觀梵蒂岡、聖天使城堡之後順路逛。"),
- _shop("s_castroni", 41.9073023, 12.4631731, "Castroni", "Castroni Via Cola di Rienzo", ["週一至六 08:00–20:00", "週日 09:30–20:00", "（Google 地圖資料）"],
+ _shop("s_castroni", 41.9073023, 12.4631731, "Castroni（Cola di Rienzo 店）", "Castroni Via Cola di Rienzo", ["週一至六 08:00–20:00", "週日 09:30–20:00", "（Google 地圖資料）"],
    "Cola di Rienzo 上的老字號高級食材店，巧克力、義大利麵、醬料、橄欖油、咖啡應有盡有，也有吧台可以喝咖啡吃點心。",
    ["買食材伴手禮的好地方：開心果醬、松露醬、手工巧克力。", "液體類（醬料、油）記得放託運行李。"],
    "逛 Cola di Rienzo 時順路。", sHours="08:00–20:00（週日 09:30 起）", stay="約 30 分鐘"),

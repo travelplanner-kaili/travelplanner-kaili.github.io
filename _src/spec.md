@@ -373,3 +373,6 @@
   - 手機介紹後面的灰色遮罩調淡（.35 → .12），發亮的點才看得到。
 - 羅馬購物新增 Castroni（Ottaviano 店）（2026-11-27 她提供內容）：Via Ottaviano 55，地鐵 A 線 Ottaviano 站旁（座標 OSM：41.9078522, 12.4577301）。介紹寫「梵諦岡旁最便宜的 Venchi」（秤重散裝、魚子方約每 100 克 €5.50）；看點：Amedei、咖啡豆、松露醬等伴手禮；沒有 Venchi 冰淇淋、散裝口味較少。營業時間照她給的（週一至五 09:00–20:00、週六 08:30–20:00、週日 11:30–20:00），註明「網路資料，出發前再確認」（網路上各家寫的時間不一致）。
   做法：notes.py 加 _shop 和 WEEK，data.json 直接加這一筆（框位置照 Cola di Rienzo 那間 Castroni 的相對位置），跑 build.py 和 build_rome.py，不重跑 gen.py（其他景點的手繪框位置不動）。
+- 店家框寫「一句話」（2026-11-27 她要求：只寫店名看不懂；店名不重要，放不下可以縮小或省略）：地圖上的店家框先寫粗體的一句話，後面接小一號的店名（引擎：景點的 slogan 欄位）；介紹頁標題照樣是店名。以後新增店家一律要有一句話。羅馬（build_rome.py 的 SLOGAN）：
+  Galleria Alberto Sordi＝玻璃頂拱廊商場、Sermoneta Gloves＝手工皮手套、Castroni（Cola di Rienzo 店）＝高級食材伴手禮、Castroni（Ottaviano 店）＝便宜 Venchi、Mercato Centrale＝車站美食市集、Boccione＝瑞可塔櫻桃派、泰斯塔西奧市場＝在地市場・熟食、萬神殿周邊小店＝手工紙品・封蠟。（字是 Claude 擬的，她可以改。）
+- 羅馬原本的 Castroni 改名「Castroni（Cola di Rienzo 店）」，跟 Ottaviano 店分開（她同意）。
