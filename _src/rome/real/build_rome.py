@@ -86,7 +86,7 @@ CITY.tourExtra = [
 data = ('<script>\n' + CAT + '\nconst SPOTS = ' + json.dumps(spots, ensure_ascii=False) + ';\nconst ROUTES = ' + json.dumps(routes, ensure_ascii=False)
         + ';\nconst LL = ' + json.dumps(LL) + ';\nconst WEEK_KEEP = new Set(' + json.dumps(KEEP) + ');\n')
 
-out = T
+out = re.sub(r'<style id="geo-city">.*?</style>\n?', '', T, count=1, flags=re.S)   # Lucca's label sizes, not Rome's
 # ---- data, days table, city ----
 i = out.index('<script>\nconst CAT = {'); j = out.index('const DKEY = ', i)
 out = out[:i] + data + out[j:]
@@ -95,6 +95,7 @@ out, n = re.subn(r'const WEEK = \{.*?\}, WEEK_PREFIX = \{.*?\}, WEEK_NODIM = new
                  lambda m: 'const WEEK = ' + json.dumps(WEEK, ensure_ascii=False) + ', WEEK_PREFIX = ' + json.dumps(WPRE, ensure_ascii=False) + ', WEEK_NODIM = new Set(' + json.dumps(NODIM) + ');', out, count=1, flags=re.S)
 assert n == 1
 out, n = re.subn(r'const CITY = \{.*?\n\};\n', lambda m: city_js, out, count=1, flags=re.S); assert n == 1
+out, n = re.subn(r'CITY\.unitM = [\d.]+;\n', '', out, count=1); assert n == 1   # Lucca's scale line from the template
 out = out.replace('const VKEY = "trip-visited-lucca"', 'const VKEY = "trip-visited-rome"', 1)
 out, n = re.subn(r'const GQ = [^\n]*', lambda m: GQ, out, count=1); assert n == 1
 out = out.replace('const REPORT_MAP = "盧卡";', 'const REPORT_MAP = "羅馬";', 1)

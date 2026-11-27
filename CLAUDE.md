@@ -45,11 +45,8 @@
   - 景點介紹和 City Walk 介紹的「加入行程」日期是一排可左右滑；我的行程日期列 touch-action: pan-x、長按 0.3 秒才拖曳。
   - Porta Portese 跳蚤市場改成區域（次要、免費、只有週日）。
   - 使用方式：基礎功能／我的行程／客製你的地圖上下排（各自接 Q&A）；分組「分享、匯出與不同裝置」；我的行程導覽 8 張。
-- 盧卡：網站上還是 2026-11-18 的版本。共用的 engine.js / build_real.py 已含以上所有羅馬改動，下次 `deploy.sh lucca` 就會一起帶上，
-  但她說「羅馬改完再做盧卡」，要等她開口。套用時要做：
-  - 盧卡的全覽／簡潔要用手繪盧卡的框位置（`live/lucca.html` 的 SPOTS 有 x,y,lx,ly 等，`coords.json` 有座標轉換）→ 做成 `s.lab` 和 `CITY.unitM`，跟 `build_rome.py` 一樣。
-  - 盧卡沒有河、沒有 City Walk 和購物街（CITY.unWalk 不設，導覽和 Q&A 的 City Walk 句子就不會出現）；城牆照舊。
-  - 重新看一遍每個羅馬專屬的東西（rome_extra.js、build_rome.py 的 CSS）在盧卡是否需要等價做法；重測、部署、更新 Project 檔。
+- 盧卡：2026-11-27 下午照羅馬規則更新上線（共用 engine.js / build_real.py 的所有羅馬改動一起帶上）。全覽／簡潔用手繪盧卡的框位置
+  （build_real.py 算 LAB 和 CITY.unitM；字級在 <style id="geo-city">，build_rome.py 會拿掉它和 CITY.unitM 那行）。之後改共用引擎，盧卡、羅馬都要重建部署（deploy.sh all）。
 - 威尼斯：還沒做真地圖版。做法同羅馬：寫 `_src/venice/real/build_venice.py`，以盧卡真地圖為模板。
   她在威尼斯靠運河認路，運河要一直清楚（手機深色模式也要，深淺照台伯河的規則）；街名一律附當地原文。
 - 她請我們記得：真地圖上線後提醒她檢查匯入時的「你的地圖更新時間」提示，再決定留不留（還沒提醒過她實際檢查）。

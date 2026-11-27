@@ -487,6 +487,14 @@ a.plan-copy { text-decoration: none; }
 :root[data-theme="dark"] .leaflet-pane path.river-line { stroke: #5AA2E0; }
 .river-name span { position: absolute; white-space: nowrap; transform: translate(0, -50%); font-family: var(--f-body); font-weight: 500; color: var(--free); opacity: .85; font-size: inherit; }
 #lmap.geo .spot .pin { --ps: clamp(7px, calc(var(--k) * 24px), 16px); width: var(--ps); height: var(--ps); left: calc(var(--ps) / -2); top: calc(var(--ps) / -2); border-width: clamp(1.2px, calc(var(--k) * 4px), 2.5px); }
+
+</style>
+<style id="geo-city">/* Lucca's hand-drawn sizes (19px names, 14.5px lines, as live/lucca.html); build_rome.py drops this block */
+#lmap.geo .spot .tab { padding: calc(var(--k) * 6px) calc(var(--k) * 12px) calc(var(--k) * 8px); }
+#lmap.geo .spot .t-name, #lmap.geo .spot.slim1 .t-name { font-size: calc(var(--k) * 19px); line-height: calc(var(--k) * 22px); }
+#lmap.geo .spot .t-wed, #lmap.geo .spot .t-price { font-size: calc(var(--k) * 14.5px); line-height: calc(var(--k) * 20px); }
+#lmap.geo .spot.slim1 .tab { padding: calc(var(--k) * 7px) calc(var(--k) * 12px); }
+#lmap.geo .spot .pin { --ps: clamp(7px, calc(var(--k) * 22px), 16px); }
 </style>'''
 
 drawer_js = drawer_js.replace(
@@ -508,7 +516,22 @@ drawer_js = drawer_js.replace('  document.getElementById("d-close").focus();',
 assert 'planToggle' in drawer_js and 'PDAYS.map' in drawer_js
 
 engine = open(R + 'engine.js').read()
-engine = open(R + 'city_lucca.js').read() + engine
+# 2026-11-27: 全覽／簡潔 use the hand-drawn Lucca layout (like Rome). The drawn map is only roughly affine to the real one
+# (most pins within 30 m; 主教座堂博物館 ~70 m, 聖米迦勒廣場 ~55 m): labels go where they were drawn, leaders reach the real pin.
+import numpy as _np, math as _m
+_sp = {m.group(1): tuple(float(m.group(k)) for k in (2, 3, 4, 5))
+       for m in re.finditer(r'\{ id:"(\w+)", cat:"\w+", x:([\d.]+), y:([\d.]+), lx:([\d.]+), ly:([\d.]+)', h)}
+_simple = json.loads(re.search(r'const SIMPLE = (\{.*?\});', h).group(1))
+_ids = [k for k in _sp if k in C['ll']]
+_X = _np.array([[_sp[k][0], _sp[k][1], 1] for k in _ids]); _Y = _np.array([C['ll'][k] for k in _ids])
+_A = _np.linalg.lstsq(_X, _Y, rcond=None)[0]; _lin = _A[:2]
+def _at(k, px, py):   # drawn label corner → map (absolute, like Rome: keeps the drawn layout free of overlaps)
+    v = _np.array([px, py, 1]) @ _A
+    return [round(float(v[0]), 7), round(float(v[1]), 7)]
+LAB = {k: dict(l=_at(k, _sp[k][2], _sp[k][3]), **({'n': _at(k, *_simple[k])} if k in _simple else {})) for k in _ids}
+_p0 = _np.array([0, 0, 1]) @ _A; _p1 = _np.array([1000, 0, 1]) @ _A
+UNIT_M = _m.hypot((_p1[0] - _p0[0]) * 111320, (_p1[1] - _p0[1]) * 111320 * _m.cos(_m.radians(_p0[0]))) / 1000
+engine = open(R + 'city_lucca.js').read() + 'CITY.unitM = %.4f;\n' % UNIT_M + engine
 import datetime as _dt
 MAP_UPDATED = _dt.datetime.now(_dt.timezone(_dt.timedelta(hours=8))).strftime('%Y-%m-%d %H:%M')
 engine = 'const MAP_UPDATED = "' + MAP_UPDATED + '";   // shown in the paste box; links carry it so an older map can warn\n' + engine
@@ -532,6 +555,7 @@ out = f'''<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8"><meta 
 {data_js}
 const LL = {json.dumps(C["ll"])}, AREA_LL = {json.dumps(C["area"])};
 SPOTS.forEach(s => {{ if (s.id === "shopping") s.area = AREA_LL; }});
+const LAB = {json.dumps(LAB)}; SPOTS.forEach(s => {{ if (LAB[s.id]) s.lab = LAB[s.id]; }});
 {simple_js}
 {days_js}
 {engine}
