@@ -33,8 +33,13 @@ FERRY_CROSS.forEach(c => L.polyline(c, { className: "ferry-line", interactive: f
    1 = round dots, 2 = dashes, a small numbered badge on each line; the stops are small dots (+ the name when zoomed in); tap = the stop's card */
 const vapLayer = L.layerGroup();
 map.createPane("vap").style.zIndex = 380;   // above the canal, under the place pins
+/* tap a line = that line's card (2026-11-27); where the two run side by side, the nearer one to the tap wins */
+const vapDist = (r, e) => { const p = map.latLngToLayerPoint(e.latlng), pts = r.pts.map(x => map.latLngToLayerPoint(x)); let d = 1e9;
+  for (let i = 0; i + 1 < pts.length; i++) d = Math.min(d, L.LineUtil.pointToSegmentDistance(p, pts[i], pts[i + 1])); return d; };
+const vapHit = e => { L.DomEvent.stopPropagation(e); if (picking || distMode) return; const r = [...VAP_ROUTES].sort((a, b) => vapDist(a, e) - vapDist(b, e))[0]; openSpot("vline" + r.ref); };
 VAP_ROUTES.forEach(r => {
   L.polyline(r.pts, { pane: "vap", className: "vap-route vap-r" + r.ref, interactive: false }).addTo(vapLayer);
+  L.polyline(r.pts, { pane: "vap", className: "vap-hit", weight: 16, opacity: 0 }).on("click", vapHit).addTo(vapLayer);
   r.badges.forEach(b => L.marker(b, { pane: "vap", icon: L.divIcon({ className: "vap-badge vap-b" + r.ref, html: `<span>${r.ref}</span>`, iconSize: [0, 0] }), interactive: false, keyboard: false }).addTo(vapLayer));
 });
 VAP.forEach(v => {
@@ -59,7 +64,7 @@ let shopOn = false;
   applySup = function () {
     _applySup();
     SPOTS.forEach(s => {
-      if (s.shopStreet || s.cat === "vap") { s.g.classList.add("gone"); return; }   // streets are the pink lines, stops are the yellow V
+      if (s.shopStreet || s.cat === "vap" || s.isLine) { s.g.classList.add("gone"); return; }   // streets are the pink lines, stops are the yellow V
       if (s.id.startsWith("tr_")) { s.g.classList.toggle("gone", !vapOn); s.g.classList.remove("dim"); return; }   // ferries follow 水路交通 only, not 推薦／需購票
       if (s.tier === "購物") { s.g.classList.toggle("gone", !shopOn); s.g.classList.toggle("shopbox", shopOn); s.g.classList.remove("dim"); }
       else if (shopOn && s.cat !== "base") { if (s.sup) s.g.classList.add("gone"); s.g.classList.remove("dim"); }

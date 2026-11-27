@@ -176,6 +176,25 @@ for ref, line, off, marks in (('1', L1, 7, [[45.4415, 12.3315], [45.4312, 12.330
     o = _offset(line, off)
     VAP_ROUTES.append(dict(ref=ref, pts=o, badges=[o[_near(line, m)] for m in marks]))
 
+# cards for the two lines (2026-11-27, she asked to open an introduction by tapping a line): built from the stops' own card
+# text (hours, prices, reminders), cat 'base' (住宿與交通: no 去過 / 加入行程); hidden as pins, opened from the line
+_vr = A['v_rialto']; _nm = {a['id']: a['name'] for a in ALL if a['cat'] == 'vap'}
+_ord1 = ['v_proma', 'v_ferrovia', 'v_sanstae', 'v_rmercato', 'v_rialto', 'v_santoma', 'v_accademia', 'v_salute', 'v_vallaresso', 'v_zaccaria']
+_ord2 = ['v_proma', 'v_ferrovia', 'v_rialto', 'v_santoma', 'v_accademia', 'v_vallaresso', 'v_zaccaria', 'v_sangiorgio', 'v_zattere']
+for _k in _ord1: assert '1' in VAPL[_k]['lines'], _k
+for _k in _ord2: assert '2' in VAPL[_k]['lines'], _k
+_tip_dir, _tip_more, _tip_dock, _tip_pass, _tip_sun = _vr['remind']
+assert _tip_dir.startswith('1 號線沿大運河每站都停') and _tip_sun.startswith('看夕陽')
+_h1, _h2 = _vr['hours']; assert _h1.startswith('1 號線約每 10～20 分一班')
+for ref, order, feat, hrs, extra in (
+    ('1', _ord1, '沿大運河每站都停，最慢但最適合看風景；終點是麗都島（Lido）。', '1 號線約每 10～20 分一班（白天）；深夜改由 N 號夜間線', []),
+    ('2', _ord2 + ['v_proma'], '環線：大運河段只停火車站、里亞托、聖托馬、學院等大站，比較快；另一半繞朱代卡運河（聖撒迦利亞 → 聖喬治島 → 扎泰雷 → 羅馬廣場）。', '2 號線約每 12 分一班（白天）；深夜改由 N 號夜間線', [_tip_sun])):
+    spots.append(dict(id='vline' + ref, cat='base', name='水上巴士 %s 號線' % ref, latin='ACTV Linea %s' % ref,
+                      feature=feat + '地圖上的站：' + ' → '.join(_nm[k] for k in order) + '。',
+                      hours=[hrs, _h2], price=_vr['price'], remind=[_tip_dock, _tip_pass] + extra, site=_vr['site'] if isinstance(_vr['site'], list) else [urlparse(_vr['site']).netloc.replace('www.', ''), _vr['site']],
+                      isLine=True))
+    LL['vline' + ref] = LL['v_rialto']; GQ['vline' + ref] = 'ACTV Linea %s, Venezia' % ref
+
 # water-bus stops (yellow V) and traghetto crossings
 VAP = [dict(id=a['id'], ll=LL[a['id']], name=VAPL[a['id']]['name'], lines=VAPL[a['id']]['lines']) for a in ALL if a['cat'] == 'vap']
 FERRY = []
@@ -291,7 +310,7 @@ shop_q = faq_item('想逛街買東西要去哪裡？'); vap_q = faq_item('地圖
 assert '地圖上橘色的路' in shop_q; shop_q = shop_q.replace('地圖上橘色的路', '地圖上粉紅色的路')
 # 2026-11-27: lines 1/2 drawn as dotted lines; no ferry sentence (she: 不用 Q&A 再解釋)
 assert '旁邊的數字是停靠的路線' in vap_q and '藍綠色小船則是 €2 的過河渡船（traghetto），兩種不一樣。' in vap_q
-vap_q = re.sub(r'是水上巴士（vaporetto）站，旁邊的數字是停靠的路線，例如「1・2」就是 1 號、2 號線都停。點一下', '是水上巴士（vaporetto）的路線：圓點線是 1 號線、虛線是 2 號線，線上的小圓點是停靠站。點站', vap_q); assert '圓點線是 1 號線' in vap_q
+vap_q = re.sub(r'是水上巴士（vaporetto）站，旁邊的數字是停靠的路線，例如「1・2」就是 1 號、2 號線都停。點一下', '是水上巴士（vaporetto）的路線：圓點線是 1 號線、虛線是 2 號線，線上的小圓點是停靠站。點線看路線介紹，點站', vap_q); assert '圓點線是 1 號線' in vap_q
 vap_q = vap_q.replace('藍綠色小船則是 €2 的過河渡船（traghetto），兩種不一樣。', '')
 assert '不想看可以在篩選列關掉「水上巴士站」。' in vap_q; vap_q = vap_q.replace('不想看可以在篩選列關掉「水上巴士站」。', '不想看可以在篩選列關掉「水路交通」（水上巴士和渡船一起關）。')
 fi = out.index('<section class="faq"'); fj = out.index('</ol></section>\n</div>', fi) + len('</ol></section>')
@@ -350,6 +369,7 @@ css = '''<style>
 /* the four Grand Canal bridges are drawn as a bridge across the canal instead of a round pin (2026-11-27) */
 .bridge-name span { position: absolute; left: 0; top: 0; white-space: nowrap; transform: translate(-50%, -50%) rotate(var(--ta)) translateY(calc(var(--bh, 9px) / 2 + 9px)); font: 700 10px var(--f-body); font-size: clamp(9px, calc(10.5px * var(--ls, 1)), 12px); color: var(--ink); -webkit-text-stroke: 2.5px var(--paper); paint-order: stroke fill; text-shadow: 0 1px 3px rgba(0,0,0,.25); cursor: pointer; }
 .spot.nolab .tab, .spot.nolab .leader { display: none; }
+#drawer[data-spot^="vline"] .d-plan { display: none; }   /* a boat line is not a place to put in a day */
 #lmap.dist .bridge-name, #lmap.planning .bridge-name { opacity: .55; }
 #lmap .spot.is-bridge .pin { width: 0; height: 0; left: 0; top: 0; border: 0; background: none; box-shadow: none; }
 #lmap .spot.is-bridge .pin::before { content: ""; position: absolute; width: var(--bw, 30px); height: var(--bh, 9px); left: calc(var(--bw, 30px) / -2); top: calc(var(--bh, 9px) / -2);
