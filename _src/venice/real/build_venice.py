@@ -210,11 +210,11 @@ EAT.append(  # 2026-11-27 she: Suso has two shops (her Google Maps link)
        price='同本店（一球約 €2.5，推薦文資料）', sPrice='一球 €2.5', links=[_GEL]))
 EAT += [  # 2026-11-27 her list (text and hours as she gave them)
   dict(id='s_bistrot', ll=[45.4355689, 12.3364874], name='Bistrot de Venise', latin='Bistrot de Venise', slogan='貴貴米其林',
-       feature='聖馬可廣場和里亞托之間 Calle dei Fabbri 上的米其林推薦餐廳，價位高。', tips=['價位高，想好好吃一頓、慶祝時再來；建議先訂位。'],
-       when='想吃一頓好的晚餐時。', week=['12:00–15:00、19:00–23:30'] * 7, hours=['每日 12:00–15:00、19:00–23:30'], price='價位高', sPrice=None),
+       feature='聖馬可廣場和里亞托之間 Calle dei Fabbri 上的米其林推薦餐廳，價位高，Google 評分 4.6。', tips=['價位高，想好好吃一頓、慶祝時再來；建議先訂位。'],
+       when='想吃一頓好的晚餐時。', week=['12:00–14:40、18:00–23:00'] * 7, hours=['每日 12:00–14:40、18:00–23:00', _GH], price='一人超過 €100（Google 地圖）', sPrice='€100+'),
   dict(id='s_friedland', ll=[45.4423503, 12.3324272], name='Fried Land', latin='Fried Land', slogan='便宜炸海鮮外帶',
-       feature='炸海鮮和義大利麵外帶店，有好幾種炸海鮮。', tips=['價格便宜、份量足夠，CP 值很高，適合買來當宵夜。'],
-       when='想吃宵夜或簡單外帶時。', week=['11:00–22:00'] * 7, hours=['每日 11:00–22:00'], price='便宜', sPrice=None),
+       feature='炸海鮮和義大利麵外帶店，有好幾種炸海鮮，Google 評分 4.5。', tips=['價格便宜、份量足夠，CP 值很高，適合買來當宵夜。'],
+       when='想吃宵夜或簡單外帶時。', week=['11:00–21:00'] * 7, hours=['每日 11:00–21:00', _GH], price='一人約 €1–10（Google 地圖）', sPrice='€1–10'),
 ]
 for e in EAT:
     t = dict(id=e['id'], cat='open', tier='購物', shop=True, compact=True, name=e['name'], latin=e['latin'], slogan=e['slogan'], feature=e['feature'],
