@@ -647,6 +647,21 @@ function panFree(ll, z) {
   const c = map.project(ll, z).add([mr.width / 2 - tx, mr.height / 2 - ty]);
   map.setView(map.unproject(c, z), z, { animate: true });
 }
+/* 2026-11-27: when a place's card opens and its pin is hidden behind the card (phone: the bottom sheet; computer: the side panel)
+   or outside the map, move the map so the glowing pin sits in the part of the map that is still visible */
+{
+  const dr = document.getElementById("drawer");
+  if (dr) new MutationObserver(() => {
+    if (dr.hidden || !dr.dataset.spot) return;
+    const s = SPOTS.find(x => x.id === dr.dataset.spot); if (!s || !s.g || s.g.classList.contains("gone")) return;
+    setTimeout(() => {
+      const mr = mapEl.getBoundingClientRect(), q = dr.getBoundingClientRect(), p = map.latLngToContainerPoint(s.ll), x = mr.left + p.x, y = mr.top + p.y, m = 30;
+      let l = mr.left + m, r = mr.right - m, t = mr.top + m, b = mr.bottom - m;
+      if (q.width > mr.width * .75) b = Math.min(b, q.top - m); else if (q.left > mr.left + mr.width / 2) r = Math.min(r, q.left - m); else l = Math.max(l, q.right + m);
+      if (x < l || x > r || y < t || y > b) panFree(s.ll);
+    }, 60);
+  }).observe(dr, { attributes: true, attributeFilter: ["hidden", "data-spot"] });
+}
 function fitPlan() {
   if (plan.on === false) return;
   const items = plan.days[plan.cur].filter(x => byId(x.id)); if (!items.length) return;

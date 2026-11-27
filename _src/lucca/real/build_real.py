@@ -116,6 +116,15 @@ extra_css = '''
 .spot .tab { position: absolute; white-space: nowrap; background: var(--paper); border: 1.6px solid var(--c); border-radius: 4px; padding: 3px 9px 4px; line-height: 1.35; box-shadow: 0 1px 6px var(--shadow); color: var(--ink); }
 .spot:hover .tab, .spot.active .tab { background: var(--bg); }
 .spot.active .tab { border-width: 3px; }
+/* 2026-11-27: the open place glows on the map (she could not find the pin when its box sits far away): a pulsing ring around the pin,
+   a thicker line from the box, and the place on top of everything */
+.spot.active .pin { box-shadow: 0 0 0 3px var(--paper), 0 0 0 6px var(--pc, var(--c)), 0 2px 8px rgba(0,0,0,.45); }
+.spot.active .pin::after { content: ""; position: absolute; left: 50%; top: 50%; width: 46px; height: 46px; margin: -23px 0 0 -23px; box-sizing: border-box; border-radius: 50%; border: 3px solid var(--pc, var(--c)); pointer-events: none; animation: pin-glow 1.3s ease-out infinite; }
+@keyframes pin-glow { 0% { transform: scale(.35); opacity: 1; } 100% { transform: scale(1.25); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .spot.active .pin::after { animation: none; opacity: .8; } }
+.spot.active .leader line { stroke-width: 3; }
+.leaflet-marker-icon:has(.spot.active) { z-index: 100000 !important; }
+.scrim { background: rgba(10,12,14,.12) !important; }   /* lighter, so the glowing place still shows above the phone card */
 .spot .t-name { font: 700 14px var(--f-body); }
 .spot .t-wed { font: 500 11.5px var(--f-body); font-variant-numeric: tabular-nums; }
 .spot .t-price { font: 700 11.5px var(--f-body); color: var(--c); font-variant-numeric: tabular-nums; }
