@@ -247,6 +247,15 @@ EAT.append(  # 2026-11-27 her pick (「早午餐店推薦」), details from her 
        when='早餐、早午餐，或逛里亞托一帶時快速吃一頓。', week=['07:30–22:00'] * 7, hours=['每日 07:30–22:00', _GH],
        price='一人約 €1–10（Google 地圖）', sPrice='€1–10',
        links=[['Farini 威尼斯官方菜單（San Lio 店）', 'https://farini.com/en/menu/venice/san-lio/']]))
+EAT.append(  # 2026-11-28 her pick (「手工提拉米蘇店推薦」); hours from Google Maps
+  dict(id='s_tremercanti', ll=[45.436285, 12.339373], name='Tiramisù – I Tre Mercanti', latin='Tiramisù - I Tre Mercanti', slogan='手工提拉米蘇店',
+       feature='威尼斯每家手工提拉米蘇都有自己的風味，但這家是最好吃的一間！許多旅客公認的必吃名店，Google 評分 4.5（5,200 多則評論）。',
+       tips=['馬斯卡彭起司層綿密濃郁、入口即化，底下的手指餅乾濕潤、有咖啡可可香；表面可可粉微苦，甜度平衡不膩。',
+             '除了經典原味，每天還輪流有開心果等特殊口味。',
+             '透明櫥窗看得到師傅現場製作；店小，多半站著吃或外帶。',
+             '下午容易排隊，避開尖峰或早點去。'],
+       when='聖馬可廣場和里亞托之間散步時，下午點心。', week=['11:00–18:30'] * 7, hours=['每日 11:00–18:30', _GH],
+       price='依店家公告', sPrice=None))
 for e in EAT:
     t = dict(id=e['id'], cat='open', tier='購物', shop=True, compact=True, name=e['name'], latin=e['latin'], slogan=e['slogan'], feature=e['feature'],
              tips=e['tips'], when=e['when'], stay='約 30 分鐘～1 小時', hours=e['hours'], price=e['price'], sPrice=e['sPrice'], sTime='用餐')
