@@ -404,3 +404,4 @@
 - 相關連結（2026-11-27 她要求）：五家冰淇淋都連到 monicaineurope.com/italy-venice-gelato/；Al Nono Risorto 連到 monicaineurope.com/venice-al-nono-risorto/。在介紹頁「介紹」分頁的「相關連結」。
 - 冰淇淋一句話（2026-11-27 她定）：Gallonetto「被說最好吃冰淇淋」、Suso「口味超多冰淇淋」、GROM「天然連鎖冰淇淋」、Amorino「不限口味秤重冰淇淋」（她打「秤中」，Claude 當成「秤重」）。Gelato di Natura 維持「在地人推薦冰淇淋」。
 - Al Nono Risorto 菜單加上網誌（monicaineurope.com/venice-al-nono-risorto）的中文譯名和心得：網誌沒有完整菜單，只有點的幾道，對到菜單上的四道（炒淡菜和蛤蜊、綜合海鮮前菜、青醬筆管麵、Teresina 披薩）在中文那行加「｜網誌譯名：…。網誌：…」；價格照菜單照片（網誌價格較舊）。看點加網誌心得「兩人吃很飽，含飲料一人約 €30」。
+- 冰淇淋口味翻譯（2026-11-27 她要的是冰淇淋推薦文裡的口味中文對照）：Gallonetto（16 種）、Suso（27 種）的介紹頁「實用資訊」最後一欄「口味（義中對照）」，平常收起，點「展開口味（照推薦文翻譯）」打開；每種一行義大利文、一行推薦文的中文譯名（照原文，只把「黑巧克利」改成「黑巧克力」）；註記店裡口味會換。資料在 _src/venice/real/flavors.py（menu／menuNote／menuTitle 欄位，菜單和口味共用同一個收合區塊，沒有英文或價格就不顯示那一行）。

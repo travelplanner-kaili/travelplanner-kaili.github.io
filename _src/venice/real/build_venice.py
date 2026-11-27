@@ -162,7 +162,8 @@ EAT = [
        when='逛里亞托市場一帶時，當點心或簡單一餐。', week=['09:00–20:30', '', '09:00–20:30', '09:00–20:30', '09:00–20:30', '09:00–19:00', '09:00–19:00'],
        hours=['週一、三至五 09:00–20:30', '週六、日 09:00–19:00', '週二休', _GH], price='一人約 €10–20（Google 地圖）', sPrice='€10–20'),
 ]
-from menu_nono import MENU as _NONO_MENU, MENU_NOTE as _NONO_NOTE   # her menu photo, Italian / English / 中文 (2026-11-27)
+from menu_nono import MENU as _NONO_MENU, MENU_NOTE as _NONO_NOTE
+from flavors import GALLONETTO as _FL_GAL, SUSO as _FL_SUSO, FLAV_NOTE as _FL_NOTE   # gelato flavors from the article (2026-11-27)   # her menu photo, Italian / English / 中文 (2026-11-27)
 # 2026-11-27: the five gelato shops from the article she sent (monicaineurope.com/italy-venice-gelato); Suso is above
 EAT += [
   dict(id='s_gallonetto', ll=[45.4372522, 12.3393132], name='Gallonetto 冰淇淋', latin='Gelateria Gallonetto', slogan='被說最好吃冰淇淋',
@@ -198,6 +199,7 @@ for e in EAT:
     if not t['sPrice']: del t['sPrice']
     if e['week']: WEEK[e['id']] = e['week']
     if e['id'] == 's_nono': t['menu'] = _NONO_MENU; t['menuNote'] = _NONO_NOTE
+    if e['id'] in ('s_gallonetto', 's_suso'): t['menu'] = _FL_GAL if e['id'] == 's_gallonetto' else _FL_SUSO; t['menuNote'] = _FL_NOTE; t['menuTitle'] = ['口味（義中對照）', '展開口味（照推薦文翻譯）']
     if e.get('links'): t['links'] = e['links']
     spots.append(t); LL[e['id']] = e['ll']; GQ[e['id']] = e['latin'] + ', Venezia'
 SIGHTS = [
@@ -519,7 +521,7 @@ MAP_UPDATED = re.search(r'const MAP_UPDATED = "([^"]+)"', out).group(1)
 # the fold-out menu in a restaurant's card (2026-11-27, Al Nono Risorto)
 _m = "${s.remind ? `<div><dt>小提醒</dt><dd>${list(s.remind)}</dd></div>` : \"\"}"
 assert out.count(_m) == 1, out.count(_m)
-out = out.replace(_m, _m + "\n      ${s.menu ? `<div class=\"menu-blk\"><dt>菜單（中英對照）</dt><dd><details><summary>展開菜單（照店家菜單照片翻譯）</summary>${s.menu.map(([h, rows]) => `<h4>${esc(h)}</h4><ul class=\"menu-list\">${rows.map(([it, en, zh, p]) => `<li><span class=\"mi-p\">€${esc(p)}</span><b>${esc(it)}</b><br><span class=\"mi-en\">${esc(en)}</span><br>${esc(zh)}</li>`).join(\"\")}</ul>`).join(\"\")}${s.menuNote ? list(s.menuNote) : \"\"}</details></dd></div>` : \"\"}", 1)
+out = out.replace(_m, _m + "\n      ${s.menu ? `<div class=\"menu-blk\"><dt>${esc((s.menuTitle || [\"菜單（中英對照）\"])[0])}</dt><dd><details><summary>${esc((s.menuTitle || [0, \"展開菜單（照店家菜單照片翻譯）\"])[1])}</summary>${s.menu.map(([h, rows]) => `<h4>${esc(h)}</h4><ul class=\"menu-list\">${rows.map(([it, en, zh, p]) => `<li>${p ? `<span class=\"mi-p\">€${esc(p)}</span>` : \"\"}<b>${esc(it)}</b>${en ? `<br><span class=\"mi-en\">${esc(en)}</span>` : \"\"}<br>${esc(zh)}</li>`).join(\"\")}</ul>`).join(\"\")}${s.menuNote ? list(s.menuNote) : \"\"}</details></dd></div>` : \"\"}", 1)
 _c = 'closest("a, button, input, select, textarea, summary, [role=button]")'
 assert out.count(_c) == 1
 out = out.replace(_c, 'closest("a, button, input, select, textarea, summary, [role=button], .menu-blk")', 1)   # reading the long menu: a tap there does not close the card
