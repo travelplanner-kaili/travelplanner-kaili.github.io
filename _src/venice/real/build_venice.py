@@ -111,7 +111,7 @@ for a in ALL:
     spots.append(t)
 # default lodging = an EXAMPLE spot near Piazza San Marco, not hers (2026-11-27: she stays at a B&B — the address is her room,
 # too dangerous on a public map). People set their own with 改成我的住宿 (kept only in their browser).
-spots.append(dict(id='hotel', cat='base', name='範例住宿（聖馬可廣場）', latin='範例位置，不是作者的住宿', mapName='HOTEL', sPrice='範例住宿',
+spots.append(dict(id='hotel', cat='base', name='範例住宿（聖馬可廣場）', latin='範例位置', mapName='HOTEL', sPrice='範例住宿',
                   feature='這是範例位置，方便看各景點從市中心走過去要多久。點「改成我的住宿」換成你自己的住宿，只會存在你自己的瀏覽器。'))
 LL['hotel'] = [45.43430, 12.33810]; GQ['hotel'] = 'Piazza San Marco, Venezia'
 # 購物: a placeholder shop until she sends the real ones (2026-11-27)
@@ -218,7 +218,7 @@ rep = [
   ('盧卡古城', '威尼斯'),
 ]
 for x, y in rep: out = out.replace(x, y)
-for x, y in [('這是作者住的旅館（範例）。', '這是範例位置，不是作者的住宿。'), ('" 是作者住的旅館。', '" 是範例位置。'),
+for x, y in [('這是作者住的旅館（範例）。', '這是範例位置。'), ('" 是作者住的旅館。', '" 是範例位置。'),
              ('這是作者住的旅館，換成你的旅館', '這是範例位置，換成你的住宿')]:
     assert x in out, x; out = out.replace(x, y)
 out = re.sub(r'<div class="eyebrow">[^<]*</div>', '<div class="eyebrow">Venezia · Veneto</div>', out, count=1)
