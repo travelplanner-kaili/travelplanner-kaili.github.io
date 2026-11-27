@@ -163,6 +163,7 @@ EAT = [
        hours=['週一、三至五 09:00–20:30', '週六、日 09:00–19:00', '週二休', _GH], price='一人約 €10–20（Google 地圖）', sPrice='€10–20'),
 ]
 from menu_nono import MENU as _NONO_MENU, MENU_NOTE as _NONO_NOTE
+from menu_tremercanti import MENU as _TM_MENU, MENU_NOTE as _TM_NOTE
 from menu_squero import MENU as _SQ_MENU, MENU_NOTE as _SQ_NOTE
 from menu_friedland import MENU as _FL_MENU, MENU_NOTE as _FLM_NOTE
 from menu_dalmoro import MENU as _DM_MENU, MENU_NOTE as _DM_NOTE
@@ -261,6 +262,7 @@ for e in EAT:
              tips=e['tips'], when=e['when'], stay='約 30 分鐘～1 小時', hours=e['hours'], price=e['price'], sPrice=e['sPrice'], sTime='用餐')
     if not t['sPrice']: del t['sPrice']
     if e['week']: WEEK[e['id']] = e['week']
+    if e['id'] == 's_tremercanti': t['menu'] = _TM_MENU; t['menuNote'] = _TM_NOTE; t['menuTitle'] = ['菜單（中英對照）', '展開菜單（照 Google 地圖和店內價目板翻譯）']
     if e['id'] == 's_squero': t['menu'] = _SQ_MENU; t['menuNote'] = _SQ_NOTE; t['menuTitle'] = ['酒單（中英對照）', '展開酒單（照 Google 地圖菜單翻譯）']
     if e['id'] == 's_friedland': t['menu'] = _FL_MENU; t['menuNote'] = _FLM_NOTE; t['menuTitle'] = ['菜單（義中對照）', '展開菜單（照店家菜單照片翻譯）']
     if e['id'] == 's_dalmoro': t['menu'] = _DM_MENU; t['menuNote'] = _DM_NOTE; t['menuTitle'] = ['菜單（義中對照）', '展開菜單（照推薦文翻譯）']
