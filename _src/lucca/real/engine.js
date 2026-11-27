@@ -119,7 +119,7 @@ function makeSpot(s) {
     band.on("click", e => { if (picking) return; L.DomEvent.stopPropagation(e); distMode ? pickSpot(s.id) : openSpot(s.id); });
   }
 }
-/* 我的住宿: the hotel on the map is the author's (Hotel Ilaria) until you set your own (kept in this browser; goes with 匯出地圖) */
+/* 我的住宿: the hotel on the map is the author's (Hotel Ilaria) until you set your own (kept in this browser; goes with 匯出整份地圖) */
 const HKEY = "trip-hotel-" + CITY.key;
 const HOTEL0 = (() => { const h = byId("hotel"); return h ? { name: h.name, latin: h.latin, feature: h.feature, hours: h.hours, sPrice: h.sPrice, ll: LL.hotel } : null; })();
 let myHotel = null; try { myHotel = JSON.parse(localStorage.getItem(HKEY) || "null"); } catch (e) {}
@@ -924,7 +924,7 @@ function checkShare() {
   history.replaceState(null, "", location.href.split("#")[0]);
   if (d) d.one ? askDay(d) : askImport(d);
 }
-/* 匯入地圖: the paste box in its own small window (opened from the links by 匯出地圖) */
+/* 匯入地圖: the paste box in its own small window (opened from the links by 匯出整份地圖) */
 const impPop = document.createElement("div"); impPop.className = "imp-pop"; impPop.hidden = true; impPop.setAttribute("role", "dialog"); impPop.setAttribute("aria-label", "匯入地圖");
 impPop.innerHTML = '<div class="add-pop-head"><b>匯入地圖</b><button type="button" class="add-pop-x" aria-label="取消">×</button></div>';
 document.body.append(impPop); impPop.append(document.getElementById("plan-paste"));
@@ -932,7 +932,7 @@ let impMode = "all";   // "all" = 匯入地圖 (whole map or one day), "day" = �
 function togglePaste(show, mode) {
   const b = document.getElementById("plan-paste"), on = typeof show === "boolean" ? show : impPop.hidden;
   if (on) { impMode = mode || "all"; impPop.querySelector(".add-pop-head b").textContent = impMode === "day" ? "匯入本日行程" : "匯入地圖";
-    document.getElementById("pp-lbl").textContent = impMode === "day" ? "貼上「匯出本日行程」複製的連結" : "貼上「匯出地圖」或「匯出本日行程」複製的連結"; }
+    document.getElementById("pp-lbl").textContent = impMode === "day" ? "貼上「匯出本日行程」複製的連結" : "貼上「匯出整份地圖」或「匯出本日行程」複製的連結"; }
   impPop.hidden = !on; b.hidden = !on;
   document.getElementById("pp-ver").textContent = "你的地圖更新時間：" + MAP_UPDATED;
   if (on) document.getElementById("pp-text").focus();
@@ -942,7 +942,7 @@ document.querySelectorAll(".imp-open").forEach(b => b.addEventListener("click", 
 document.getElementById("pp-cancel").addEventListener("click", () => togglePaste(false));
 document.getElementById("pp-ok").addEventListener("click", () => {
   const t = document.getElementById("pp-text"), d = readCode(t.value), v = document.getElementById("pp-ver");
-  if (!d) { v.textContent = impMode === "day" ? "看不懂這段文字：請貼「匯出本日行程」複製出來的整段連結。" : "看不懂這段文字：請貼「匯出地圖」或「匯出本日行程」複製出來的整段連結。"; v.classList.add("warn"); return; }
+  if (!d) { v.textContent = impMode === "day" ? "看不懂這段文字：請貼「匯出本日行程」複製出來的整段連結。" : "看不懂這段文字：請貼「匯出整份地圖」或「匯出本日行程」複製出來的整段連結。"; v.classList.add("warn"); return; }
   // 2026-11-27: 我的行程 only takes one day; a whole map goes through 匯入地圖 at the top
   if (impMode === "day" && !d.one) { v.textContent = "這是整份地圖的連結，請到地圖上方的「匯入地圖」匯入（那裡也可以只匯入其中一天）。"; v.classList.add("warn"); return; }
   v.classList.remove("warn"); t.value = ""; const m = impMode; togglePaste(false); m === "day" || d.one ? askDay(d) : askImport(d);
@@ -1008,7 +1008,7 @@ const TOUR = (() => {
         if (!a || !b) return a || b; const r = [a, b].map(x => x.getBoundingClientRect());
         const u = { left: Math.min(r[0].left, r[1].left), top: Math.min(r[0].top, r[1].top), right: Math.max(r[0].right, r[1].right), bottom: Math.max(r[0].bottom, r[1].bottom) };
         u.width = u.right - u.left; u.height = u.bottom - u.top; return { getBoundingClientRect: () => u }; },
-      t: "帶著走", x: "這些設定換手機、換瀏覽器都看不到。按「匯出地圖」複製連結，到另一台裝置按「匯入地圖」貼上就好。最好在桌面設一個捷徑，每次從同一個入口進來。" }
+      t: "帶著走", x: "這些設定換手機、換瀏覽器都看不到。按「匯出整份地圖」複製連結，到另一台裝置按「匯入地圖」貼上就好。最好在桌面設一個捷徑，每次從同一個入口進來。" }
   ];
   let STEPS = MAIN, CUR_KEY = KEY, afterEnd = null;
   let i = 0, hole = null, card = null, shield = null;
