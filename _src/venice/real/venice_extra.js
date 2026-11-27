@@ -37,7 +37,7 @@ map.createPane("vap").style.zIndex = 380;   // above the canal, under the place 
    Every stop is a numbered circle on its line(s) — "1" on line 1, "2" on line 2 — drawn above the lines so the number is never covered
    (she asked for this); a stop of both lines has both circles side by side. The name sits on the bank side, off the lines.
    Place boxes keep clear of the lines (extraObstacles), so the water routes stay whole. */
-const VGAP = 11;
+const VGAP0 = 11; let VGAP = VGAP0;   // the gap and the circles shrink with the map when zoomed out (2026-11-27)
 const vapLines = {}, vapHits = {}, vapOffPts = {};
 const vapHit = ref => e => { L.DomEvent.stopPropagation(e); if (picking || distMode) return; openSpot("vline" + ref); };
 VAP_ROUTES.forEach(r => {
@@ -53,6 +53,8 @@ const vapMarks = VAP.map(v => {
 });
 const nearOn = (pts, p) => { let best = null; for (let i = 0; i + 1 < pts.length; i++) { const q = L.LineUtil.closestPointOnSegment(p, pts[i], pts[i + 1]), d = q.distanceTo(p); if (!best || d < best.d) best = { d, q, i }; } return best; };
 function layoutVap() {
+  const vs = Math.min(1, Math.max(.5, Math.pow(2, (map.getZoom() - 16) * .6))); VGAP = VGAP0 * vs; mapEl.style.setProperty("--vs", vs.toFixed(3));
+  Object.values(vapHits).forEach(h => h.setStyle({ weight: Math.max(8, 2 * VGAP - 2) }));
   VAP_ROUTES.forEach(r => {
     const P = r.pts.map(x => map.latLngToLayerPoint(x));
     const O = P.map((p, i) => { if (!r.sh[i]) return p; const a = P[Math.max(0, i - 1)], b = P[Math.min(P.length - 1, i + 1)], dx = b.x - a.x, dy = b.y - a.y, l = Math.hypot(dx, dy) || 1;

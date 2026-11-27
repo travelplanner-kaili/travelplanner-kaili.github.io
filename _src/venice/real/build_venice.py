@@ -405,10 +405,10 @@ css = '''<style>
 .leaflet-pane path.vap-route { fill: none; stroke-linecap: round; stroke-linejoin: round; }
 .leaflet-pane path.vap-r1 { stroke: var(--vap); stroke-width: 4.5; stroke-dasharray: 0 8; }
 .leaflet-pane path.vap-r2 { stroke: var(--vap2); stroke-width: 3; stroke-dasharray: 9 6; stroke-linecap: butt; }
-.vap-mark .vc { position: absolute; left: 0; top: 0; width: 19px; height: 19px; margin: -9.5px 0 0 -9.5px; box-sizing: border-box; border-radius: 50%; display: grid; place-items: center; font: 800 11.5px/1 var(--f-body); border: 2px solid var(--paper); box-shadow: 0 1px 3px rgba(0,0,0,.4); cursor: pointer; }
+.vap-mark .vc { --d: calc(19px * var(--vs, 1)); position: absolute; left: 0; top: 0; width: var(--d); height: var(--d); margin: calc(var(--d) / -2) 0 0 calc(var(--d) / -2); box-sizing: border-box; border-radius: 50%; display: grid; place-items: center; font: 800 calc(11.5px * var(--vs, 1))/1 var(--f-body); border: calc(2px * var(--vs, 1)) solid var(--paper); box-shadow: 0 1px 3px rgba(0,0,0,.4); cursor: pointer; }
 .vap-mark .vc1 { background: var(--vap); color: #2A2000; }
 .vap-mark .vc2 { background: var(--vap2); color: #fff; }
-.vap-mark .vc0 { width: 14px; height: 14px; margin: -7px 0 0 -7px; background: var(--paper); border: 3.5px solid #8A6A00; }
+.vap-mark .vc0 { --d: calc(14px * var(--vs, 1)); background: var(--paper); border: calc(3.5px * var(--vs, 1)) solid #8A6A00; }
 .vap-mark .vl { position: absolute; left: var(--lx, 12px); top: var(--ly, 0px); transform: translateY(-50%); white-space: nowrap; font: 700 12.5px/1.2 var(--f-body); color: var(--ink); background: var(--paper); border: 1.5px solid #8A6A00; border-radius: 999px; padding: 2px 7px; box-shadow: 0 1px 3px rgba(0,0,0,.25); cursor: pointer; }
 .vap-mark[data-al="r"] .vl { transform: translate(-100%, -50%); }
 .vap-mark[data-al="t"] .vl { transform: translate(-50%, -100%); }
