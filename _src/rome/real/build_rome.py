@@ -93,6 +93,8 @@ out, _n = re.subn(r'<button class="icon-btn shop-btn lucca-only".*?</button>', '
 i = out.index('<script>\nconst CAT = {'); j = out.index('const DKEY = ', i)
 out = out[:i] + data + out[j:]
 out = out.replace('const DKEY = "trip-days-lucca"', 'const DKEY = "trip-days-rome"', 1)
+# 星期幾去: Rome starts with every day on (spec 2026-11-15; the Lucca template has only 三, which leaked into Rome — fixed 2026-11-27)
+out, _n = re.subn(r'(<button class="chip day" type="button" data-day="\d" aria-pressed=")(?:true|false)', r'\1true', out); assert _n == 7, _n
 out, n = re.subn(r'const WEEK = \{.*?\}, WEEK_PREFIX = \{.*?\}, WEEK_NODIM = new Set\(\[.*?\]\);',
                  lambda m: 'const WEEK = ' + json.dumps(WEEK, ensure_ascii=False) + ', WEEK_PREFIX = ' + json.dumps(WPRE, ensure_ascii=False) + ', WEEK_NODIM = new Set(' + json.dumps(NODIM) + ');', out, count=1, flags=re.S)
 assert n == 1
