@@ -212,7 +212,7 @@ EAT += [  # 2026-11-27 her list (text and hours as she gave them)
   dict(id='s_bistrot', ll=[45.4355689, 12.3364874], name='Bistrot de Venise', latin='Bistrot de Venise', slogan='貴貴米其林',
        feature='聖馬可廣場和里亞托之間 Calle dei Fabbri 上的米其林推薦餐廳，價位高，Google 評分 4.6。', tips=['價位高，想好好吃一頓、慶祝時再來；建議先訂位。'],
        when='想吃一頓好的晚餐時。', week=['12:00–14:40、18:00–23:00'] * 7, hours=['每日 12:00–14:40、18:00–23:00', _GH], price='一人超過 €100（Google 地圖）', sPrice='€100+'),
-  dict(id='s_friedland', ll=[45.4423503, 12.3324272], name='Fried Land', latin='Fried Land / fresh pasta to go', slogan='炸物店',
+  dict(id='s_friedland', ll=[45.4423503, 12.3324272], name='Fried Land', latin='Fried Land / fresh pasta to go', slogan='外帶炸物店',
        feature='卡納雷吉歐區巷子裡的外帶小店，主打炸海鮮和現煮義大利麵，份量足、價格親民，Google 評分 4.5。',
        tips=['炸魷魚圈、小魚、蝦子、沙丁魚都受稱讚，麵衣薄脆，擠檸檬汁更清爽；墨魚麵、培根蛋麵也有人推。',
              '一份約 €7.5–9，一人一份或兩人合點就很飽，適合買來當宵夜。',
