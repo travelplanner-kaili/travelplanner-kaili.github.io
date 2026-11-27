@@ -68,7 +68,7 @@ mapbox_rest = mapbox_rest.replace('<div class="zoom">', '''<aside class="plan" i
         <div class="pa-btns"><button type="button" id="pa-ok" class="pa-ok">確認</button><button type="button" id="pa-cancel" class="pa-del">取消</button></div>
       </div>
       <p class="plan-share-note" id="plan-share-note" hidden></p>
-      <div class="plan-foot"><span id="plan-sum"></span><span class="plan-acts"><button type="button" id="plan-share" class="plan-copy">分享本日行程</button><a id="plan-go" class="plan-copy" target="_blank" rel="noopener" hidden>Google 導航<span class="go-ar">↗</span></a><button type="button" id="plan-copy" class="plan-copy">轉文字</button></span></div>
+      <div class="plan-foot"><span id="plan-sum"></span><span class="plan-acts"><button type="button" id="plan-share" class="plan-copy">匯出本日行程</button><a id="plan-go" class="plan-copy" target="_blank" rel="noopener" hidden>Google 導航<span class="go-ar">↗</span></a><button type="button" id="plan-copy" class="plan-copy">轉文字</button></span></div>
     </aside>
     <div class="zoom">''', 1)
 
@@ -581,12 +581,12 @@ def _faq_fold(out):
     items.append('<li class="faq-item"><p class="faq-q"><span class="n">Q0</span><span>地圖更新是什麼？</span></p><p class="faq-a">景點、介紹、營業時間這些圖資大家都一樣，如有改版會自動提醒更新，讓你的資訊永遠維持在最新版，[[ref:看不到我的景點跟行程]] 裡你自己的設定（景點、行程那些）不會被自動更新動到。</p></li>')
     items.append('<li class="faq-item"><p class="faq-q"><span class="n">Q0</span><span>為什麼其他人的地圖跟我不一樣，看不到我的景點跟行程？</span></p><p class="faq-a">請參考 [[ref:地圖更新是什麼]]，這份地圖的圖資是自動更新的，但 [[ref:可以新增景點嗎]]～[[ref:飯店可以改成我的]] 行程、自己加的景點、標記去過的景點、星期幾去、住宿，這些自己設定的資訊，只存在你現在打開這個網址的瀏覽器裡。換手機、換電腦，或同一台換個瀏覽器打開（例如從 LINE 點開），都看不到。</p></li>')
     items.append('<li class="faq-item"><p class="faq-q"><span class="n">Q0</span><span>怎麼給別人（別的裝置）「沒有」我資料的地圖？</span></p><p class="faq-a">點 <button type="button" class="faq-copyurl" data-url="https://travelplanner-kaili.github.io/lucca/">travelplanner-kaili.github.io/lucca</button> 直接幫你複製網址，傳給對方。</p></li>')
-    items.append('<li class="faq-item"><p class="faq-q"><span class="n">Q0</span><span>可以只分享某一天的行程嗎？</span></p><p class="faq-a">可以。在「我的行程」按「分享本日行程」，會把目前打開的這一天做成一個連結。開啟另一個裝置的「我的行程」，選「＋ 匯入分享行程」，會把你的行程加成新的一天。用「匯入地圖」貼上整份地圖的連結時，也可以選「只匯入其中一天」。</p></li>')   # 2026-11-27: one-day share is back
+    items.append('<li class="faq-item"><p class="faq-q"><span class="n">Q0</span><span>可以只匯出某一天的行程嗎？</span></p><p class="faq-a">可以。在「我的行程」按「匯出本日行程」，會把目前打開的這一天做成一個連結。開啟另一個裝置的「我的行程」，選「＋ 匯入本日行程」，會把你的行程加成新的一天。用「匯入地圖」貼上整份地圖的連結時，也可以選「只匯入其中一天」。</p></li>')   # 2026-11-27: one-day share is back
     DROP = ['別人能看到我的行程嗎', '為什麼點開同一個地圖，看到的東西不一樣', '沒有網路也能用嗎', '沒有網路時怎麼導航', '為什麼拉遠之後景點框不見了']   # said in 為什麼其他人看不到我的行程
     items = [x for x in items if not any(k in x for k in DROP)]
     ttl0 = lambda x: re.search(r'<span class="n">Q\d+</span><span>([^<]*)', x).group(1)
     # 我的行程 has its own section (its own tour + folded text), in this order
-    PLANQ = ['可以排每天的行程嗎', '排好的行程在哪裡看', '行程的日期怎麼設定', '換順序', '還沒排進行程', '轉成文字', '只分享某一天']
+    PLANQ = ['可以排每天的行程嗎', '排好的行程在哪裡看', '行程的日期怎麼設定', '換順序', '還沒排進行程', '轉成文字', '只匯出某一天']
     planq = []
     for k in PLANQ:
         for x in items:

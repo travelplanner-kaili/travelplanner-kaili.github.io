@@ -503,7 +503,7 @@ function renderPlan() {
   placeTab();
   mapEl.classList.toggle("planning", active);
   const days = document.getElementById("plan-days");
-  days.innerHTML = PDAYS.map(d => `<button type="button" role="tab" data-k="${d.k}" aria-selected="${dayOn && d.k === plan.cur}">${d.label.replace(/[&<>"]/g, c => "&#" + c.charCodeAt(0) + ";")}<span class="n">${plan.days[d.k].length || ""}</span></button>`).join("") + '<button type="button" class="pd-add" aria-label="新增一天">＋</button><button type="button" class="pd-paste">＋ 匯入分享行程</button>';
+  days.innerHTML = PDAYS.map(d => `<button type="button" role="tab" data-k="${d.k}" aria-selected="${dayOn && d.k === plan.cur}">${d.label.replace(/[&<>"]/g, c => "&#" + c.charCodeAt(0) + ";")}<span class="n">${plan.days[d.k].length || ""}</span></button>`).join("") + '<button type="button" class="pd-add" aria-label="新增一天">＋</button><button type="button" class="pd-paste">＋ 匯入本日行程</button>';
   // drag a day tab to change the order of the days (the date goes with it; the user edits dates by hand)
   if (!days._sortable) days._sortable = Sortable.create(days, { draggable: "button[data-k]", animation: 150, delay: 300, delayOnTouchOnly: true, touchStartThreshold: 6, onEnd: () => {   // phone: long press drags, a swipe scrolls the row
     const order = [...days.querySelectorAll("button[data-k]")].map(b => b.dataset.k);
@@ -867,7 +867,7 @@ function askImport(d) {
     location.replace(location.pathname + location.search);
   });
 }
-/* ---- one day (2026-11-27, back from the 11-18 version she liked): 分享本日行程 / ＋ 匯入分享行程 / 匯入地圖「只匯入其中一天」 ----
+/* ---- one day (2026-11-27, back from the 11-18 version she liked): 匯出本日行程 / ＋ 匯入本日行程 / 匯入地圖「只匯入其中一天」 ----
    the day always comes in as a NEW day (never merged into a date you have); its own spots come along (same name + place = the same spot);
    visited, 星期幾去 and hotel are left alone; the very same day (date, weekday, spots) is not added twice */
 const dayTxt = (sd, x) => { const l = dayLabel({ date: sd.date, wd: sd.wd }); return `${l}${sd.memo ? "　" + sd.memo : ""}・${sd.items.length} 個點`; };
@@ -896,7 +896,7 @@ function importDay(d, i) {
 function askDay(d) {
   const box = document.createElement("div"); box.className = "share-ask"; box.setAttribute("role", "dialog");
   const many = d.days.length > 1;
-  box.innerHTML = `<div class="sa-card"><b>匯入分享行程</b><p class="sa-sum"></p>${verNote(d)}
+  box.innerHTML = `<div class="sa-card"><b>匯入本日行程</b><p class="sa-sum"></p>${verNote(d)}
     ${many ? '<label class="sa-pick">要匯入哪一天？ <select class="sa-day" aria-label="匯入哪一天"></select></label>' : ""}
     <ul class="sa-list"><li><b>加入：</b>加成你的新的一天，你原本的行程和景點都不會被改。</li></ul>
     <p class="sa-warn sa-msg" aria-live="polite"></p><div class="pa-btns"><button type="button" class="pa-ok" id="sa-yes">加入</button><button type="button" id="sa-no">取消</button></div></div>`;
@@ -906,7 +906,7 @@ function askDay(d) {
   box.querySelector("#sa-no").addEventListener("click", () => box.remove());
   box.querySelector("#sa-yes").addEventListener("click", () => { const r = importDay(d, many ? +box.querySelector(".sa-day").value : 0); if (r) box.querySelector(".sa-msg").textContent = r; else box.remove(); });
 }
-/* 分享本日行程: only the open day and the own spots it uses */
+/* 匯出本日行程: only the open day and the own spots it uses */
 document.getElementById("plan-share").addEventListener("click", async e => {
   const x = PDAYS.find(y => y.k === plan.cur); if (!x) return;
   const items = plan.days[x.k].filter(y => byId(y.id)), ids = new Set(items.map(y => y.id));
@@ -914,8 +914,8 @@ document.getElementById("plan-share").addEventListener("click", async e => {
     mine: MINE.filter(m => ids.has(m.id)).map(m => [m.id, m.name, +m.ll[0].toFixed(6), +m.ll[1].toFixed(6), m.note || "", m.gurl || ""]) };
   const url = location.href.split("#")[0] + "#share=" + b64e(JSON.stringify(data)), b = e.currentTarget, note = document.getElementById("plan-share-note");
   note.hidden = false;
-  note.textContent = location.protocol === "file:" ? "提醒：這個檔案還沒放上網址，連結只有這台電腦打得開。" : "連結已複製，請開啟另一個裝置的「我的行程」，選「＋ 匯入分享行程」。";
-  try { await navigator.clipboard.writeText(url); b.textContent = "已複製"; setTimeout(() => { b.textContent = "分享本日行程"; }, 1800); }
+  note.textContent = location.protocol === "file:" ? "提醒：這個檔案還沒放上網址，連結只有這台電腦打得開。" : "連結已複製，請開啟另一個裝置的「我的行程」，選「＋ 匯入本日行程」。";
+  try { await navigator.clipboard.writeText(url); b.textContent = "已複製"; setTimeout(() => { b.textContent = "匯出本日行程"; }, 1800); }
   catch (err) { note.textContent = "請自己全選複製這段連結："; const i = document.createElement("textarea"); i.value = url; i.rows = 3; i.readOnly = true; i.className = "plan-txt"; note.append(i); i.select(); }
 });
 function checkShare() {
@@ -931,8 +931,8 @@ document.body.append(impPop); impPop.append(document.getElementById("plan-paste"
 let impMode = "all";   // "all" = 匯入地圖 (whole map or one day), "day" = 我的行程「＋ 匯入分享行程」 (one day)
 function togglePaste(show, mode) {
   const b = document.getElementById("plan-paste"), on = typeof show === "boolean" ? show : impPop.hidden;
-  if (on) { impMode = mode || "all"; impPop.querySelector(".add-pop-head b").textContent = impMode === "day" ? "匯入分享行程" : "匯入地圖";
-    document.getElementById("pp-lbl").textContent = impMode === "day" ? "貼上「分享本日行程」或「匯出地圖」複製的連結" : "貼上「匯出地圖」或「分享本日行程」複製的連結"; }
+  if (on) { impMode = mode || "all"; impPop.querySelector(".add-pop-head b").textContent = impMode === "day" ? "匯入本日行程" : "匯入地圖";
+    document.getElementById("pp-lbl").textContent = impMode === "day" ? "貼上「匯出本日行程」複製的連結" : "貼上「匯出地圖」或「匯出本日行程」複製的連結"; }
   impPop.hidden = !on; b.hidden = !on;
   document.getElementById("pp-ver").textContent = "你的地圖更新時間：" + MAP_UPDATED;
   if (on) document.getElementById("pp-text").focus();
@@ -942,7 +942,9 @@ document.querySelectorAll(".imp-open").forEach(b => b.addEventListener("click", 
 document.getElementById("pp-cancel").addEventListener("click", () => togglePaste(false));
 document.getElementById("pp-ok").addEventListener("click", () => {
   const t = document.getElementById("pp-text"), d = readCode(t.value), v = document.getElementById("pp-ver");
-  if (!d) { v.textContent = "看不懂這段文字：請貼「分享本日行程」或「匯出地圖」複製出來的整段連結。"; v.classList.add("warn"); return; }
+  if (!d) { v.textContent = impMode === "day" ? "看不懂這段文字：請貼「匯出本日行程」複製出來的整段連結。" : "看不懂這段文字：請貼「匯出地圖」或「匯出本日行程」複製出來的整段連結。"; v.classList.add("warn"); return; }
+  // 2026-11-27: 我的行程 only takes one day; a whole map goes through 匯入地圖 at the top
+  if (impMode === "day" && !d.one) { v.textContent = "這是整份地圖的連結，請到地圖上方的「匯入地圖」匯入（那裡也可以只匯入其中一天）。"; v.classList.add("warn"); return; }
   v.classList.remove("warn"); t.value = ""; const m = impMode; togglePaste(false); m === "day" || d.one ? askDay(d) : askImport(d);
 });
 L.DomEvent.disableClickPropagation(document.getElementById("plan-paste"));
