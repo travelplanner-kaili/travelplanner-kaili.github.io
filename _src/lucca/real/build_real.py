@@ -449,11 +449,9 @@ a.plan-copy { text-decoration: none; }
 #dist-note > p { min-width: 0; flex: 1; }
 .icon-btn.help-btn span { font: 700 17px/1 var(--f-body); }
 .tour-hole2 { box-shadow: none; background: rgba(255,255,255,.12); }
-.faq-trio { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 24px; align-items: start; }
-.faq-col { min-width: 0; }
-.faq-col .faq-list { grid-template-columns: 1fr; }
-.faq-col .faq-sub { min-height: 2.6em; display: flex; flex-wrap: wrap; align-items: baseline; }
-@media (max-width: 860px) { .faq-trio { grid-template-columns: 1fr; } .faq-col .faq-sub { min-height: 0; } }
+.faq-trio { display: block; }   /* 2026-11-27: back to one section after another (基礎功能＋its Q&A, 我的行程＋its Q&A, 客製＋its Q&A); each Q&A list uses the full width */
+.faq-col { min-width: 0; margin-bottom: 6px; }
+.faq-col .faq-sub { display: flex; flex-wrap: wrap; align-items: baseline; }
 .tour-foot .tour-skip { white-space: nowrap; }
 .tour-dots { flex-wrap: wrap; row-gap: 4px; }
 .icon-btn.names-btn { position: relative; }
@@ -577,7 +575,7 @@ def _faq_fold(out):
     i = out.index('<ol class="faq-list">'); j = out.index('</ol>', i)
     items = re.findall(r'<li class="faq-item">.*?</li>', out[i:j], flags=re.S)
     COVERED = ['怎麼看某個景點的介紹', '可以看某個地方周邊的景點', '可以知道到某個景點要走多遠', '可以乾淨一點嗎', '待一天', '我只想去免費的景點', '早上很早或晚上還能去哪裡', '只看那幾天的營業時間', '手機上地圖太小', '可以排每天的行程嗎', '排好的行程在哪裡看', '可以直接用 Google 地圖導航嗎', '可以看到我現在在哪裡', '地圖上沒有的地方可以自己加', '可以把街道底圖藏起來']
-    # 分享與換裝置: principle first (map data updates itself; your own settings stay in this browser), then how to share
+    # 分享、匯出與不同裝置: principle first (map data updates itself; your own settings stay in this browser), then how to share
     items.append('<li class="faq-item"><p class="faq-q"><span class="n">Q0</span><span>地圖更新是什麼？</span></p><p class="faq-a">景點、介紹、營業時間這些圖資大家都一樣，如有改版會自動提醒更新，讓你的資訊永遠維持在最新版，[[ref:看不到我的景點跟行程]] 裡你自己的設定（景點、行程那些）不會被自動更新動到。</p></li>')
     items.append('<li class="faq-item"><p class="faq-q"><span class="n">Q0</span><span>為什麼其他人的地圖跟我不一樣，看不到我的景點跟行程？</span></p><p class="faq-a">請參考 [[ref:地圖更新是什麼]]，這份地圖的圖資是自動更新的，但 [[ref:可以新增景點嗎]]～[[ref:飯店可以改成我的]] 行程、自己加的景點、標記去過的景點、星期幾去、住宿，這些自己設定的資訊，只存在你現在打開這個網址的瀏覽器裡。換手機、換電腦，或同一台換個瀏覽器打開（例如從 LINE 點開），都看不到。</p></li>')
     items.append('<li class="faq-item"><p class="faq-q"><span class="n">Q0</span><span>怎麼給別人（別的裝置）「沒有」我資料的地圖？</span></p><p class="faq-a">點 <button type="button" class="faq-copyurl" data-url="https://travelplanner-kaili.github.io/lucca/">travelplanner-kaili.github.io/lucca</button> 直接幫你複製網址，傳給對方。</p></li>')
@@ -603,7 +601,7 @@ def _faq_fold(out):
             if k in ttl0(x) and x not in custq: custq.append(x)
     rest = [x for x in rest if x not in custq]
     GROUPS = [
-              ('分享與換裝置', ['地圖更新是什麼', '看不到我的景點跟行程', '「沒有」我資料的地圖', '「有」我資料的地圖', '把景點分享給朋友']),
+              ('分享、匯出與不同裝置', ['地圖更新是什麼', '看不到我的景點跟行程', '「沒有」我資料的地圖', '「有」我資料的地圖', '把景點分享給朋友']),
               ('其他', ['像 App 一樣'])]
     CUST_NOTE = ('<p class="faq-gnote">※ 客製設定只會存在你製作的那一個頁面。換手機、換電腦，或同一台換個瀏覽器打開（例如從 LINE 點開），都看不到。相關討論請參考 [[ref:看不到我的景點跟行程]]、[[ref:「有」我資料的地圖]]。<br>※ 最好設一個捷徑在桌面，方便從同一入口進去編輯本機設定，相關討論請參考 [[ref:像 App 一樣]]。</p>')
     GNOTE = {}
