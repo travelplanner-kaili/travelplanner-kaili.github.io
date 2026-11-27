@@ -109,10 +109,11 @@ for a in ALL:
     if lab: t['lab'] = lab
     if a.get('gq'): GQ[a['id']] = a['gq'] + ', Venezia'
     spots.append(t)
-# her lodging (Booking receipt she sent 2026-11-27): Venice Apartment 3, Castello 5191 — OSM puts no. 5191 near Santa Maria Formosa; no dates shown
-spots.append(dict(id='hotel', cat='base', name='Venice Apartment 3', latin='Castello 5191, 30122 Venezia', mapName='HOTEL', sPrice='我的住宿',
-                  feature='住宿（民宿）。威尼斯的地址是「區名＋門牌號碼」，同一區的號碼連著編、不照街道走，找路請直接用 Google 地圖導航。'))
-LL['hotel'] = C['hotel']; GQ['hotel'] = 'Castello 5191, Venezia'
+# default lodging = an EXAMPLE spot near Piazza San Marco, not hers (2026-11-27: she stays at a B&B — the address is her room,
+# too dangerous on a public map). People set their own with 改成我的住宿 (kept only in their browser).
+spots.append(dict(id='hotel', cat='base', name='範例住宿（聖馬可廣場）', latin='範例位置，不是作者的住宿', mapName='HOTEL', sPrice='範例住宿',
+                  feature='這是範例位置，方便看各景點從市中心走過去要多久。點「改成我的住宿」換成你自己的住宿，只會存在你自己的瀏覽器。'))
+LL['hotel'] = [45.43430, 12.33810]; GQ['hotel'] = 'Piazza San Marco, Venezia'
 # 購物: a placeholder shop until she sends the real ones (2026-11-27)
 spots.append(dict(id='s_test', cat='open', tier='購物', shop=True, compact=True, name='test', latin='Test shop（暫放）',
                   feature='測試用的暫放店家，之後會換成真的店。', sHours='10:00–19:30', sTime='逛街', sPrice='免費逛',
@@ -192,7 +193,7 @@ src = open(LR + 'build_real.py').read()
 a = src.index('drawer_js = drawer_js.replace(\n'); b = src.index("assert 'planToggle' in drawer_js and 'PDAYS.map' in drawer_js")
 ns = {'drawer_js': dj}; exec(src[a:b], ns); dj = ns['drawer_js']
 for k in ('planToggle', 'h-change', 'hotelFromLine', 'bindMineEdit', 'bindHotel'): assert k in dj, k
-dj = dj.replace('例如：Hotel Ilaria', '例如：Venice Apartment 3')
+dj = dj.replace('例如：Hotel Ilaria', '例如：你的旅館或民宿名稱')
 dj, _n = re.subn(r'\n\s*\$\{s\.stars \? `<p class="stars".*?</p>` : ""\}', '', dj, count=1); assert _n == 1
 i = out.index('/* ---- Drawer ---- */'); j = out.index('</script>', i)
 out = out[:i] + dj + '\n' + open(OUT + 'venice_extra.js').read() + out[j:]
@@ -206,7 +207,7 @@ rep = [
   ('travelplanner-kaili.github.io/lucca/', 'travelplanner-kaili.github.io/venice/'),
   ('travelplanner-kaili.github.io/lucca', 'travelplanner-kaili.github.io/venice'),
   ('「盧卡地圖」圖示', '「威尼斯地圖」圖示'),
-  ('Hotel Ilaria', 'Venice Apartment 3'),
+  ('Hotel Ilaria', '範例住宿'),
   ('43.8429, 10.5027', '45.4375, 12.3360'),
   ('最後只留城牆、道路和景點', '最後只留運河和景點'),
   ('（只留城牆、主要道路、購物商圈和景點）', '（只留大運河、購物街和景點）'),
@@ -217,6 +218,9 @@ rep = [
   ('盧卡古城', '威尼斯'),
 ]
 for x, y in rep: out = out.replace(x, y)
+for x, y in [('這是作者住的旅館（範例）。', '這是範例位置，不是作者的住宿。'), ('" 是作者住的旅館。', '" 是範例位置。'),
+             ('這是作者住的旅館，換成你的旅館', '這是範例位置，換成你的住宿')]:
+    assert x in out, x; out = out.replace(x, y)
 out = re.sub(r'<div class="eyebrow">[^<]*</div>', '<div class="eyebrow">Venezia · Veneto</div>', out, count=1)
 
 # ---- FAQ: Venice's 購物 and 水上巴士 questions join the basics (like Rome) ----

@@ -50,7 +50,7 @@
   購物（11-27）：build_real.py 的 SHOPS（目前只有暫放的 test）、按鈕 class lucca-only 和 <style id="lucca-only"> 由 build_rome.py 拿掉；導覽「購物」卡文字是暫擬。
 - 威尼斯：2026-11-27 上線（venice/）。_src/venice/real/build_venice.py（盧卡模板＋羅馬的介紹頁＋venice_extra.js：水上巴士 V、渡船、購物）。
   座標在 coords_raw.json（OSM 查的），大運河 canal.json。容器連不到 OSM，查座標／抓圖塊要透過她電腦 Claude App 的內建瀏覽器（javascript_tool fetch）。
-  住宿 Venice Apartment 3（Castello 5191）。購物店家目前只有暫放的 test。
+  預設住宿是聖馬可廣場旁的「範例住宿」，不放她的民宿（安全考量）。購物店家目前只有暫放的 test。
 - 她請我們記得：真地圖上線後提醒她檢查匯入時的「你的地圖更新時間」提示，再決定留不留（還沒提醒過她實際檢查）。
 - 桌面檔：這幾天她的電腦資料夾沒連上，桌面的 `羅馬真地圖版.html` 是舊的；網站和 Project 是最新。
 
