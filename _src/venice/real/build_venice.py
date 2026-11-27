@@ -363,7 +363,7 @@ shop_q = faq_item('想逛街買東西要去哪裡？'); vap_q = faq_item('地圖
 assert '地圖上橘色的路' in shop_q; shop_q = shop_q.replace('地圖上橘色的路', '地圖上粉紅色的路')
 # 2026-11-27: lines 1/2 drawn as dotted lines; no ferry sentence (she: 不用 Q&A 再解釋)
 assert '旁邊的數字是停靠的路線' in vap_q and '藍綠色小船則是 €2 的過河渡船（traghetto），兩種不一樣。' in vap_q
-vap_q = re.sub(r'是水上巴士（vaporetto）站，旁邊的數字是停靠的路線，例如「1・2」就是 1 號、2 號線都停。點一下', '是水上巴士（vaporetto）的路線：圓點線是 1 號線、虛線是 2 號線，線上的小圓點是停靠站。點線看路線介紹，點站', vap_q); assert '圓點線是 1 號線' in vap_q
+vap_q = re.sub(r'是水上巴士（vaporetto）站，旁邊的數字是停靠的路線，例如「1・2」就是 1 號、2 號線都停。點一下', '是水上巴士（vaporetto）的路線：圓點線是 1 號線、虛線是 2 號線，線上寫 1、2 的圓圈是停靠站。點線看路線介紹，點站', vap_q); assert '圓點線是 1 號線' in vap_q
 vap_q = vap_q.replace('藍綠色小船則是 €2 的過河渡船（traghetto），兩種不一樣。', '')
 assert '不想看可以在篩選列關掉「水上巴士站」。' in vap_q; vap_q = vap_q.replace('不想看可以在篩選列關掉「水上巴士站」。', '不想看可以在篩選列關掉「水路交通」（水上巴士和渡船一起關）。')
 fi = out.index('<section class="faq"'); fj = out.index('</ol></section>\n</div>', fi) + len('</ol></section>')
@@ -401,15 +401,18 @@ css = '''<style>
 /* the Grand Canal stays clear (she finds her way by the canals): same strength as the Tiber rule */
 .leaflet-pane path.ferry-line { stroke: var(--ferry); stroke-width: 3; stroke-dasharray: 5 4; stroke-linecap: round; fill: none; }
 .vap-mark .v { position: absolute; left: -18px; top: -18px; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 0; }   /* tap area */
-/* 2026-11-27 (later): lines 1 and 2 are dotted lines on the water (1 = round dots, 2 = dashes) with numbered badges; the stops are small dots on them */
+/* 2026-11-27 (later): lines 1 and 2 are dotted lines on the water (1 = round dots, 2 = dashes) ; every stop is a numbered circle (1 / 2) on its line(s), above the lines */
 .leaflet-pane path.vap-route { fill: none; stroke-linecap: round; stroke-linejoin: round; }
 .leaflet-pane path.vap-r1 { stroke: var(--vap); stroke-width: 4.5; stroke-dasharray: 0 8; }
 .leaflet-pane path.vap-r2 { stroke: var(--vap2); stroke-width: 3; stroke-dasharray: 9 6; stroke-linecap: butt; }
-.vap-badge span { position: absolute; left: -8px; top: -8px; width: 16px; height: 16px; border-radius: 50%; display: grid; place-items: center; font: 800 10.5px/1 var(--f-body); border: 1.5px solid var(--paper); box-shadow: 0 1px 2px rgba(0,0,0,.35); }
-.vap-b1 span { background: var(--vap); color: #2A2000; }
-.vap-b2 span { background: var(--vap2); color: #fff; }
-.vap-mark .vn { position: absolute; left: calc(var(--vlen, 0px) / -2 - 7px); top: -7px; width: calc(var(--vlen, 0px) + 14px); height: 14px; border-radius: 7px; transform: rotate(var(--vang, 0deg)); box-sizing: border-box; border-radius: 50%; background: var(--paper); border: 3.5px solid #8A6A00; box-shadow: 0 1px 3px rgba(0,0,0,.4); cursor: pointer; }   /* 2026-11-27: bigger, she could not see or tap the 9px dot */
-.vap-mark .vl { position: absolute; left: calc(var(--vlen, 0px) / 2 + 12px); top: 50%; transform: translateY(-50%); white-space: nowrap; font: 700 12.5px/1.2 var(--f-body); color: var(--ink); background: var(--paper); border: 1.5px solid #8A6A00; border-radius: 999px; padding: 2px 7px; box-shadow: 0 1px 3px rgba(0,0,0,.25); cursor: pointer; }
+.vap-mark .vc { position: absolute; left: 0; top: 0; width: 19px; height: 19px; margin: -9.5px 0 0 -9.5px; box-sizing: border-box; border-radius: 50%; display: grid; place-items: center; font: 800 11.5px/1 var(--f-body); border: 2px solid var(--paper); box-shadow: 0 1px 3px rgba(0,0,0,.4); cursor: pointer; }
+.vap-mark .vc1 { background: var(--vap); color: #2A2000; }
+.vap-mark .vc2 { background: var(--vap2); color: #fff; }
+.vap-mark .vc0 { width: 14px; height: 14px; margin: -7px 0 0 -7px; background: var(--paper); border: 3.5px solid #8A6A00; }
+.vap-mark .vl { position: absolute; left: var(--lx, 12px); top: var(--ly, 0px); transform: translateY(-50%); white-space: nowrap; font: 700 12.5px/1.2 var(--f-body); color: var(--ink); background: var(--paper); border: 1.5px solid #8A6A00; border-radius: 999px; padding: 2px 7px; box-shadow: 0 1px 3px rgba(0,0,0,.25); cursor: pointer; }
+.vap-mark[data-al="r"] .vl { transform: translate(-100%, -50%); }
+.vap-mark[data-al="t"] .vl { transform: translate(-50%, -100%); }
+.vap-mark[data-al="b"] .vl { transform: translate(-50%, 0); }
 .vap-mark .vl i { font-style: normal; font-weight: 600; font-size: 11px; color: var(--muted); }
 .vap-mark .vl b { color: #8A6A00; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .vap-mark .vl b { color: var(--vap); } }

@@ -30,25 +30,28 @@ const BRIDGE_IDS = ["rialto", "pontacc", "scalzi", "costituzione"];
 FERRY_CROSS.forEach(c => L.polyline(c, { className: "ferry-line", interactive: false }).addTo(ferryLayer));
 
 /* water-bus (vaporetto): lines 1 and 2 drawn as dotted lines (2026-11-27, she asked for the stops joined into lines):
-   1 = round dots, 2 = dashes, a small numbered badge on each line; the stops are small dots (+ the name when zoomed in); tap = the stop's card */
+   1 = round dots, 2 = dashes; tap a line = its card, tap a stop = the stop card */
 const vapLayer = L.layerGroup();
 map.createPane("vap").style.zIndex = 380;   // above the canal, under the place pins
-/* 2026-11-27 (later): the two lines are pushed apart on screen (9 px each side, where they run together) so a tap hits the right one;
-   a stop both lines call at is a capsule across both lines (like a metro interchange), a stop of one line is a dot on that line only */
-const VGAP = 9;
+/* 2026-11-27 (later): the two lines are pushed apart on screen (11 px each side, where they run together) so a tap hits the right one.
+   Every stop is a numbered circle on its line(s) — "1" on line 1, "2" on line 2 — drawn above the lines so the number is never covered
+   (she asked for this); a stop of both lines has both circles side by side. The name sits on the bank side, off the lines.
+   Place boxes keep clear of the lines (extraObstacles), so the water routes stay whole. */
+const VGAP = 11;
 const vapLines = {}, vapHits = {}, vapOffPts = {};
 const vapHit = ref => e => { L.DomEvent.stopPropagation(e); if (picking || distMode) return; openSpot("vline" + ref); };
 VAP_ROUTES.forEach(r => {
   vapLines[r.ref] = L.polyline(r.pts, { pane: "vap", className: "vap-route vap-r" + r.ref, interactive: false }).addTo(vapLayer);
   vapHits[r.ref] = L.polyline(r.pts, { pane: "vap", className: "vap-hit", weight: 2 * VGAP - 2, opacity: 0 }).on("click", vapHit(r.ref)).addTo(vapLayer);
-  r.badgeMarks = r.badges.map(b => L.marker(b, { pane: "vap", icon: L.divIcon({ className: "vap-badge vap-b" + r.ref, html: `<span>${r.ref}</span>`, iconSize: [0, 0] }), interactive: false, keyboard: false }).addTo(vapLayer));
 });
 const vapMarks = VAP.map(v => {
-  const m = L.marker(v.ll, { icon: L.divIcon({ className: "vap-mark", html: `<span class="v" title="${esc(v.name)}（水上巴士站）">V</span><span class="vn"></span><span class="vl lbl-obst">${esc((SPOTS.find(x => x.id === v.id) || {}).name || v.name)} <i>${esc(v.name)}</i></span>`, iconSize: [0, 0] }), keyboard: false, zIndexOffset: 400 });   // above the place pins
+  const own = ["1", "2"].filter(x => v.lines.includes(x));
+  const circles = own.length ? own.map(x => `<span class="vc vc${x}">${x}</span>`).join("") : '<span class="vc vc0"></span>';
+  const m = L.marker(v.ll, { icon: L.divIcon({ className: "vap-mark", html: `<span class="v" title="${esc(v.name)}（水上巴士站）">V</span>${circles}<span class="vl lbl-obst">${esc((SPOTS.find(x => x.id === v.id) || {}).name || v.name)} <i>${esc(v.name)}</i></span>`, iconSize: [0, 0] }), keyboard: false, zIndexOffset: 500 });   // above the place pins and the lines
   m.on("click", e => { L.DomEvent.stopPropagation(e); if (picking || distMode) return; openSpot(v.id); });
   m.addTo(vapLayer); return m;
 });
-const nearOn = (pts, p) => { let best = null; for (let i = 0; i + 1 < pts.length; i++) { const q = L.LineUtil.closestPointOnSegment(p, pts[i], pts[i + 1]), d = q.distanceTo(p); if (!best || d < best.d) best = { d, q }; } return best.q; };
+const nearOn = (pts, p) => { let best = null; for (let i = 0; i + 1 < pts.length; i++) { const q = L.LineUtil.closestPointOnSegment(p, pts[i], pts[i + 1]), d = q.distanceTo(p); if (!best || d < best.d) best = { d, q, i }; } return best; };
 function layoutVap() {
   VAP_ROUTES.forEach(r => {
     const P = r.pts.map(x => map.latLngToLayerPoint(x));
@@ -56,17 +59,35 @@ function layoutVap() {
       return L.point(p.x - dy / l * VGAP * r.sign, p.y + dx / l * VGAP * r.sign); });
     vapOffPts[r.ref] = O; const ll = O.map(p => map.layerPointToLatLng(p));
     vapLines[r.ref].setLatLngs(ll); vapHits[r.ref].setLatLngs(ll);
-    r.badgeMarks.forEach((m, k) => m.setLatLng(map.layerPointToLatLng(nearOn(O, map.latLngToLayerPoint(r.badges[k])))));
   });
   VAP.forEach((v, k) => {
-    const p = map.latLngToLayerPoint(v.ll), on = ["1", "2"].filter(x => v.lines.includes(x)).map(x => nearOn(vapOffPts[x], p));
-    const el = vapMarks[k].getElement();
-    if (!on.length) { vapMarks[k].setLatLng(v.ll); el && el.style.setProperty("--vlen", "0px"); return; }
-    const a = on[0], b = on[1] ? nearOn(vapOffPts["2"], a) : on[0], mid = L.point((a.x + b.x) / 2, (a.y + b.y) / 2);
+    const el = vapMarks[k].getElement(), raw = map.latLngToLayerPoint(v.ll), own = ["1", "2"].filter(x => v.lines.includes(x));
+    if (!own.length) { vapMarks[k].setLatLng(v.ll); if (el) { el.style.setProperty("--lx", "12px"); el.style.setProperty("--ly", "0px"); el.dataset.al = "l"; } return; }
+    const pa = nearOn(vapOffPts[own[0]], raw), a = pa.q, b = own[1] ? nearOn(vapOffPts[own[1]], a).q : a, mid = L.point((a.x + b.x) / 2, (a.y + b.y) / 2);
     vapMarks[k].setLatLng(map.layerPointToLatLng(mid));
-    if (el) { el.style.setProperty("--vlen", a.distanceTo(b).toFixed(1) + "px"); el.style.setProperty("--vang", (Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI).toFixed(1) + "deg"); }
+    if (!el) return;
+    const cs = el.querySelectorAll(".vc");
+    [a, b].slice(0, cs.length).forEach((q, n) => { cs[n].style.left = (q.x - mid.x) + "px"; cs[n].style.top = (q.y - mid.y) + "px"; });
+    // the name: across the line(s), on the bank side of the real stop, clear of the circles
+    const O = vapOffPts[own[0]], s0 = O[pa.i], s1 = O[pa.i + 1], tl = Math.hypot(s1.x - s0.x, s1.y - s0.y) || 1;
+    let nx = -(s1.y - s0.y) / tl, ny = (s1.x - s0.x) / tl;
+    const side = (raw.x - mid.x) * nx + (raw.y - mid.y) * ny; if (side < 0) { nx = -nx; ny = -ny; }
+    const far = Math.max((a.x - mid.x) * nx + (a.y - mid.y) * ny, (b.x - mid.x) * nx + (b.y - mid.y) * ny) + 16;
+    el.style.setProperty("--lx", (nx * far).toFixed(1) + "px"); el.style.setProperty("--ly", (ny * far).toFixed(1) + "px");
+    el.dataset.al = Math.abs(nx) < .4 ? (ny > 0 ? "b" : "t") : nx > 0 ? "l" : "r";
   });
 }
+/* obstacles for the place boxes: small squares along both lines (on screen), plus the ferry crossings */
+window.extraObstacles = () => {
+  if (!vapOn) return [];
+  const out = [], W = mapEl.clientWidth, H = mapEl.clientHeight, add = (p, r) => { if (p.x > -20 && p.y > -20 && p.x < W + 20 && p.y < H + 20) out.push({ x: p.x - r, y: p.y - r, w: 2 * r, h: 2 * r }); };
+  Object.values(vapLines).forEach(pl => {
+    const pts = pl.getLatLngs().map(x => map.latLngToContainerPoint(x));
+    for (let i = 0; i + 1 < pts.length; i++) { const a = pts[i], b = pts[i + 1], n = Math.max(1, Math.ceil(a.distanceTo(b) / 8));
+      for (let t = 0; t < n; t++) add(L.point(a.x + (b.x - a.x) * t / n, a.y + (b.y - a.y) * t / n), 4); }
+  });
+  return out;
+};
 map.on("zoomend", layoutVap);
 let vapOn = true; try { vapOn = localStorage.getItem("trip-vap-venice") !== "0"; } catch (e) {}
 function applyVap() {   // 【水路交通】: the water-bus lines and stops, and the traghetti (pins, boxes, crossing lines)

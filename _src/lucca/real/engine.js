@@ -185,6 +185,7 @@ function layoutLabels() {
   const mr = mapEl.getBoundingClientRect();
   STREETS.forEach(st => { const el = st.label && st.label.getElement(); if (!el || el.classList.contains("off")) return; const r = el.querySelector("span").getBoundingClientRect(); if (r.width) boxes.push({ x: r.left - mr.left, y: r.top - mr.top, w: r.width, h: r.height }); });
   coverBoxes(mr).forEach(b => boxes.push(b));
+  if (window.extraObstacles) window.extraObstacles().forEach(b => boxes.push(b));   // city lines that boxes must not cut (Venice water bus)
   mapEl.querySelectorAll(".lbl-obst").forEach(el => { const r = el.getBoundingClientRect(); if (r.width && el.offsetParent) boxes.push({ x: r.left - mr.left, y: r.top - mr.top, w: r.width, h: r.height }); });   // names a city draws itself (Venice bridges)
   // a day open: labels stay inside the map's visible edges (they are placed again after every pan then)
   const mw = mapEl.clientWidth, mh = mapEl.clientHeight, outside = r => planOn && (r.x < 2 || r.y < 2 || r.x + r.w > mw - 2 || r.y + r.h > mh - 2);
