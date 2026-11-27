@@ -109,6 +109,7 @@ function makeSpot(s) {
   if (s.slogan) {   // 2026-11-27: shops lead with what you go there for (e.g. 便宜 Venchi), the shop's name small after it
     const tn = g.querySelector(".t-name"); tn.textContent = ""; const a = document.createElement("b"), n = document.createElement("span");
     a.className = "t-slogan"; a.textContent = s.slogan; n.className = "t-shopname"; n.textContent = s.name; tn.append(a, n);
+    g.classList.add("has-slogan");   // 2026-11-27: folded to the slogan; hover (computer) or the open card unfolds it
   }
   if (g.querySelector(".t-price")) { if (s.id === "hotel") g.querySelector(".t-price").remove(); else g.querySelector(".t-price").textContent = s.sPrice; }
   if (!WEEK[s.id] && s.sHours && g.querySelector(".t-wed")) g.querySelector(".t-wed").textContent = s.sHours;
@@ -139,7 +140,7 @@ const areaVis = (s, v) => s.areaEl.eachLayer(l => { if (l._path) { l._path.style
 let distMode = false;
 /* labels are placed again at every zoom: important sights first, each label takes the first free spot around its pin;
    if the full label (hours, price) cannot fit it shrinks to the name, and if even that cannot fit only the pin stays */
-const ORDER = s => s.tier === "主要" ? 0 : s.cat === "base" ? 1 : s.tier === "推薦" ? 2 : 3;
+const ORDER = s => s.tier === "主要" ? 0 : (s.tier === "購物" && window.SHOP_ON) ? .5 : s.cat === "base" ? 1 : s.tier === "推薦" ? 2 : 3;   // 2026-11-27: with 購物 on, shops get room right after the 主要 sights (they were left as bare dots)
 /* 眼睛 (label mode): 自動 = place what fits (a label that cannot fit shrinks to its name, then to just the pin);
    全覽 = every label in full; 簡潔 = every label name only (as the hand-drawn map did) */
 const LMODES = ["auto", "full", "names"], LMODE_TXT = { auto: "自動", full: "全覽", names: "簡潔" };

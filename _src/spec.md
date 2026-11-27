@@ -386,3 +386,8 @@
   - 購物（每間都有一句話）：Trattoria Il Vagone 4.6「車站旁人氣小館」、Oppa 韓式中式料理 4.5「韓式・中式料理」、Suso 冰淇淋 4.6「人氣義式冰淇淋」（用 Sotoportego de la Bissa 那間本店）、Ristorante Caffè Saraceno 4.6「里亞托運河邊餐廳」、Ostaria dai Zemei 4.5「威尼斯小點 cicchetti」（週二休）。沒加：Cantina Do Mori（4.4）、DESPAR 超市、Fried Land、Pastificio Giacomo Rizzo（圖上沒寫分數）。
   - 景點：尖塔橋 Ponte delle Guglie＝推薦；十二使徒橋 Ponte dei Santi Apostoli、聖耶肋米亞教堂、釘子橋與仁慈橋、聖巴托洛梅奧廣場＝次要。圖上其他景點（赤足橋、學院橋、里亞托橋、猶太區、黃金宮、聖馬可廣場）原本就有。
   - 做法：build_venice.py 的 EAT、SIGHTS（engine 的 slogan 欄位）。
+- 店家框折疊（2026-11-27 她回報威尼斯的購物標籤重疊得亂七八糟）：三張地圖有「一句話」的店家框，平常只顯示一句話（店名、營業時間、價格收起來），框變小就不容易重疊。
+  - 電腦：滑鼠移過去展開完整的框（疊在最上層），點下去開介紹。
+  - 手機：沒有滑過去這件事，點一下直接開介紹（介紹裡什麼都有；不做「先展開再點一次」，比較快）。
+  - 打開介紹時那間店的框也是展開的。
+  - 開「購物」時，店家排在主要景點之後、推薦景點和渡船之前（原本店家被擠到只剩一個點）。

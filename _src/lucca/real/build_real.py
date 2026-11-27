@@ -127,6 +127,16 @@ extra_css = '''
 .scrim { background: rgba(10,12,14,.12) !important; }   /* lighter, so the glowing place still shows above the phone card */
 .spot .t-name { font: 700 14px var(--f-body); }
 .spot .t-name .t-shopname { margin-left: .4em; font-size: .78em; font-weight: 600; opacity: .8; }   /* shops: slogan first, the name small */
+/* 2026-11-27: shop boxes are folded to the slogan (she: Venice shop boxes overlapped badly). Computer: hover unfolds the box on top of
+   everything, click opens the card. Phone: one tap opens the card (it has everything). The open shop stays unfolded. */
+.spot.has-slogan .t-shopname, .spot.has-slogan .t-more { display: none !important; }
+.spot.has-slogan.active .t-shopname { display: inline !important; }
+.spot.has-slogan.active .t-more { display: block !important; }
+@media (hover: hover) {
+  .spot.has-slogan:hover .t-shopname { display: inline !important; }
+  .spot.has-slogan:hover .t-more { display: block !important; }
+  .leaflet-marker-icon:has(.spot.has-slogan:hover) { z-index: 100001 !important; }
+}
 .spot .t-wed { font: 500 11.5px var(--f-body); font-variant-numeric: tabular-nums; }
 .spot .t-price { font: 700 11.5px var(--f-body); color: var(--c); font-variant-numeric: tabular-nums; }
 .spot .day-off { color: var(--paid); font-weight: 700; }
