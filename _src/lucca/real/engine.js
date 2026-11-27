@@ -44,7 +44,7 @@ if (CITY.river) {
   map.createPane("river").style.zIndex = 350;
   const rv = L.polyline(CITY.river, { pane: "river", className: "river-line", interactive: false }).addTo(map);
   const rl = CITY.riverLabel && L.marker(CITY.riverLabel.ll, { pane: "river", icon: L.divIcon({ className: "river-name", html: "<span>" + CITY.riverLabel.text + "</span>", iconSize: [0, 0] }), interactive: false, keyboard: false }).addTo(map);
-  const rw = () => { const k = unitPx(); rv.setStyle({ weight: Math.max(6, 26 * k) }); if (rl && rl.getElement()) rl.getElement().style.fontSize = Math.max(10, 19 * k) + "px"; };
+  const rw = () => { const k = unitPx(); rv.setStyle({ weight: Math.max(6, 26 * k) }); if (rl && rl.getElement()) rl.getElement().style.fontSize = Math.min(24, Math.max(10, 19 * k)) + "px"; };   // 2026-11-27: capped, zoomed in it covered the map
   map.on("zoomend", rw); map.whenReady(rw);
 }
 /* city walls (Lucca: 11 bastions, approximate outline) */

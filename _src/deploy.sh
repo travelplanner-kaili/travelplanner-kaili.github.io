@@ -1,6 +1,6 @@
 #!/bin/bash
 # Build and copy the real maps into the published folders. Then commit with a message that says WHY.
-#   _src/deploy.sh lucca   |   _src/deploy.sh rome   |   _src/deploy.sh all
+#   _src/deploy.sh lucca   |   _src/deploy.sh rome   |   _src/deploy.sh venice   |   _src/deploy.sh all
 # Lucca note: build_rome.py also rebuilds Lucca locally, but Lucca is only published when asked for.
 set -e
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
@@ -12,5 +12,9 @@ fi
 if [ "$what" = rome ] || [ "$what" = all ]; then
   python3 "$REPO/_src/rome/real/build_rome.py"
   cp "$REPO/_src/rome/real/rome-real.html" "$REPO/rome/index.html"; cp "$REPO/_src/rome/real/version.json" "$REPO/rome/"
+fi
+if [ "$what" = venice ] || [ "$what" = all ]; then
+  python3 "$REPO/_src/venice/real/build_venice.py"
+  cp "$REPO/_src/venice/real/venice-real.html" "$REPO/venice/index.html"; cp "$REPO/_src/venice/real/version.json" "$REPO/venice/"
 fi
 echo "copied. now: git add -A && git commit (explain the reason) && git -c push.negotiate=true push origin main"

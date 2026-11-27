@@ -5,8 +5,8 @@
 
 - 行程：羅馬 1/26–2/3（Hotel Nazionale Roma）→ 盧卡 2/3–2/5（Hotel Ilaria）→ 威尼斯 2/5–2/8。
 - 網站：https://travelplanner-kaili.github.io/ （本 repo，GitHub Pages，main 分支一推就上線，約 1 分鐘）
-  - `lucca/`、`rome/`：已上線的真地圖版（Leaflet 真街道底圖 + 全部功能）。
-  - `index.html`：地圖目錄頁。威尼斯還沒做真地圖版（目錄上是「準備中」）。
+  - `lucca/`、`rome/`、`venice/`：已上線的真地圖版（Leaflet 真街道底圖 + 全部功能）。
+  - `index.html`：地圖目錄頁。
 - claude.ai Project「旅遊地圖」放了同樣的成品和規格書：`claude/盧卡真地圖版.html`、`claude/羅馬真地圖版.html`、
   `claude/旅遊地圖製作規格.md`（＝ `_src/spec.md`），還有舊的手繪版。
 
@@ -27,7 +27,7 @@
 
 ## 每次改完的固定流程（使用者習慣）
 1. 改 `_src/`，跑 build，用 Playwright 在電腦（1280）和手機（390）寬度都測，截圖自己看。
-2. `_src/deploy.sh rome|lucca|all` 複製成品 → `git commit`（訊息寫原因）→ `git -c push.negotiate=true push origin main`，用 `gh run watch` 等上線。
+2. `_src/deploy.sh rome|lucca|venice|all` 複製成品 → `git commit`（訊息寫原因）→ `git -c push.negotiate=true push origin main`，用 `gh run watch` 等上線。
 3. 上傳 Project：`claude/羅馬真地圖版.html` / `claude/盧卡真地圖版.html`（成品）、`claude/旅遊地圖製作規格.md`（規格）。
 4. 如果連得到她的電腦（remote-devices 工具），把成品存到桌面 `C:\Users\alily\OneDrive\桌面\盧卡真地圖版.html` / `羅馬真地圖版.html`，用 md5 核對。
 5. 回報：做了什麼、哪裡要她自己看。網站更新要 1～2 分鐘，叫她看地圖下方「最新更新」時間。
@@ -46,10 +46,11 @@
   - Porta Portese 跳蚤市場改成區域（次要、免費、只有週日）。
   - 使用方式：基礎功能／我的行程／客製你的地圖上下排（各自接 Q&A）；分組「分享、匯出與不同裝置」；我的行程導覽 8 張。
 - 盧卡：2026-11-27 下午照羅馬規則更新上線（共用 engine.js / build_real.py 的所有羅馬改動一起帶上）。全覽／簡潔用手繪盧卡的框位置
-  （build_real.py 算 LAB 和 CITY.unitM；字級在 <style id="geo-city">，build_rome.py 會拿掉它和 CITY.unitM 那行）。之後改共用引擎，盧卡、羅馬都要重建部署（deploy.sh all）。
+  （build_real.py 算 LAB 和 CITY.unitM；字級在 <style id="geo-city">，build_rome.py 會拿掉它和 CITY.unitM 那行）。之後改共用引擎，三個城市都要重建部署（deploy.sh all）。
   購物（11-27）：build_real.py 的 SHOPS（目前只有暫放的 test）、按鈕 class lucca-only 和 <style id="lucca-only"> 由 build_rome.py 拿掉；導覽「購物」卡文字是暫擬。
-- 威尼斯：還沒做真地圖版。做法同羅馬：寫 `_src/venice/real/build_venice.py`，以盧卡真地圖為模板。
-  她在威尼斯靠運河認路，運河要一直清楚（手機深色模式也要，深淺照台伯河的規則）；街名一律附當地原文。
+- 威尼斯：2026-11-27 上線（venice/）。_src/venice/real/build_venice.py（盧卡模板＋羅馬的介紹頁＋venice_extra.js：水上巴士 V、渡船、購物）。
+  座標在 coords_raw.json（OSM 查的），大運河 canal.json。容器連不到 OSM，查座標／抓圖塊要透過她電腦 Claude App 的內建瀏覽器（javascript_tool fetch）。
+  住宿 Venice Apartment 3（Castello 5191）。購物店家目前只有暫放的 test。
 - 她請我們記得：真地圖上線後提醒她檢查匯入時的「你的地圖更新時間」提示，再決定留不留（還沒提醒過她實際檢查）。
 - 桌面檔：這幾天她的電腦資料夾沒連上，桌面的 `羅馬真地圖版.html` 是舊的；網站和 Project 是最新。
 
