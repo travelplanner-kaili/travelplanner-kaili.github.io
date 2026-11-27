@@ -149,9 +149,9 @@ EAT = [
   dict(id='s_oppa', ll=[45.4421384, 12.3217142], name='Oppa 韓式中式料理', latin='Oppa Ristorante coreano e cinese', slogan='韓式・中式料理',
        feature='火車站附近的韓國、中式餐廳，Google 評分 4.5。吃膩義大利菜時的選擇。', tips=['想吃米飯、熱湯時可以來。'],
        when='吃膩義大利菜的時候。', week=None, hours=['營業時間請看 Google 地圖'], price='一人約 €10–20（Google 地圖）', sPrice='€10–20'),
-  dict(id='s_suso', ll=[45.4377263, 12.3374098], name='Suso 冰淇淋', latin='Gelatoteca Suso', slogan='★口味超多冰淇淋',
+  dict(id='s_suso', ll=[45.4377263, 12.3374098], name='Suso 冰淇淋（本店）', latin='Gelatoteca Suso', slogan='★口味超多冰淇淋',
        feature='里亞托橋旁小巷裡（Sotoportego de la Bissa）的人氣冰淇淋店，只有威尼斯有。口味二十多種、可以免費試吃，也賣自家做的蛋糕、餅乾和巧克力。Google 評分 4.6。',
-       tips=['推薦招牌「雙焦糖」（甜但不膩）；芒果口味偏酸。', '店裡沒有內用座位，附近的 Sant\'Antonio 橋可以拍運河。'],
+       tips=['推薦招牌「雙焦糖」（甜但不膩）；芒果口味偏酸。', '本店常大排長龍，可以走約 3 分鐘到分店（Salizada San Giovanni Grisostomo），人比較少。', '店裡沒有內用座位，附近的 Sant\'Antonio 橋可以拍運河。'],
        when='逛里亞托橋一帶時。', week=['10:00–23:00'] * 7, hours=['每日 10:00–23:00（推薦文資料）'],
        price='一球 €2.5、兩球 €4、三球 €5.9、四球 €6.9；加鮮奶油或換巧克力甜筒 +€0.5，部分口味另加價（推薦文資料）', sPrice='一球 €2.5', links=[_GEL]),
   dict(id='s_saraceno', ll=[45.4379258, 12.3352382], name='Ristorante Caffè Saraceno', latin='Ristorante Caffè Saraceno', slogan='里亞托運河邊餐廳',
@@ -202,6 +202,12 @@ EAT.append(  # 2026-11-27 her pick: article monicaineurope.com/venice-dal-moros-
        when='聖馬可廣場和里亞托之間散步時，買午餐帶著走。', week=['12:00–18:00'] * 7, hours=['每日 12:00–18:00', _GH],
        price='一人約 €10–20（Google 地圖）', sPrice='€10–20',
        links=[["Dal Moro's 食記（Monica in Europe）", 'https://monicaineurope.com/venice-dal-moros-freshpastatogo/']]))
+EAT.append(  # 2026-11-27 she: Suso has two shops (her Google Maps link)
+  dict(id='s_suso2', ll=[45.4389856, 12.3371667], name='Suso 冰淇淋（分店）', latin='Suso – Salizada San Giovanni Grisostomo', slogan='★口味超多冰淇淋',
+       feature='Suso 的第二家店，在里亞托橋北邊的 Salizada San Giovanni Grisostomo，離本店走路約 3 分鐘，Google 評分 4.6。口味和本店一樣。',
+       tips=['本店排隊太長時來這裡，人比較少（Google 評論）。', '推薦招牌「雙焦糖」；開心果、榛果也常被推薦。'],
+       when='逛里亞托橋一帶時。', week=['09:30–22:30'] * 7, hours=['每日 09:30–22:30', _GH],
+       price='同本店（一球約 €2.5，推薦文資料）', sPrice='一球 €2.5', links=[_GEL]))
 for e in EAT:
     t = dict(id=e['id'], cat='open', tier='購物', shop=True, compact=True, name=e['name'], latin=e['latin'], slogan=e['slogan'], feature=e['feature'],
              tips=e['tips'], when=e['when'], stay='約 30 分鐘～1 小時', hours=e['hours'], price=e['price'], sPrice=e['sPrice'], sTime='用餐')
@@ -209,7 +215,7 @@ for e in EAT:
     if e['week']: WEEK[e['id']] = e['week']
     if e['id'] == 's_dalmoro': t['menu'] = _DM_MENU; t['menuNote'] = _DM_NOTE; t['menuTitle'] = ['菜單（義中對照）', '展開菜單（照推薦文翻譯）']
     if e['id'] == 's_nono': t['menu'] = _NONO_MENU; t['menuNote'] = _NONO_NOTE
-    if e['id'] in ('s_gallonetto', 's_suso'): t['menu'] = _FL_GAL if e['id'] == 's_gallonetto' else _FL_SUSO; t['menuNote'] = _FL_NOTE; t['menuTitle'] = ['口味（義中對照）', '展開口味（照推薦文翻譯）']
+    if e['id'] in ('s_gallonetto', 's_suso', 's_suso2'): t['menu'] = _FL_GAL if e['id'] == 's_gallonetto' else _FL_SUSO; t['menuNote'] = _FL_NOTE; t['menuTitle'] = ['口味（義中對照）', '展開口味（照推薦文翻譯）']
     if e.get('links'): t['links'] = e['links']
     spots.append(t); LL[e['id']] = e['ll']; GQ[e['id']] = e['latin'] + ', Venezia'
 SIGHTS = [
