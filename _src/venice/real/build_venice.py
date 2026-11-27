@@ -27,6 +27,52 @@ SHOP_IDS = [a['id'] for a in ALL if a['cat'] == 'shop']
 assert len(SHOP_PATHS) == len(SHOP_IDS) == 5
 A = {a['id']: a for a in ALL}
 
+# ---- privacy (2026-11-27, she asked not to expose where she is): the public map shows 2/12–2/15, and her real arrival
+# (train, seat, time), departure and 【這趟旅程】 notes are taken out. Museum free days are said generally (每月第一個週日).
+def _sub(id, field, old, new):
+    a = A[id]; v = a[field]
+    if isinstance(v, list):
+        hit = [k for k, x in enumerate(v) if old in x]; assert hit, (id, field, old)
+        for k in hit: v[k] = v[k].replace(old, new)
+        a[field] = [x for x in v if x.strip()]
+    else:
+        assert old in v, (id, field, old); a[field] = v.replace(old, new)
+PRIV = [
+  ('sanmarco', 'when', '；週五 14:55 才到站，當天來不及', ''),
+  ('rialto', 'remind', '，2/5 下午才抵達、週日休市，只能排在週六（2/6）早上', ''),
+  ('mercato', 'when', '只能排週六（2/6）08:00～10:00：週五下午才抵達、週日休市，11:00 後攤販開始收攤。', '週二至週六 08:00～10:00 最熱鬧，11:00 後攤販開始收攤。'),
+  ('frari', 'when', '週五下午從火車站走往市區時也順路', '從火車站走往市區時也順路'),
+  ('ghetto', 'remind', '2/5（五）14:55 到站後可以直接從這區開始：', ''),
+  ('tr_ferrovia', 'when', '只有週六（2/6）上午能搭：週五 14:55 到站時已收班、週日停駛。', '只有週一至週六上午能搭，下午和週日停駛。'),
+  ('tr_carbon', 'when', '只能排週六上午：週五下午才到、14:00 收，週日不開。', '週一至週六上午，14:00 收班，週日不開。'),
+  ('piazza', 'remind', '2/5～2/7 正逢 2027 威尼斯嘉年華（官方日期 1/23～2/9），週末是人潮最高峰', '2027 威尼斯嘉年華官方日期 1/23～2/9，週末是人潮最高峰'),
+  ('accademia', 'when', '或週五下午抵達後（開到 19:15）；2/7（週日）是當月第一個週日免費入場', '或平日傍晚（開到 19:15）；每月第一個週日免費入場'),
+  ('accademia', 'price', '2/7 是二月第一個週日，', '每月第一個週日'),
+  ('accademia', 'remind', '2/7（週日）看完', '第一個週日看完'),
+  ('accademia', 'remind', '2/7（週日）免費日人潮多', '第一個週日免費日人潮多'),
+  ('accademia', 'remind', '，或週五傍晚抵達後去（開到 19:15）', '，或平日傍晚去（開到 19:15）'),
+  ('accademia', 'pl', '€15（2/7 免費）', '€15（首週日免費）'),
+  ('correr', 'remind', '2/7（第一個週日）', '每月第一個週日'),
+  ('correr', 'pl', '2/7 考古館免費', '首週日考古館免費'),
+  ('zattere', 'remind', '2/7（日）建議接在學院美術館後面', '第一個週日建議接在學院美術館後面'),
+  ('grimani', 'when', '2/7（週日）免費日上午', '每月第一個週日（免費）上午'),
+  ('grimani', 'price', '2/7 是當月第一個週日，', '每月第一個週日'),
+  ('grimani', 'remind', '2/7 免費是依往年', '第一個週日免費是依往年'),
+  ('grimani', 'pl', '2/7 免費', '首週日免費'),
+  ('oriente', 'when', '2/7 下午', '每月第一個週日下午（免費）'),
+  ('oriente', 'price', '2/7 國立部分免費', '每月第一個週日國立部分免費'),
+  ('oriente', 'pl', '2/7 免費', '首週日免費'),
+  ('station', 'feature', '我們 2/5（週五）從佛羅倫斯搭 Italo 8910，12:39 開、14:55 抵達這裡（6 車 9 號位）。', ''),
+  ('station', 'remind', '抵達：2/5（五）14:55，Italo 8910（佛羅倫斯 S.M.N. 12:39 開）。', ''),
+  ('station', 'remind', '週五下午抵達後還來得及', '下午抵達後還來得及'),
+  ('station', 'remind', '離開時 2/8 一早出發，要先確認', '一早離開的話，要先確認'),
+]
+for x in PRIV: _sub(*x)
+for id in ('tr_dogana', 'tr_giglio', 'v_ferrovia'):
+    A[id]['remind'] = [x for x in A[id]['remind'] if not x.startswith('【這趟旅程】')]
+for a in ALL: a.pop('rows', None)   # the hand-drawn label rows (not used on the real map)
+_left = re.findall(r'2/[5-8](?!\d)|14:55|Italo|號位|這趟旅程', json.dumps(ALL, ensure_ascii=False)); assert not _left, _left
+
 # drawn x,y → lat,lng (least squares on well-known landmarks)
 CORE = ['sanmarco', 'ducale', 'piazza', 'campanile', 'sospiri', 'rialto', 'accademia', 'salute', 'guggenheim', 'sangiorgio', 'frari', 'sanrocco',
         'fenice', 'bovolo', 'mercato', 'pontacc', 'dogana', 'acquaalta', 'zanipolo', 'miracoli', 'correr', 'cadoro', 'grimani', 'oriente',
@@ -63,8 +109,8 @@ for a in ALL:
     if lab: t['lab'] = lab
     if a.get('gq'): GQ[a['id']] = a['gq'] + ', Venezia'
     spots.append(t)
-# her lodging (Booking receipt she sent 2026-11-27): Venice Apartment 3, Castello 5191 — OSM puts no. 5191 near Santa Maria Formosa
-spots.append(dict(id='hotel', cat='base', name='Venice Apartment 3', latin='Castello 5191, 30122 Venezia', mapName='HOTEL', sPrice='我的住宿 2/5–2/8',
+# her lodging (Booking receipt she sent 2026-11-27): Venice Apartment 3, Castello 5191 — OSM puts no. 5191 near Santa Maria Formosa; no dates shown
+spots.append(dict(id='hotel', cat='base', name='Venice Apartment 3', latin='Castello 5191, 30122 Venezia', mapName='HOTEL', sPrice='我的住宿',
                   feature='住宿（民宿）。威尼斯的地址是「區名＋門牌號碼」，同一區的號碼連著編、不照街道走，找路請直接用 Google 地圖導航。'))
 LL['hotel'] = C['hotel']; GQ['hotel'] = 'Castello 5191, Venezia'
 # 購物: a placeholder shop until she sends the real ones (2026-11-27)
@@ -87,7 +133,7 @@ for sid, d in zip(SHOP_IDS, SHOP_PATHS):
     pts = [aff(float(x), float(y)) for x, y in re.findall(r'([\d.]+) ([\d.]+)', d)]
     shop_streets.append(dict(id=sid, name=SHOPL[sid]['name'] + ' ' + SHOPL[sid]['orig'], pts=pts, at=0.5, cls='shop-street', minZoom=16.25))
 
-days = [dict(k='0205', date='2/5', wd=4), dict(k='0206', date='2/6', wd=5), dict(k='0207', date='2/7', wd=6), dict(k='0208', date='2/8', wd=0)]
+days = [dict(k='0212', date='2/12', wd=4), dict(k='0213', date='2/13', wd=5), dict(k='0214', date='2/14', wd=6), dict(k='0215', date='2/15', wd=0)]   # shown one week later than her real stay (privacy, 2026-11-27)
 CITY = {
   'key': 'venice', 'name': '威尼斯', 'title': '威尼斯', 'center': [45.4365, 12.3330], 'farKm': 15,
   'bounds': [[45.4255, 12.3150], [45.4470, 12.3530]], 'homeSpot': 'rialto', 'homeZoom': 15.5,
@@ -134,7 +180,7 @@ out = re.sub(r'(<button class="chip day" type="button" data-day="(\d)" aria-pres
              lambda m: m.group(1) + ('true' if m.group(2) in '456' else 'false'), out)
 # 水上巴士站 chip after 冷門時段
 out, n = re.subn(r'(<button class="chip cold" id="f-cold"[^>]*>.*?</button>)',
-                 lambda m: m.group(1) + '<button class="chip vap-chip" type="button" aria-pressed="true" style="--c:var(--vap)" data-tip="地圖上黃色的 V：水上巴士站"><span class="dot"></span>水上巴士站</button>', out, count=1, flags=re.S)
+                 lambda m: m.group(1) + '<button class="chip vap-chip" type="button" aria-pressed="true" style="--c:var(--vap)" data-tip="地圖上的小黃點：水上巴士站"><span class="dot"></span>水上巴士站</button>', out, count=1, flags=re.S)
 assert n == 1
 
 # ---- drawer: Rome's, with the same real-map patches ----
@@ -176,7 +222,7 @@ out = re.sub(r'<div class="eyebrow">[^<]*</div>', '<div class="eyebrow">Venezia 
 # ---- FAQ: Venice's 購物 and 水上巴士 questions join the basics (like Rome) ----
 def faq_item(title):
     return re.search(r'<li class="faq-item"><p class="faq-q"><span class="n">Q\d+</span><span>' + re.escape(title) + r'</span>.*?</li>', H, flags=re.S).group(0)
-shop_q = faq_item('想逛街買東西要去哪裡？'); vap_q = faq_item('地圖上黃色的 V 是什麼？')
+shop_q = faq_item('想逛街買東西要去哪裡？'); vap_q = faq_item('地圖上黃色的 V 是什麼？').replace('地圖上黃色的 V 是什麼？', '地圖上的小黃點是什麼？')
 assert '地圖上橘色的路' in shop_q; shop_q = shop_q.replace('地圖上橘色的路', '地圖上粉紅色的路')
 assert '藍綠色小船則是' in vap_q; vap_q = vap_q.replace('藍綠色小船則是', '藍綠色的點和大運河上的短線則是')
 fi = out.index('<section class="faq"'); fj = out.index('</ol></section>\n</div>', fi) + len('</ol></section>')
@@ -213,8 +259,9 @@ css = '''<style>
 .street-name.shop-street span:hover { text-decoration: underline; }
 /* the Grand Canal stays clear (she finds her way by the canals): same strength as the Tiber rule */
 .leaflet-pane path.ferry-line { stroke: var(--ferry); stroke-width: 3; stroke-dasharray: 5 4; stroke-linecap: round; fill: none; }
-.vap-mark .v { position: absolute; left: -9px; top: -9px; width: 18px; height: 18px; border-radius: 50%; background: var(--vap); color: #3A2E00; border: 2px solid var(--paper); font: 800 11px/14px var(--f-body); text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,.35); cursor: pointer; }
-.vap-mark .vl { position: absolute; left: 12px; top: -8px; white-space: nowrap; font: 700 11px var(--f-body); color: var(--ink); text-shadow: 0 0 3px var(--paper), 0 0 3px var(--paper), 0 0 2px var(--paper); cursor: pointer; }
+.vap-mark .v { position: absolute; left: -12px; top: -12px; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; font-size: 0; }   /* tap area */
+.vap-mark .v::after { content: ""; position: absolute; left: 7px; top: 7px; width: 10px; height: 10px; border-radius: 50%; background: var(--vap); }   /* 2026-11-27: a small solid yellow dot (the V circles were too loud) */
+.vap-mark .vl { position: absolute; left: 9px; top: -8px; white-space: nowrap; font: 700 11px var(--f-body); color: var(--ink); text-shadow: 0 0 3px var(--paper), 0 0 3px var(--paper), 0 0 2px var(--paper); cursor: pointer; }
 .vap-mark .vl b { color: #8A6A00; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .vap-mark .vl b { color: var(--vap); } }
 :root[data-theme="dark"] .vap-mark .vl b { color: var(--vap); }

@@ -6,7 +6,7 @@ SPOTS.forEach(s => { if (s.id.startsWith("tr_") && s.g) { s.g.style.setProperty(
 const ferryLayer = L.layerGroup().addTo(map);
 FERRY_CROSS.forEach(c => L.polyline(c, { className: "ferry-line", interactive: false }).addTo(ferryLayer));
 
-/* water-bus (vaporetto) stops: yellow V + the lines that stop there; tap = the stop's card */
+/* water-bus (vaporetto) stops: small solid yellow dot (+ the lines that stop there when zoomed in); tap = the stop's card */
 const vapLayer = L.layerGroup();
 VAP.forEach(v => {
   const m = L.marker(v.ll, { icon: L.divIcon({ className: "vap-mark", html: `<span class="v" title="${esc(v.name)}（水上巴士站）">V</span><span class="vl">${esc(v.name)} <b>${v.lines.join("・")}</b></span>`, iconSize: [0, 0] }), keyboard: false, zIndexOffset: 400 });   // above the place pins, or a tap on V opens the pin under it
