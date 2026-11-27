@@ -257,6 +257,17 @@ EAT.append(  # 2026-11-28 her pick (「手工提拉米蘇店推薦」); hours fr
              '下午容易排隊，避開尖峰或早點去。'],
        when='聖馬可廣場和里亞托之間散步時，下午點心。', week=['11:00–18:30'] * 7, hours=['每日 11:00–18:30', _GH],
        price='依店家公告', sPrice=None))
+EAT.append(  # 2026-11-28 her pick (slogan hers); written from the Monica in Europe article she sent; hours from Google Maps
+  dict(id='s_pontini', ll=[45.4440018, 12.325357], name='Trattoria Bar Pontini', latin='Trattoria Bar Pontini', slogan='河邊預約餐廳',
+       feature='尖塔橋旁卡納雷吉歐運河邊的餐廳，戶外座位在河景第一排，看得到貢多拉和來往的船；面朝西邊，傍晚可以看粉紅色的日落。海鮮、義大利麵很多選擇，有單點也有套餐。Google 評分 4.4。',
+       tips=['常常客滿，尤其戶外座位：一定要先打電話訂位（+39 041 714123），或順路經過時現場預約隔天的位子，可以指定戶外區。',
+             '網誌點的菜：海鮮拼盤 Sea Food Platter €30（醋漬沙丁魚、鱈魚泥、扇貝、煙燻鮭魚、花枝、蝦，還附一大盤炸海鮮）；番茄大蝦麵 Spaghetti alla busera €16；番茄海鮮麵 Spaghetti allo scoglio €15（淡菜、蛤蜊多）；手工提拉米蘇 €8（很大份，建議兩三人分）。',
+             '網誌作者說這家是她在威尼斯吃過最好吃的海鮮義大利麵。',
+             '點完餐會先送麵包籃；開胃酒可以點 Aperol Spritz。',
+             '亞洲客人很多。'],
+       when='傍晚看日落吃晚餐（記得先訂位）。', week=['07:30–22:30', '', '07:30–22:30', '07:30–22:30', '07:30–22:30', '07:30–22:30', '10:00–22:30'],
+       hours=['週二至六 07:30–22:30', '週日 10:00–22:30', '週一休', _GH], price='一人約 €20–30（Google 地圖）', sPrice='€20–30',
+       links=[['Trattoria Bar Pontini 食記（Monica in Europe）', 'https://monicaineurope.com/venice-restaurant-trattoria-bar-pontini/']]))
 for e in EAT:
     t = dict(id=e['id'], cat='open', tier='購物', shop=True, compact=True, name=e['name'], latin=e['latin'], slogan=e['slogan'], feature=e['feature'],
              tips=e['tips'], when=e['when'], stay='約 30 分鐘～1 小時', hours=e['hours'], price=e['price'], sPrice=e['sPrice'], sTime='用餐')
