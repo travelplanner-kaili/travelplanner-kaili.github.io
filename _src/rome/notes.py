@@ -253,19 +253,20 @@ NEW += [
 
 # Vatican Museums: official hours page + ticket release (user-supplied 2026-11-08)
 UPDATES['vaticani'].update({
+  'sPrice': '€22',   # 2026-11-27 she updated: €22 / €10
   'sHours': '週一至六 08:00–20:00（週日休）',
-  'warn': '一定要在官網提前買票：參觀日前約 1.5～2 個月開始放票，放票時間不固定，要常上官網查；官網買不到，出發前一、兩週留意有沒有釋出的票。門票實名，入場核對護照姓名。週日休館；1/31 是 1 月最後一個週日，09:00–14:00 免費開放（最後入場 12:30），人潮極多',
+  'warn': '一定要在官網提前買票：放票時間不固定（2026 年 11 月底一次放了半年的票），要常上官網查；官網買不到，出發前一、兩週留意有沒有釋出的票。門票實名，入場核對護照姓名。週日休館；1/31 是 1 月最後一個週日，09:00–14:00 免費開放（最後入場 12:30），人潮極多',
   'hours': ['週一至週六 08:00–20:00（最後入場 18:00）', '閉館前 30 分鐘要離開展廳', '週日休館',
             '每月最後一個週日 09:00–14:00 免費開放（最後入場 12:30），旅程中為 1/31',
             '固定閉館日：1/1、1/6、2/11、3/19、4/6、5/1、6/29、8/14–15、11/1、12/8、12/25–26（旅程 1/26–2/3 期間沒有遇到）',
             '（官方開放時間頁，2026 年 11 月查閱）'],
-  'price': '全票 €20＋官網預約費 €5，共 €25；優待票 €8＋€5，共 €13。每月最後一個週日免費。門票實名制，入場會核對護照姓名。（票價依購票教學整理，以官方購票網站為準）',
+  'price': '全票 €22、優待票 €10（2026 年 11 月官網售價）。每月最後一個週日免費。門票實名制，入場會核對護照姓名。（以官方購票網站為準）',
   'site': ('tickets.museivaticani.va（官方購票）', 'https://tickets.museivaticani.va/home'),
   'links': [['官方開放時間', 'https://www.museivaticani.va/content/museivaticani/en/info/orari-musei-vaticani.html'],
             ['參觀指南（mimigo）', 'https://mimigo.tw/vatican-museum-guide/#%E5%AE%98%E6%96%B9%E9%A0%90%E7%B4%84%E8%88%87%E7%AC%AC%E4%B8%89%E6%96%B9%E5%B9%B3%E5%8F%B0%E5%82%99%E6%A1%88'],
             ['購票教學（歡歡旅遊）', 'https://huannntravel.com/vatican-museum-ticket/#%E6%A8%99%E6%BA%96%E7%A5%A8%EF%BC%9A%E6%A2%B5%E8%92%82%E5%B2%A1%E5%8D%9A%E7%89%A9%E9%A4%A8%E8%A5%BF%E6%96%AF%E6%B1%80%E6%95%99%E5%A0%82']],
 })
-UPDATES['vaticani']['tips'] = UPDATES['vaticani']['tips'] + ['官網購票：選人數與日期 → 選「梵蒂岡博物館＋西斯汀小堂」標準票 → 選入場時段 → 填實名資料 → 付款 → 確認 email 收到電子票。買完可回官網查訂單確認成功。']
+UPDATES['vaticani']['tips'] = UPDATES['vaticani']['tips'] + ['官網買票請認明「Vatican Museums - Admission Ticket：€22」（還沒放票時，這個選項不會出現）。', '官網購票：選人數與日期 → 選「Vatican Museums - Admission Ticket」（€22） → 選入場時段 → 填實名資料 → 付款 → 確認 email 收到電子票。買完可回官網查訂單確認成功。']
 UPDATES['sistina'].update({'hours': ['隨梵蒂岡博物館開放：週一至週六 08:00–20:00（最後入場 18:00，閉館前 30 分鐘要離開）', '週日休館（1/31 最後一個週日免費開放 09:00–14:00 除外）']})
 
 # Borghese: sunset + Piazza del Popolo churches timing (user-supplied 2026-11-08; sunset computed for Rome)
