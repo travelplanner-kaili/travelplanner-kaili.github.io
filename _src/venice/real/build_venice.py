@@ -171,10 +171,63 @@ L1 = _chain(_l1, start=[x[0] for x in _l1].index('Ferrovia - Piazzale Roma'))
 if L1[0][1] > L1[-1][1]: L1 = L1[::-1]   # P.le Roma first
 L2 = _chain(_R['2'])
 def _near(line, ll): return min(range(len(line)), key=lambda i: (line[i][0] - ll[0]) ** 2 + (line[i][1] - ll[1]) ** 2)
+# the side-by-side offset is done in screen pixels by venice_extra.js (2026-11-27: same gap at every zoom, she asked for more room);
+# sh = this point runs together with the other line (within 40 m), only those points are pushed apart
+def _dseg(p, line): return min(dist(p, q) for q in line)
+def _proj(p, line):   # nearest point on a polyline (flat metres)
+    best = None
+    for q, r in zip(line, line[1:]):
+        ax, ay = (q[1] - p[1]) * KM[1], (q[0] - p[0]) * KM[0]; bx, by = (r[1] - p[1]) * KM[1], (r[0] - p[0]) * KM[0]
+        dx, dy = bx - ax, by - ay; t = max(0, min(1, -(ax * dx + ay * dy) / (dx * dx + dy * dy or 1))); x, y = ax + t * dx, ay + t * dy
+        if best is None or math.hypot(x, y) < best[0]: best = (math.hypot(x, y), [p[0] + y / KM[0], p[1] + x / KM[1]])
+    return best[1]
+# on the Grand Canal both lines follow the canal's smooth centre line (canal.json): the raw routes zig-zag to every pier, and
+# pushed apart on screen those zig-zags became kinks (2026-11-27)
+def _sub_on(line, base, near_m=45):
+    def pi(p):
+        best = None
+        for k, (q, r) in enumerate(zip(base, base[1:])):
+            ax, ay = (q[1] - p[1]) * KM[1], (q[0] - p[0]) * KM[0]; bx, by = (r[1] - p[1]) * KM[1], (r[0] - p[0]) * KM[0]
+            dx, dy = bx - ax, by - ay; t = max(0, min(1, -(ax * dx + ay * dy) / (dx * dx + dy * dy or 1))); x, y = ax + t * dx, ay + t * dy
+            if best is None or math.hypot(x, y) < best[0]: best = (math.hypot(x, y), k + t, [p[0] + y / KM[0], p[1] + x / KM[1]])
+        return best
+    on = [pi(p)[0] < near_m for p in line]; out = []; k = 0
+    while k < len(line):
+        if not on[k]: out.append(line[k]); k += 1; continue
+        e = k
+        while e + 1 < len(line) and on[e + 1]: e += 1
+        (_, ta, pa), (_, tb, pb) = pi(line[k]), pi(line[e])
+        if e - k >= 2 and abs(tb - ta) > .5:
+            mid = [list(q) for q in base[int(ta) + 1:int(tb) + 1]] if ta <= tb else [list(q) for q in base[int(tb) + 1:int(ta) + 1]][::-1]
+            out += [pa] + mid + [pb]
+        else: out += line[k:e + 1]
+        k = e + 1
+    return out
+L1 = _sub_on(L1, CANAL); L2 = _sub_on(L2, CANAL)
+# where line 2 runs with line 1, it takes line 1's own path (same points), so the two are pushed apart from the same centre line
+# and stay parallel (a point-by-point snap zig-zagged and the lines crossed)
+def _proj_i(p):
+    best = None
+    for k, (q, r) in enumerate(zip(L1, L1[1:])):
+        ax, ay = (q[1] - p[1]) * KM[1], (q[0] - p[0]) * KM[0]; bx, by = (r[1] - p[1]) * KM[1], (r[0] - p[0]) * KM[0]
+        dx, dy = bx - ax, by - ay; t = max(0, min(1, -(ax * dx + ay * dy) / (dx * dx + dy * dy or 1))); x, y = ax + t * dx, ay + t * dy
+        if best is None or math.hypot(x, y) < best[0]: best = (math.hypot(x, y), k, [p[0] + y / KM[0], p[1] + x / KM[1]])
+    return best[1], best[2]
+_sh = [_dseg(p, L1) < 40 for p in L2]; _new = []; k = 0
+while k < len(L2):
+    if not _sh[k]: _new.append(L2[k]); k += 1; continue
+    e = k
+    while e + 1 < len(L2) and _sh[e + 1]: e += 1
+    if e - k >= 2:
+        (ia, pa), (ib, pb) = _proj_i(L2[k]), _proj_i(L2[e]); assert ia <= ib, (ia, ib)
+        _new += [pa] + [list(q) for q in L1[ia + 1:ib + 1]] + [pb]
+    else: _new += L2[k:e + 1]
+    k = e + 1
+L2 = _new
 VAP_ROUTES = []
-for ref, line, off, marks in (('1', L1, 7, [[45.4415, 12.3315], [45.4312, 12.3308]]), ('2', L2, -7, [[45.4423, 12.3270], [45.4311, 12.3335], [45.4297, 12.3225], [45.4310, 12.3425]])):
-    o = _offset(line, off)
-    VAP_ROUTES.append(dict(ref=ref, pts=o, badges=[o[_near(line, m)] for m in marks]))
+for ref, line, other, sign, marks in (('1', L1, L2, 1, [[45.4415, 12.3315], [45.4312, 12.3308]]), ('2', L2, L1, -1, [[45.4423, 12.3270], [45.4311, 12.3335], [45.4297, 12.3225], [45.4310, 12.3425]])):
+    VAP_ROUTES.append(dict(ref=ref, pts=[[round(p[0], 6), round(p[1], 6)] for p in line], sign=sign,
+                           sh=[1 if _dseg(p, other) < 40 else 0 for p in line], badges=[line[_near(line, m)] for m in marks]))
 
 # cards for the two lines (2026-11-27, she asked to open an introduction by tapping a line): built from the stops' own card
 # text (hours, prices, reminders), cat 'base' (住宿與交通: no 去過 / 加入行程); hidden as pins, opened from the line
@@ -355,8 +408,8 @@ css = '''<style>
 .vap-badge span { position: absolute; left: -8px; top: -8px; width: 16px; height: 16px; border-radius: 50%; display: grid; place-items: center; font: 800 10.5px/1 var(--f-body); border: 1.5px solid var(--paper); box-shadow: 0 1px 2px rgba(0,0,0,.35); }
 .vap-b1 span { background: var(--vap); color: #2A2000; }
 .vap-b2 span { background: var(--vap2); color: #fff; }
-.vap-mark .vn { position: absolute; left: -7px; top: -7px; width: 14px; height: 14px; box-sizing: border-box; border-radius: 50%; background: var(--paper); border: 3.5px solid #8A6A00; box-shadow: 0 1px 3px rgba(0,0,0,.4); cursor: pointer; }   /* 2026-11-27: bigger, she could not see or tap the 9px dot */
-.vap-mark .vl { position: absolute; left: calc(100% + 5px); top: 50%; transform: translateY(-50%); white-space: nowrap; font: 700 12.5px/1.2 var(--f-body); color: var(--ink); background: var(--paper); border: 1.5px solid #8A6A00; border-radius: 999px; padding: 2px 7px; box-shadow: 0 1px 3px rgba(0,0,0,.25); cursor: pointer; }
+.vap-mark .vn { position: absolute; left: calc(var(--vlen, 0px) / -2 - 7px); top: -7px; width: calc(var(--vlen, 0px) + 14px); height: 14px; border-radius: 7px; transform: rotate(var(--vang, 0deg)); box-sizing: border-box; border-radius: 50%; background: var(--paper); border: 3.5px solid #8A6A00; box-shadow: 0 1px 3px rgba(0,0,0,.4); cursor: pointer; }   /* 2026-11-27: bigger, she could not see or tap the 9px dot */
+.vap-mark .vl { position: absolute; left: calc(var(--vlen, 0px) / 2 + 12px); top: 50%; transform: translateY(-50%); white-space: nowrap; font: 700 12.5px/1.2 var(--f-body); color: var(--ink); background: var(--paper); border: 1.5px solid #8A6A00; border-radius: 999px; padding: 2px 7px; box-shadow: 0 1px 3px rgba(0,0,0,.25); cursor: pointer; }
 .vap-mark .vl i { font-style: normal; font-weight: 600; font-size: 11px; color: var(--muted); }
 .vap-mark .vl b { color: #8A6A00; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .vap-mark .vl b { color: var(--vap); } }

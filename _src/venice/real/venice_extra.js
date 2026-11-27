@@ -33,23 +33,45 @@ FERRY_CROSS.forEach(c => L.polyline(c, { className: "ferry-line", interactive: f
    1 = round dots, 2 = dashes, a small numbered badge on each line; the stops are small dots (+ the name when zoomed in); tap = the stop's card */
 const vapLayer = L.layerGroup();
 map.createPane("vap").style.zIndex = 380;   // above the canal, under the place pins
-/* tap a line = that line's card (2026-11-27); where the two run side by side, the nearer one to the tap wins */
-const vapDist = (r, e) => { const p = map.latLngToLayerPoint(e.latlng), pts = r.pts.map(x => map.latLngToLayerPoint(x)); let d = 1e9;
-  for (let i = 0; i + 1 < pts.length; i++) d = Math.min(d, L.LineUtil.pointToSegmentDistance(p, pts[i], pts[i + 1])); return d; };
-const vapHit = e => { L.DomEvent.stopPropagation(e); if (picking || distMode) return; const r = [...VAP_ROUTES].sort((a, b) => vapDist(a, e) - vapDist(b, e))[0]; openSpot("vline" + r.ref); };
+/* 2026-11-27 (later): the two lines are pushed apart on screen (9 px each side, where they run together) so a tap hits the right one;
+   a stop both lines call at is a capsule across both lines (like a metro interchange), a stop of one line is a dot on that line only */
+const VGAP = 9;
+const vapLines = {}, vapHits = {}, vapOffPts = {};
+const vapHit = ref => e => { L.DomEvent.stopPropagation(e); if (picking || distMode) return; openSpot("vline" + ref); };
 VAP_ROUTES.forEach(r => {
-  L.polyline(r.pts, { pane: "vap", className: "vap-route vap-r" + r.ref, interactive: false }).addTo(vapLayer);
-  L.polyline(r.pts, { pane: "vap", className: "vap-hit", weight: 16, opacity: 0 }).on("click", vapHit).addTo(vapLayer);
-  r.badges.forEach(b => L.marker(b, { pane: "vap", icon: L.divIcon({ className: "vap-badge vap-b" + r.ref, html: `<span>${r.ref}</span>`, iconSize: [0, 0] }), interactive: false, keyboard: false }).addTo(vapLayer));
+  vapLines[r.ref] = L.polyline(r.pts, { pane: "vap", className: "vap-route vap-r" + r.ref, interactive: false }).addTo(vapLayer);
+  vapHits[r.ref] = L.polyline(r.pts, { pane: "vap", className: "vap-hit", weight: 2 * VGAP - 2, opacity: 0 }).on("click", vapHit(r.ref)).addTo(vapLayer);
+  r.badgeMarks = r.badges.map(b => L.marker(b, { pane: "vap", icon: L.divIcon({ className: "vap-badge vap-b" + r.ref, html: `<span>${r.ref}</span>`, iconSize: [0, 0] }), interactive: false, keyboard: false }).addTo(vapLayer));
 });
-VAP.forEach(v => {
-  const m = L.marker(v.ll, { icon: L.divIcon({ className: "vap-mark", html: `<span class="v" title="${esc(v.name)}（水上巴士站）">V</span><span class="vn"><span class="vl lbl-obst">${esc((SPOTS.find(x => x.id === v.id) || {}).name || v.name)} <i>${esc(v.name)}</i></span></span>`, iconSize: [0, 0] }), keyboard: false, zIndexOffset: 400 });   // above the place pins, or a tap on V opens the pin under it
+const vapMarks = VAP.map(v => {
+  const m = L.marker(v.ll, { icon: L.divIcon({ className: "vap-mark", html: `<span class="v" title="${esc(v.name)}（水上巴士站）">V</span><span class="vn"></span><span class="vl lbl-obst">${esc((SPOTS.find(x => x.id === v.id) || {}).name || v.name)} <i>${esc(v.name)}</i></span>`, iconSize: [0, 0] }), keyboard: false, zIndexOffset: 400 });   // above the place pins
   m.on("click", e => { L.DomEvent.stopPropagation(e); if (picking || distMode) return; openSpot(v.id); });
-  m.addTo(vapLayer);
+  m.addTo(vapLayer); return m;
 });
+const nearOn = (pts, p) => { let best = null; for (let i = 0; i + 1 < pts.length; i++) { const q = L.LineUtil.closestPointOnSegment(p, pts[i], pts[i + 1]), d = q.distanceTo(p); if (!best || d < best.d) best = { d, q }; } return best.q; };
+function layoutVap() {
+  VAP_ROUTES.forEach(r => {
+    const P = r.pts.map(x => map.latLngToLayerPoint(x));
+    const O = P.map((p, i) => { if (!r.sh[i]) return p; const a = P[Math.max(0, i - 1)], b = P[Math.min(P.length - 1, i + 1)], dx = b.x - a.x, dy = b.y - a.y, l = Math.hypot(dx, dy) || 1;
+      return L.point(p.x - dy / l * VGAP * r.sign, p.y + dx / l * VGAP * r.sign); });
+    vapOffPts[r.ref] = O; const ll = O.map(p => map.layerPointToLatLng(p));
+    vapLines[r.ref].setLatLngs(ll); vapHits[r.ref].setLatLngs(ll);
+    r.badgeMarks.forEach((m, k) => m.setLatLng(map.layerPointToLatLng(nearOn(O, map.latLngToLayerPoint(r.badges[k])))));
+  });
+  VAP.forEach((v, k) => {
+    const p = map.latLngToLayerPoint(v.ll), on = ["1", "2"].filter(x => v.lines.includes(x)).map(x => nearOn(vapOffPts[x], p));
+    const el = vapMarks[k].getElement();
+    if (!on.length) { vapMarks[k].setLatLng(v.ll); el && el.style.setProperty("--vlen", "0px"); return; }
+    const a = on[0], b = on[1] ? nearOn(vapOffPts["2"], a) : on[0], mid = L.point((a.x + b.x) / 2, (a.y + b.y) / 2);
+    vapMarks[k].setLatLng(map.layerPointToLatLng(mid));
+    if (el) { el.style.setProperty("--vlen", a.distanceTo(b).toFixed(1) + "px"); el.style.setProperty("--vang", (Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI).toFixed(1) + "deg"); }
+  });
+}
+map.on("zoomend", layoutVap);
 let vapOn = true; try { vapOn = localStorage.getItem("trip-vap-venice") !== "0"; } catch (e) {}
 function applyVap() {   // 【水路交通】: the water-bus lines and stops, and the traghetti (pins, boxes, crossing lines)
   if (vapOn) { vapLayer.addTo(map); ferryLayer.addTo(map); } else { vapLayer.remove(); ferryLayer.remove(); }
+  if (vapOn) layoutVap();
   layoutLabels();
   document.querySelectorAll(".vap-chip").forEach(b => b.setAttribute("aria-pressed", vapOn));
   const sm = map.getZoom() < 16; if (mapEl.classList.contains("vap-small") !== sm) { mapEl.classList.toggle("vap-small", sm); layoutLabels(); }   // names only when zoomed in: place labels would cover them
