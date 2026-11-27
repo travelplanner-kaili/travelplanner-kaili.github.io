@@ -108,7 +108,7 @@ function makeSpot(s) {
   g.querySelector(".t-name").textContent = s.id === "hotel" ? "HOTEL" : s.name;   // 2026-11-21: the full name is in the card
   if (s.slogan) {   // 2026-11-27: shops lead with what you go there for (e.g. 便宜 Venchi), the shop's name small after it
     const tn = g.querySelector(".t-name"); tn.textContent = ""; const a = document.createElement("b"), n = document.createElement("span");
-    a.className = "t-slogan"; a.textContent = s.slogan; n.className = "t-shopname"; n.textContent = s.name; tn.append(a, n);
+    a.className = "t-slogan"; a.textContent = s.slogan; if (s.menu) { const mi = document.createElement("i"); mi.className = "t-menuic"; mi.textContent = "📖"; mi.title = "有翻譯菜單"; a.append(mi); } n.className = "t-shopname"; n.textContent = s.name; tn.append(a, n);
     g.classList.add("has-slogan");   // 2026-11-27: folded to the slogan; hover (computer) or the open card unfolds it
   }
   if (g.querySelector(".t-price")) { if (s.id === "hotel") g.querySelector(".t-price").remove(); else g.querySelector(".t-price").textContent = s.sPrice; }

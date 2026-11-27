@@ -127,6 +127,7 @@ extra_css = '''
 .scrim { background: rgba(10,12,14,.12) !important; }   /* lighter, so the glowing place still shows above the phone card */
 .spot .t-name { font: 700 14px var(--f-body); }
 .spot .t-name .t-shopname { margin-left: .4em; font-size: .78em; font-weight: 600; opacity: .8; }   /* shops: slogan first, the name small */
+.spot .t-slogan .t-menuic { font-style: normal; font-size: .8em; margin-left: .25em; }   /* 2026-11-27: shops with a translated menu */
 /* 2026-11-27: shop boxes are folded to the slogan (she: Venice shop boxes overlapped badly). Computer: hover unfolds the box on top of
    everything, click opens the card. Phone: one tap opens the card (it has everything). The open shop stays unfolded. */
 .spot.has-slogan .t-shopname, .spot.has-slogan .t-more { display: none !important; }

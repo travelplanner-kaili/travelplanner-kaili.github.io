@@ -163,6 +163,7 @@ EAT = [
        hours=['週一、三至五 09:00–20:30', '週六、日 09:00–19:00', '週二休', _GH], price='一人約 €10–20（Google 地圖）', sPrice='€10–20'),
 ]
 from menu_nono import MENU as _NONO_MENU, MENU_NOTE as _NONO_NOTE
+from menu_dalmoro import MENU as _DM_MENU, MENU_NOTE as _DM_NOTE
 from flavors import GALLONETTO as _FL_GAL, SUSO as _FL_SUSO, FLAV_NOTE as _FL_NOTE   # gelato flavors from the article (2026-11-27)   # her menu photo, Italian / English / 中文 (2026-11-27)
 # 2026-11-27: the five gelato shops from the article she sent (monicaineurope.com/italy-venice-gelato); Suso is above
 EAT += [
@@ -193,11 +194,21 @@ EAT.append(  # 2026-11-27 she asked to add it (Google 4.2; her own pick, so outs
        when='逛里亞托市場一帶時，吃午餐或晚餐。', week=['12:00–15:00、18:00–23:00'] * 5 + ['12:00–22:30', '12:00–22:30'],
        hours=['週一至五 12:00–15:00、18:00–23:00', '週六、日 12:00–22:30', _GH], price='一人約 €20–30（Google 地圖）', sPrice='€20–30',
        links=[['Al Nono Risorto 食記（Monica in Europe）', 'https://monicaineurope.com/venice-al-nono-risorto/']]))
+EAT.append(  # 2026-11-27 her pick: article monicaineurope.com/venice-dal-moros-freshpastatogo + the brand's site menu
+  dict(id='s_dalmoro', ll=[45.436192, 12.339795], name="Dal Moro's 外帶義大利麵", latin="Dal Moro's Fresh Pasta To Go", slogan='好吃外帶義麵',
+       feature='很有名的手工義大利麵外帶店，在聖瑪利亞福爾摩沙廣場附近的小巷（Calle de la Casseleria）。只外帶、沒有內用，從窗戶看得到裡面做麵。',
+       tips=['買了坐在河邊或橋邊吃，是威尼斯流行的吃法；比餐廳便宜，也省掉入座費。', '熱門時段排隊會排到把巷子堵住，避開正中午比較好。',
+             '份量很夠，兩個人吃一份也可以。', '網誌心得：麵很有嚼勁，但 2 號培根蛋黃口味覺得普通。'],
+       when='聖馬可廣場和里亞托之間散步時，買午餐帶著走。', week=['12:00–17:00'] * 7, hours=['每日 12:00–17:00（推薦文資料）', '其他網站寫週一至六 12:00–20:30、週日休，出發前再確認'],
+       price='一份約 €7–13（官網馬拉加店價格，威尼斯店可能不同）', sPrice='€7–13',
+       links=[["Dal Moro's 食記（Monica in Europe）", 'https://monicaineurope.com/venice-dal-moros-freshpastatogo/'],
+              ["Dal Moro's 官網菜單", 'https://www.dalmoros.it/pasta-fresca-da-asporto/menu/']]))
 for e in EAT:
     t = dict(id=e['id'], cat='open', tier='購物', shop=True, compact=True, name=e['name'], latin=e['latin'], slogan=e['slogan'], feature=e['feature'],
              tips=e['tips'], when=e['when'], stay='約 30 分鐘～1 小時', hours=e['hours'], price=e['price'], sPrice=e['sPrice'], sTime='用餐')
     if not t['sPrice']: del t['sPrice']
     if e['week']: WEEK[e['id']] = e['week']
+    if e['id'] == 's_dalmoro': t['menu'] = _DM_MENU; t['menuNote'] = _DM_NOTE; t['menuTitle'] = ['菜單（義中對照）', '展開菜單（推薦文＋官網）']
     if e['id'] == 's_nono': t['menu'] = _NONO_MENU; t['menuNote'] = _NONO_NOTE
     if e['id'] in ('s_gallonetto', 's_suso'): t['menu'] = _FL_GAL if e['id'] == 's_gallonetto' else _FL_SUSO; t['menuNote'] = _FL_NOTE; t['menuTitle'] = ['口味（義中對照）', '展開口味（照推薦文翻譯）']
     if e.get('links'): t['links'] = e['links']
