@@ -680,6 +680,13 @@ out = out.replace('</head>', '''<style id="lucca-only">
 .icon-btn.shop-btn[aria-pressed="true"] { background: var(--open); color: var(--paper); }
 .spot.shopbox .tab { background: var(--c); }
 .spot.shopbox .tab .t-name, .spot.shopbox .tab .t-more { color: var(--paper); }
+/* Via Fillungo = shopping street, pink like Rome's (2026-11-27) */
+:root { --shop-street: #C8457F; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --shop-street: #F08CBA; } }
+:root[data-theme="dark"] { --shop-street: #F08CBA; }
+.leaflet-pane path.street-band.shop-street { stroke: var(--shop-street); stroke-opacity: .5; }
+#lmap.base-faded .leaflet-pane path.street-band.shop-street { stroke-opacity: .7; }
+.street-name.shop-street span { color: var(--shop-street); }
 </style>
 </head>''', 1)
 _shop_logic = '''
