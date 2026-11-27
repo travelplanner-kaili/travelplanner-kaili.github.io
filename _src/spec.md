@@ -409,3 +409,4 @@
 ## 2026-11-27 晚 Dal Moro's、菜單小圖示
 - 威尼斯新增購物（餐廳）「Dal Moro's 外帶義大利麵」，slogan「好吃外帶義麵」（她定）。資料：推薦文 monicaineurope.com/venice-dal-moros-freshpastatogo（號碼菜單＋中文照文章）＋品牌官網菜單（官網是西班牙馬拉加分店的，標「參考用料」）。兩個網址都附上。
 - 有翻譯菜單或口味表的店（s.menu），框上 slogan 後面加 📖 小圖示（engine.js，class t-menuic）。
+- 介紹頁「菜單／口味」欄標題後面也加 📖（跟地圖框一致，好辨認）。Gallonetto、Suso 的一句話前面加「★」（她要求）。
