@@ -213,7 +213,7 @@ extra_css = '''
 .plan-dayedit input { width: 70px; }
 .plan-dayedit .pd-del { margin-left: auto; border: 0; background: none; color: var(--paid); font: 700 12px var(--f-body); cursor: pointer; text-decoration: underline; }
 .plan-list .p-info.closed { color: var(--paid); font-weight: 700; }
-.plan.c2 .plan-dayedit { display: none; }
+/* 2026-11-27: 最簡 keeps the date + weekday row too (she: it is a setting of the whole day) */
 .plan-addbtn { margin: 4px 12px 6px; align-self: flex-start; font: 700 12.5px var(--f-body); border: 1.5px dashed var(--route); color: var(--route); background: var(--paper); border-radius: 999px; padding: 3px 12px; cursor: pointer; }
 .plan.c2 .plan-addbtn { display: none; }
 .plan-add { margin: 0 10px 8px; padding: 8px 10px; border: 1.5px solid var(--route); border-radius: 10px; display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; color: var(--muted); }
