@@ -402,3 +402,5 @@
   - Amorino（Ruga Vecchia San Giovanni 480）「玫瑰花冰淇淋」：週一至五 12:00–23:00、週六日 11:00–23:00，依份量計價、口味隨便混。
   - GROM「天然食材冰淇淋」：放聖露西亞火車站裡那家（4.6），另一家在聖巴拿巴廣場（Strada Nova 那家已永久歇業）。
 - 相關連結（2026-11-27 她要求）：五家冰淇淋都連到 monicaineurope.com/italy-venice-gelato/；Al Nono Risorto 連到 monicaineurope.com/venice-al-nono-risorto/。在介紹頁「介紹」分頁的「相關連結」。
+- 冰淇淋一句話（2026-11-27 她定）：Gallonetto「被說最好吃冰淇淋」、Suso「口味超多冰淇淋」、GROM「天然連鎖冰淇淋」、Amorino「不限口味秤重冰淇淋」（她打「秤中」，Claude 當成「秤重」）。Gelato di Natura 維持「在地人推薦冰淇淋」。
+- Al Nono Risorto 菜單加上網誌（monicaineurope.com/venice-al-nono-risorto）的中文譯名和心得：網誌沒有完整菜單，只有點的幾道，對到菜單上的四道（炒淡菜和蛤蜊、綜合海鮮前菜、青醬筆管麵、Teresina 披薩）在中文那行加「｜網誌譯名：…。網誌：…」；價格照菜單照片（網誌價格較舊）。看點加網誌心得「兩人吃很飽，含飲料一人約 €30」。
