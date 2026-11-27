@@ -659,6 +659,51 @@ def _faq_fold(out):
              '</section></div><h3 class="faq-sub">其他問題</h3>%s') % (''.join(cov), ''.join(planq), CUST_NOTE, ''.join(custq), ''.join(parts))
     return out[:i] + block + out[j + 5:]
 out = _add_help(_faq_refs(_faq_fold(out)))
+# ---- 購物 (2026-11-27, she asked for it on Lucca too): the shop button + shops as solid green boxes, like Rome.
+# Lucca-only pieces: buttons (class lucca-only) and <style id="lucca-only"> are dropped by build_rome.py (Rome has its own);
+# the test spot sits in the data block and the JS after the drawer, both of which build_rome.py replaces anyway.
+SHOPS = [dict(id='s_test', cat='open', tier='購物', shop=True, compact=True, name='test', latin='Test shop（暫放）',
+              feature='測試用的暫放店家，之後會換成真的店。', sHours='10:00–19:30', sTime='逛街', sPrice='免費逛',
+              hours=['測試資料'], price='免費逛', tips=['這是暫放的測試店家。'], when='逛街時順路', stay='約 15 分鐘',
+              ll=[43.84460, 10.50432])]   # Via Fillungo
+_shop_js = ''.join('SPOTS.push(%s); LL.%s = %s;\n' % (json.dumps({k: v for k, v in x.items() if k != 'll'}, ensure_ascii=False), x['id'], json.dumps(x['ll'])) for x in SHOPS)
+_a = 'const LAB = '; _i = out.index(_a); _i = out.index('\n', _i) + 1
+out = out[:_i] + _shop_js + out[_i:]
+_shop_btn = lambda i: ('<button class="icon-btn shop-btn lucca-only" id="%s" type="button" aria-pressed="false" aria-label="購物：在地圖上加上購物的店家" data-tip="購物">'
+  '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1.2 12.2a1 1 0 0 1-1 .8H7.2a1 1 0 0 1-1-.8z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>'
+  '<path d="M9 10V6.5a3 3 0 0 1 6 0V10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>') % i
+out, _n = re.subn(r'(<button class="icon-btn dist" id="(f-dist|fs-dist-btn)"[^>]*>.*?</button>)',
+                  lambda m: m.group(1) + _shop_btn('f-shop' if m.group(2) == 'f-dist' else 'fs-shop-btn'), out, flags=re.S)
+assert _n == 2, _n
+out = out.replace('</head>', '''<style id="lucca-only">
+.icon-btn.shop-btn { border-color: var(--open); color: var(--open); }
+.icon-btn.shop-btn[aria-pressed="true"] { background: var(--open); color: var(--paper); }
+.spot.shopbox .tab { background: var(--c); }
+.spot.shopbox .tab .t-name, .spot.shopbox .tab .t-more { color: var(--paper); }
+</style>
+</head>''', 1)
+_shop_logic = '''
+/* ---- 購物 (Lucca, same as Rome): the button shows the shops as solid boxes; other filters pause ---- */
+let shopOn = false;
+{
+  const _applySup = applySup;
+  applySup = function () {
+    _applySup();
+    SPOTS.forEach(s => {
+      if (s.tier === "購物") { s.g.classList.toggle("gone", !shopOn); s.g.classList.toggle("shopbox", shopOn); s.g.classList.remove("dim"); }
+      else if (shopOn && s.cat !== "base") { if (s.sup) s.g.classList.add("gone"); s.g.classList.remove("dim"); }
+    });
+    document.querySelectorAll("#f-sup, .chip[data-cat], #f-cold").forEach(c => c.classList.toggle("muted", shopOn));
+    layoutLabels();
+  };
+}
+document.querySelectorAll(".shop-btn").forEach(b => b.addEventListener("click", () => {
+  shopOn = !shopOn; window.SHOP_ON = shopOn; document.querySelectorAll(".shop-btn").forEach(x => x.setAttribute("aria-pressed", shopOn)); applySup();
+}));
+applySup();
+'''
+_k = out.index('\n</script>', out.index('/* ---- Drawer ---- */'))
+out = out[:_k] + _shop_logic + out[_k:]
 assert 'const REPORT_BUILD = "' in out
 out = re.sub(r'const REPORT_BUILD = "[^"]*";', 'const REPORT_BUILD = "真地圖版 " + MAP_UPDATED;', out, count=1)
 open(R + 'lucca-real.html', 'w').write(out)

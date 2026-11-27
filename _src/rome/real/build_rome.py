@@ -87,6 +87,8 @@ data = ('<script>\n' + CAT + '\nconst SPOTS = ' + json.dumps(spots, ensure_ascii
         + ';\nconst LL = ' + json.dumps(LL) + ';\nconst WEEK_KEEP = new Set(' + json.dumps(KEEP) + ');\n')
 
 out = re.sub(r'<style id="geo-city">.*?</style>\n?', '', T, count=1, flags=re.S)   # Lucca's label sizes, not Rome's
+out = re.sub(r'<style id="lucca-only">.*?</style>\n?', '', out, count=1, flags=re.S)
+out, _n = re.subn(r'<button class="icon-btn shop-btn lucca-only".*?</button>', '', out, flags=re.S); assert _n == 2   # Rome adds its own 購物 buttons
 # ---- data, days table, city ----
 i = out.index('<script>\nconst CAT = {'); j = out.index('const DKEY = ', i)
 out = out[:i] + data + out[j:]

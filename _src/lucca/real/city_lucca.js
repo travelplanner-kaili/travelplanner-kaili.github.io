@@ -11,5 +11,6 @@ const CITY = {
 ],
   days: [{ k: "0203", date: "2/3", wd: 2 }, { k: "0204", date: "2/4", wd: 3 }, { k: "0205", date: "2/5", wd: 4 }],
   tourSpots: ["duomo", "michele", "guinigi", "anfiteatro", "frediano"], hideSpot: "guinigi",
-  demo: [{ id: "duomo", time: "09:30", note: "先買聯票" }, { id: "campanile", time: "10:30", note: "" }, { id: "guinigi", time: "11:30", note: "" }]
+  demo: [{ id: "duomo", time: "09:30", note: "先買聯票" }, { id: "campanile", time: "10:30", note: "" }, { id: "guinigi", time: "11:30", note: "" }],
+  tourExtra: [{ sel: ".icon-btn.shop-btn", t: "購物", x: "按這顆會在地圖上加上店家（綠色實心框），其他篩選先暫停；再按一次收起。" }]   // 2026-11-27 draft wording, she may change it
 };

@@ -47,6 +47,7 @@
   - 使用方式：基礎功能／我的行程／客製你的地圖上下排（各自接 Q&A）；分組「分享、匯出與不同裝置」；我的行程導覽 8 張。
 - 盧卡：2026-11-27 下午照羅馬規則更新上線（共用 engine.js / build_real.py 的所有羅馬改動一起帶上）。全覽／簡潔用手繪盧卡的框位置
   （build_real.py 算 LAB 和 CITY.unitM；字級在 <style id="geo-city">，build_rome.py 會拿掉它和 CITY.unitM 那行）。之後改共用引擎，盧卡、羅馬都要重建部署（deploy.sh all）。
+  購物（11-27）：build_real.py 的 SHOPS（目前只有暫放的 test）、按鈕 class lucca-only 和 <style id="lucca-only"> 由 build_rome.py 拿掉；導覽「購物」卡文字是暫擬。
 - 威尼斯：還沒做真地圖版。做法同羅馬：寫 `_src/venice/real/build_venice.py`，以盧卡真地圖為模板。
   她在威尼斯靠運河認路，運河要一直清楚（手機深色模式也要，深淺照台伯河的規則）；街名一律附當地原文。
 - 她請我們記得：真地圖上線後提醒她檢查匯入時的「你的地圖更新時間」提示，再決定留不留（還沒提醒過她實際檢查）。
