@@ -163,6 +163,7 @@ EAT = [
        hours=['週一、三至五 09:00–20:30', '週六、日 09:00–19:00', '週二休', _GH], price='一人約 €10–20（Google 地圖）', sPrice='€10–20'),
 ]
 from menu_nono import MENU as _NONO_MENU, MENU_NOTE as _NONO_NOTE
+from menu_friedland import MENU as _FL_MENU, MENU_NOTE as _FLM_NOTE
 from menu_dalmoro import MENU as _DM_MENU, MENU_NOTE as _DM_NOTE
 from flavors import GALLONETTO as _FL_GAL, SUSO as _FL_SUSO, FLAV_NOTE as _FL_NOTE   # gelato flavors from the article (2026-11-27)   # her menu photo, Italian / English / 中文 (2026-11-27)
 # 2026-11-27: the five gelato shops from the article she sent (monicaineurope.com/italy-venice-gelato); Suso is above
@@ -219,7 +220,7 @@ EAT += [  # 2026-11-27 her list (text and hours as she gave them)
              '幾乎沒有座位，用紙杯或外帶盒出餐，可以邊走邊吃或坐運河邊吃；店員親切。',
              '口味偏道地義式：有人覺得麵偏硬、蒜味淡；炸蝦是連頭帶殼一起炸。',
              '在運河邊吃要小心海鷗和鴿子搶食。'],
-       when='想吃宵夜或簡單外帶時。', week=['11:00–21:00'] * 7, hours=['每日 11:00–21:00', _GH], price='一份約 €7.5–9（網路評論）', sPrice='€7.5–9',
+       when='想吃宵夜或簡單外帶時。', week=['11:00–21:00'] * 7, hours=['每日 11:00–21:00', _GH], price='炸物 €4–11、麵 €7.5–9、沙拉 €7（菜單照片）', sPrice='€4–11',
        links=[['威尼斯美食總整理（Monica in Europe）', 'https://monicaineurope.com/venice-food-guides/'],
               ['Fried Land 評論（Tripadvisor）', 'https://www.tripadvisor.com.tw/Restaurant_Review-g187870-d7224041-Reviews-Fried_Land-Venice_Veneto.html']]),
 ]
@@ -228,6 +229,7 @@ for e in EAT:
              tips=e['tips'], when=e['when'], stay='約 30 分鐘～1 小時', hours=e['hours'], price=e['price'], sPrice=e['sPrice'], sTime='用餐')
     if not t['sPrice']: del t['sPrice']
     if e['week']: WEEK[e['id']] = e['week']
+    if e['id'] == 's_friedland': t['menu'] = _FL_MENU; t['menuNote'] = _FLM_NOTE; t['menuTitle'] = ['菜單（義中對照）', '展開菜單（照店家菜單照片翻譯）']
     if e['id'] == 's_dalmoro': t['menu'] = _DM_MENU; t['menuNote'] = _DM_NOTE; t['menuTitle'] = ['菜單（義中對照）', '展開菜單（照推薦文翻譯）']
     if e['id'] == 's_nono': t['menu'] = _NONO_MENU; t['menuNote'] = _NONO_NOTE
     if e['id'] in ('s_gallonetto', 's_suso', 's_suso2'): t['menu'] = _FL_GAL if e['id'] == 's_gallonetto' else _FL_SUSO; t['menuNote'] = _FL_NOTE; t['menuTitle'] = ['口味（義中對照）', '展開口味（照推薦文翻譯）']

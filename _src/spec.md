@@ -415,3 +415,4 @@
 - 威尼斯購物再加三家（2026-11-27 她給的文字和營業時間）：Bistrot de Venise「貴貴米其林」（她定，Calle dei Fabbri 4685，每日 12:00–15:00、19:00–23:30）；Fried Land「便宜炸海鮮外帶」（Claude 擬，Campiello dei Fiori 2287，每日 11:00–22:00）。Crepes House by PePe 她說已經關門，不放。座標用 Google 地圖。
 - 營業時間（2026-11-27 她定）：網路上查得到的（Google 地圖）一律照網路，不照她貼的文字。Bistrot de Venise 改成每日 12:00–14:40、18:00–23:00（一人超過 €100，4.6）；Fried Land 每日 11:00–21:00（€1–10，4.5）。
 - Fried Land（2026-11-27 她給整理文字）：一句話「外帶炸物店」（她改）；介紹和小提醒照她的文字整理（炸物推薦、一份 €7.5–9、沒座位、口味偏道地、海鷗）；營業時間照 Google 11:00–21:00；相關連結放 Monica 美食總整理、Tripadvisor。
+- Fried Land 菜單（2026-11-27 她給 Google 地圖菜單照片）：炸物、沙拉、海鮮麵、陸上麵、飲料，義大利文＋中文＋價格（_src/venice/real/menu_friedland.py），框上一句話後面有 📖。
