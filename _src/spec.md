@@ -382,3 +382,7 @@
   營業時間照官網／Google：週二至日 11:00–17:00（最後入場 16:30），週一休；週末一定要預約（電話或 WhatsApp）。票價官網只寫「導覽 €8（要預約）」；不適用每月第一個週日免費日。小提醒：地底涼、通道窄，帶薄外套穿好走的鞋，不開閃光燈。
   做法：notes.py 的 NEW、WEEK、EXTRA_REMIND，data.json 直接加這一筆（框位置在點的右下），跑 build.py、build_rome.py，不重跑 gen.py。
 - 羅馬購物新增餐廳 Miscele e Fuoco（2026-11-27 她給 Google 地圖連結和心得）：Via Cavour 319，競技場和 Monti 之間（41.8937131, 12.4890175）。一句話「隱藏版蝦燉飯」（Claude 擬）。看點照她的話：披薩、海鮮麵好吃；隱藏版蝦子燉飯（新菜單沒有，現場說要點 risotto alla crema di scampi，「是導遊 Nick 的朋友」照她原文）。營業時間照 Google：每日 08:00–23:30（週五、六到 24:00），訂位電話 06 2539 2338，€10–20。
+- 威尼斯新增（2026-11-27 她給一張「從聖露西亞車站散步到聖馬可廣場」的圖：Google 4.5 分以上的店家／餐廳加進購物，景點分配到不同層級）。座標用 Google 地圖／OSM（透過她電腦的瀏覽器），營業時間用 Google；查不到的寫「營業時間請看 Google 地圖」。暫放的「test」店家拿掉。
+  - 購物（每間都有一句話）：Trattoria Il Vagone 4.6「車站旁人氣小館」、Oppa 韓式中式料理 4.5「韓式・中式料理」、Suso 冰淇淋 4.6「人氣義式冰淇淋」（用 Sotoportego de la Bissa 那間本店）、Ristorante Caffè Saraceno 4.6「里亞托運河邊餐廳」、Ostaria dai Zemei 4.5「威尼斯小點 cicchetti」（週二休）。沒加：Cantina Do Mori（4.4）、DESPAR 超市、Fried Land、Pastificio Giacomo Rizzo（圖上沒寫分數）。
+  - 景點：尖塔橋 Ponte delle Guglie＝推薦；十二使徒橋 Ponte dei Santi Apostoli、聖耶肋米亞教堂、釘子橋與仁慈橋、聖巴托洛梅奧廣場＝次要。圖上其他景點（赤足橋、學院橋、里亞托橋、猶太區、黃金宮、聖馬可廣場）原本就有。
+  - 做法：build_venice.py 的 EAT、SIGHTS（engine 的 slogan 欄位）。

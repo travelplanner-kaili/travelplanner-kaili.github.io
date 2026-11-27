@@ -137,11 +137,55 @@ for a in ALL:
 spots.append(dict(id='hotel', cat='base', name='範例住宿（聖馬可廣場）', latin='範例位置', mapName='HOTEL', sPrice='範例住宿',
                   feature='這是範例位置，方便看各景點從市中心走過去要多久。點「改成我的住宿」換成你自己的住宿，只會存在你自己的瀏覽器。'))
 LL['hotel'] = [45.43430, 12.33810]; GQ['hotel'] = 'Piazza San Marco, Venezia'
-# 購物: a placeholder shop until she sends the real ones (2026-11-27)
-spots.append(dict(id='s_test', cat='open', tier='購物', shop=True, compact=True, name='test', latin='Test shop（暫放）',
-                  feature='測試用的暫放店家，之後會換成真的店。', sHours='10:00–19:30', sTime='逛街', sPrice='免費逛',
-                  hours=['測試資料'], price='免費逛', tips=['這是暫放的測試店家。'], when='逛街時順路', stay='約 15 分鐘'))
-LL['s_test'] = [45.43745, 12.33660]   # Salizada Pio X, near Rialto
+# 2026-11-27: from her picture 「從聖露西亞車站散步到聖馬可廣場」 — places to eat rated 4.5+ on Google (Cantina Do Mori 4.4 left out;
+# DESPAR, Fried Land, Pastificio Rizzo had no rating), and the sights spread over the tiers. Positions: Google Maps / OSM (her browser).
+# Each shop has a slogan for its box (her rule: a name alone says nothing). Replaces the 「test」 placeholder shop.
+_GH = '（Google 地圖資料）'
+EAT = [
+  dict(id='s_vagone', ll=[45.4418996, 12.3220173], name='Trattoria Il Vagone', latin='Trattoria Il Vagone', slogan='車站旁人氣小館',
+       feature='聖露西亞火車站附近的義大利家常小館，Google 評分 4.6。', tips=['離火車站走路幾分鐘，剛到威尼斯或要離開前順路吃一頓。'],
+       when='剛到或要離開威尼斯時。', week=['12:00–23:00'] * 7, hours=['每日 12:00–23:00', _GH], price='一人約 €20–30（Google 地圖）', sPrice='€20–30'),
+  dict(id='s_oppa', ll=[45.4421384, 12.3217142], name='Oppa 韓式中式料理', latin='Oppa Ristorante coreano e cinese', slogan='韓式・中式料理',
+       feature='火車站附近的韓國、中式餐廳，Google 評分 4.5。吃膩義大利菜時的選擇。', tips=['想吃米飯、熱湯時可以來。'],
+       when='吃膩義大利菜的時候。', week=None, hours=['營業時間請看 Google 地圖'], price='一人約 €10–20（Google 地圖）', sPrice='€10–20'),
+  dict(id='s_suso', ll=[45.4377263, 12.3374098], name='Suso 冰淇淋', latin='Suso Gelatoteca', slogan='人氣義式冰淇淋',
+       feature='里亞托橋附近的人氣義式冰淇淋店（Sotoportego de la Bissa），Google 評分 4.6。', tips=['店門口常排隊，人多時隊伍會排進小巷。'],
+       when='逛里亞托橋一帶時。', week=None, hours=['營業時間請看 Google 地圖'], price='依店家公告', sPrice=None),
+  dict(id='s_saraceno', ll=[45.4379258, 12.3352382], name='Ristorante Caffè Saraceno', latin='Ristorante Caffè Saraceno', slogan='里亞托運河邊餐廳',
+       feature='里亞托橋旁大運河邊的餐廳，Google 評分 4.6。', tips=['想坐運河邊的位子，早一點去或先訂位。'],
+       when='逛完里亞托橋，坐下來吃一頓。', week=['08:00–24:00'] * 7, hours=['每日 08:00–24:00', _GH], price='一人約 €20–70（Google 地圖）', sPrice='€20–70'),
+  dict(id='s_zemei', ll=[45.4379089, 12.3329955], name='Ostaria dai Zemei', latin='Ostaria dai Zemei', slogan='威尼斯小點 cicchetti',
+       feature='里亞托橋西邊（聖保羅區）的小酒館，Google 評分 4.5，站著點幾樣威尼斯小點（cicchetti）配一杯酒。', tips=['週二休息；週六、日到 19:00。'],
+       when='逛里亞托市場一帶時，當點心或簡單一餐。', week=['09:00–20:30', '', '09:00–20:30', '09:00–20:30', '09:00–20:30', '09:00–19:00', '09:00–19:00'],
+       hours=['週一、三至五 09:00–20:30', '週六、日 09:00–19:00', '週二休', _GH], price='一人約 €10–20（Google 地圖）', sPrice='€10–20'),
+]
+for e in EAT:
+    t = dict(id=e['id'], cat='open', tier='購物', shop=True, compact=True, name=e['name'], latin=e['latin'], slogan=e['slogan'], feature=e['feature'],
+             tips=e['tips'], when=e['when'], stay='約 30 分鐘～1 小時', hours=e['hours'], price=e['price'], sPrice=e['sPrice'], sTime='用餐')
+    if not t['sPrice']: del t['sPrice']
+    if e['week']: WEEK[e['id']] = e['week']
+    spots.append(t); LL[e['id']] = e['ll']; GQ[e['id']] = e['latin'] + ', Venezia'
+SIGHTS = [
+  dict(id='guglie', tier='推薦', cat='open', ll=[45.44363, 12.32546], name='尖塔橋', latin='Ponte delle Guglie',
+       feature='跨卡納雷吉歐運河的石橋，兩端橋柱上有尖塔（guglie）裝飾，名字就是這樣來的。從火車站往里亞托走一定會經過。',
+       tips=['站在橋上可以看卡納雷吉歐運河兩岸。'], when='從火車站走往里亞托時順路。', stay='約 5 分鐘'),
+  dict(id='apostoli', tier='次要', cat='open', ll=[45.44002, 12.33646], name='十二使徒橋', latin='Ponte dei Santi Apostoli',
+       feature='新街（Strada Nova）往里亞托路上的橋，旁邊是聖使徒廣場和聖使徒教堂，名字來自這座教堂。',
+       tips=['附近有冰淇淋和義大利麵專賣店，散步時可以停一下。'], when='從火車站走往里亞托時順路。', stay='約 5 分鐘'),
+  dict(id='geremia', tier='次要', cat='free', ll=[45.44264, 12.32533], name='聖耶肋米亞教堂', latin='Chiesa dei Santi Geremia e Lucia',
+       feature='尖塔橋旁的教堂，裡面供奉聖露西亞（Santa Lucia）的遺體；聖露西亞火車站的名字就是來自她。',
+       tips=['教堂就在火車站往里亞托的路上，經過時可以進去看看。'], when='從火車站走往里亞托時順路。', stay='約 15 分鐘', hours=['開放時間請看 Google 地圖'], price='免費。'),
+  dict(id='chiodo', tier='次要', cat='open', ll=[45.44284, 12.33473], name='釘子橋與仁慈橋', latin='Ponte Chiodo / Ponte della Misericordia',
+       feature='米塞里科迪亞一帶的兩座小橋。釘子橋兩側沒有欄杆，保留威尼斯老橋的樣子，很少見。',
+       tips=['釘子橋沒有欄杆，拍照時注意腳步。'], when='逛米塞里科迪亞堤岸時順路。', stay='約 10 分鐘'),
+  dict(id='bartolomeo', tier='次要', cat='open', ll=[45.43768, 12.33681], name='聖巴托洛梅奧廣場', latin='Campo San Bartolomeo',
+       feature='里亞托橋聖馬可這一側橋下的小廣場，中間有劇作家哥爾多尼（Carlo Goldoni）的雕像，在地人常約在這裡碰面。',
+       tips=['旁邊的小巷裡有 Suso 冰淇淋。'], when='逛里亞托橋時順路。', stay='約 10 分鐘'),
+]
+for e in SIGHTS:
+    t = {k: v for k, v in e.items() if k != 'll'}
+    t.setdefault('hours', ['全天開放']); t.setdefault('price', '免費。')
+    spots.append(t); LL[e['id']] = e['ll']; GQ[e['id']] = e['latin'] + ', Venezia'
 
 # water-bus lines 1 and 2 (2026-11-27, she asked for the stops joined into lines): OSM route relations ACTV Linea 1 / Linea 2,
 # chained in order; on the Grand Canal the two lines run side by side (offset 7 m each way) so both stay visible.
