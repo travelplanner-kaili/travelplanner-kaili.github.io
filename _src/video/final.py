@@ -5,6 +5,7 @@ C=[(['去羅馬自助旅行？','景點、時間、票價，一張地圖看完']
    (['點景點，介紹馬上滑出來','特色、看點，一次看懂'],150,m['tap1']+0.45,m['tips']-0.05),
    (['實用資訊都整理好了','營業時間、從住宿走多遠、小提醒'],1440,m['tips']+0.35,m['close1']+0.3),
    (['6 條 City Walk 散步路線','沿路景點都幫你串好'],1440,m['walk']+0.3,m['close2']+0.3),
+   (['點兩個景點，秒算距離','照真實街道算，不是直線'],150,m['dist']+0.3,m['distoff']+0.3),
    (['排出你自己的每日行程','一鍵加入，一鍵 Google 導航'],150,m['plan']+0.3,m['end']+0.2)]
 caps=[]
 for i,(t,y,a,b) in enumerate(C):
@@ -18,13 +19,10 @@ d=ImageDraw.Draw(bg); FT='/usr/share/fonts/opentype/noto/NotoSansCJK-Black.ttc'
 f=lambda s:ImageFont.truetype(FT,s,index=3)
 def ctext(y,t,ft,fill):
     w=d.textbbox((0,0),t,font=ft)[2]; d.text(((W-w)//2,y),t,font=ft,fill=fill)
-d.rounded_rectangle([90,560,990,1330],48,fill=(255,252,246),outline=(214,96,30),width=8)
-ctext(640,'羅馬景點地圖',f(104),(214,96,30))
-ctext(790,'免費使用・手機打開就能用',f(54),(40,36,33))
-d.rounded_rectangle([150,925,930,1045],26,fill=(214,96,30))
-ctext(948,'travelplanner-kaili.github.io/rome',f(44),(255,255,255))
-ctext(1110,'連結在留言／個人簡介',f(50),(40,36,33))
-ctext(1205,'也有盧卡地圖，威尼斯準備中',f(40),(120,112,104))
+d.rounded_rectangle([110,700,970,1180],48,fill=(255,252,246))
+ctext(780,'我的羅馬地圖小勞作',f(80),(214,96,30))
+ctext(915,'到 2027 年 2 月為止',f(56),(40,36,33))
+ctext(1000,'會持續自動更新',f(56),(40,36,33))
 ctext(1830,'地圖資料 © OpenStreetMap 貢獻者',f(30),(235,230,224))
 bg.save('full/end.jpg',quality=92)
 Image.open(f'{F}/{fr[-1][0]}').save('full/last.jpg',quality=92)

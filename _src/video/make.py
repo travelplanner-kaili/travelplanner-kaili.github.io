@@ -4,7 +4,12 @@ from PIL import Image, ImageDraw, ImageFont
 W, H = 1080, 1920
 FONT = '/usr/share/fonts/opentype/noto/NotoSansCJK-Black.ttc'   # index 3 = TC
 def caption(lines, path, accent=(214, 96, 30)):
-    f = ImageFont.truetype(FONT, 78, index=3); fs = ImageFont.truetype(FONT, 60, index=3)
+    big, small = 78, 60
+    while True:   # shrink until the widest line fits inside the frame
+        f = ImageFont.truetype(FONT, big, index=3); fs = ImageFont.truetype(FONT, small, index=3)
+        ws = [ImageDraw.Draw(Image.new('RGB', (1, 1))).textbbox((0, 0), t, font=ft)[2] for t, ft in zip(lines, [f] + [fs] * (len(lines) - 1))]
+        if max(ws) + 110 <= W - 40 or big < 50: break
+        big -= 4; small -= 3
     fonts = [f] + [fs] * (len(lines) - 1)
     widths = [ImageDraw.Draw(Image.new('RGB', (1, 1))).textbbox((0, 0), t, font=ft)[2] for t, ft in zip(lines, fonts)]
     bw = max(widths) + 110; lh = [100] + [82] * (len(lines) - 1); bh = sum(lh) + 70

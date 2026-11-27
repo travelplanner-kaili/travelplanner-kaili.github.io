@@ -17,6 +17,15 @@ module.exports = async (p, H) => {
   H.mark('pill'); await p.screenshot({path:'/home/claude/video/dbg_pill.jpg',type:'jpeg'}); console.log('pill at',pill); await H.tap(pill); await H.wait(300); if (!(await p.evaluate(() => !document.getElementById('drawer').hidden && document.getElementById('drawer').dataset.route))) { console.log('pill miss'); await p.evaluate(() => openRoute('bernini-walk')); } await H.wait(2300);
   H.mark('close2'); await H.tapSel('#d-close'); await H.wait(500);
   await H.tapSel('#fs-route-btn'); await H.wait(500);   // City Walk off
+  // S4b 點對點: tap two spots, the card shows the real walking distance
+  H.mark('dist');
+  await H.fly(await p.evaluate(() => [(LL.pantheon[0] + LL.trevi[0]) / 2, (LL.pantheon[1] + LL.trevi[1]) / 2]), 15.75, 0.8); await H.wait(950);
+  await H.tapSel('#fs-dist-btn'); await H.wait(700);
+  for (const id of ['pantheon', 'trevi']) {
+    await H.tap(await H.xy(id)); await H.wait(900);
+  }
+  await H.wait(2400);
+  H.mark('distoff'); await H.tapSel('#fs-dist-btn'); await H.wait(500);
   // S5 add three spots to day 1 from the drawer, then open 我的行程
   H.mark('plan');
   await H.fly(await LL('pantheon'), 15.6, 0.8); await H.wait(1000);

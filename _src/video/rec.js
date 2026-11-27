@@ -8,7 +8,9 @@ await p.addInitScript((B)=>{localStorage.setItem('trip-tour-rome','1');localStor
 const need=new Set();
 await c.route('http://rome.test/**',r=>r.fulfill({path:'/home/claude/rome/real/rome-real.html',contentType:'text/html; charset=utf-8'}));
 await c.route(/tile\.openstreetmap\.org/,async r=>{const m=r.request().url().match(/org\/(\d+)\/(\d+)\/(\d+)\.png/);const f=m&&`/home/claude/video/tiles/${m[1]}/${m[2]}/${m[3]}.png`;if(f&&fs.existsSync(f))return r.fulfill({path:f,contentType:'image/jpeg'});if(m)need.add(m.slice(1,4).join('/'));return r.abort();});
-await c.route(/routing\.openstreetmap|overpass|version\.json/,r=>r.abort());
+const RT=fs.existsSync('/home/claude/video/routes.json')?JSON.parse(fs.readFileSync('/home/claude/video/routes.json','utf8')):{};const needR=new Set();
+await c.route(/routing\.openstreetmap/,r=>{const u=r.request().url();if(RT[u])return r.fulfill({body:JSON.stringify(RT[u]),contentType:'application/json'});needR.add(u);return r.abort();});
+await c.route(/overpass|version\.json/,r=>r.abort());
 await p.goto('http://rome.test/rome-real.html');await p.waitForTimeout(1500);
 await p.addStyleTag({content:`.leaflet-control-attribution{display:none!important}
 .tapfx{position:fixed;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;background:rgba(255,255,255,.6);border:3px solid rgba(30,30,30,.6);box-shadow:0 0 0 6px rgba(255,255,255,.35);z-index:99999;pointer-events:none;animation:tapfx .6s ease-out forwards}
@@ -33,5 +35,5 @@ const t0=Date.now()/1000/SLOW;H.mark('start');await seq(p,H);H.mark('end');
 rec=false;await loop;
 const m={};for(const k in H.marks)m[k]=H.marks[k]-frames[0][1];
 fs.writeFileSync(`${OUT}/frames.json`,JSON.stringify(frames));fs.writeFileSync(`${OUT}/marks.json`,JSON.stringify(m));
-fs.writeFileSync(`${OUT}/need.json`,JSON.stringify([...need]));console.log('missing tiles',need.size);console.log('frames',frames.length,'out secs',(frames.at(-1)[1]-frames[0][1]).toFixed(2),'marks',JSON.stringify(m));
+fs.writeFileSync(`${OUT}/need.json`,JSON.stringify([...need]));console.log('missing tiles',need.size);fs.writeFileSync(`${OUT}/needR.json`,JSON.stringify([...needR]));console.log('missing routes',[...needR].map(u=>u.split('/driving/')[1].split('?')[0].split(';').length));console.log('frames',frames.length,'out secs',(frames.at(-1)[1]-frames[0][1]).toFixed(2),'marks',JSON.stringify(m));
 await b.close();})();
